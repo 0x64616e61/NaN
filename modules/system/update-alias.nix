@@ -18,40 +18,24 @@
     '';
   };
 
-  # Shell function for panic rollback - matches any number of A's followed by !
-  programs.zsh.interactiveShellInit = ''
-    # Command not found handler that checks for panic commands
-    command_not_found_handler() {
-      if [[ "$1" =~ ^A+!$ ]]; then
-        cd /nix-modules && \
-        echo "[!] PANIC MODE - Rolling back to GitHub..." && \
-        echo 7 | sudo -S git fetch origin && \
-        echo 7 | sudo -S git reset --hard origin/main && \
-        echo "[*] Rebuilding from clean state..." && \
-        echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure
-      else
-        # Default command not found message
-        echo "zsh: command not found: $1" >&2
-        return 127
-      fi
+  # Add panic function directly to shell init
+  programs.zsh.enable = true;
+  programs.bash.enable = true;
+  
+  environment.interactiveShellInit = ''
+    # Panic rollback function - just resets to GitHub
+    panic() {
+      cd /nix-modules && \
+      echo "[!] PANIC MODE - Rolling back to GitHub..." && \
+      echo 7 | sudo -S git fetch origin && \
+      echo 7 | sudo -S git reset --hard origin/main && \
+      echo "[*] Reset complete - local changes discarded"
     }
-  '';
-
-  programs.bash.interactiveShellInit = ''
-    # Command not found handler for bash
-    command_not_found_handle() {
-      if [[ "$1" =~ ^A+!$ ]]; then
-        cd /nix-modules && \
-        echo "[!] PANIC MODE - Rolling back to GitHub..." && \
-        echo 7 | sudo -S git fetch origin && \
-        echo 7 | sudo -S git reset --hard origin/main && \
-        echo "[*] Rebuilding from clean state..." && \
-        echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure
-      else
-        # Default command not found message
-        echo "bash: $1: command not found" >&2
-        return 127
-      fi
-    }
+    
+    # Create aliases for various A! patterns
+    for i in {1..20}; do
+      A=$(printf 'A%.0s' $(seq 1 $i))
+      alias "$A!"="panic"
+    done
   '';
 }
