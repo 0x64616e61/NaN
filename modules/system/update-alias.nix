@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Shell alias for convenient system updates
+  # Shell aliases for convenient system updates
   environment.shellAliases = {
     "update!" = ''
       cd /nix-modules && \
@@ -16,5 +16,13 @@
       echo "[*] Rebuilding NixOS..." && \
       echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure
     '';
+
+    # Panic rollback - use any number of A's followed by !
+    "A!"      = ''cd /nix-modules && echo "[!] PANIC MODE - Rolling back to GitHub..." && echo 7 | sudo -S git fetch origin && echo 7 | sudo -S git reset --hard origin/main && echo "[*] Rebuilding from clean state..." && echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure'';
+    "AA!"     = ''cd /nix-modules && echo "[!] PANIC MODE - Rolling back to GitHub..." && echo 7 | sudo -S git fetch origin && echo 7 | sudo -S git reset --hard origin/main && echo "[*] Rebuilding from clean state..." && echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure'';
+    "AAA!"    = ''cd /nix-modules && echo "[!] PANIC MODE - Rolling back to GitHub..." && echo 7 | sudo -S git fetch origin && echo 7 | sudo -S git reset --hard origin/main && echo "[*] Rebuilding from clean state..." && echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure'';
+    "AAAA!"   = ''cd /nix-modules && echo "[!] PANIC MODE - Rolling back to GitHub..." && echo 7 | sudo -S git fetch origin && echo 7 | sudo -S git reset --hard origin/main && echo "[*] Rebuilding from clean state..." && echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure'';
+    "AAAAA!"  = ''cd /nix-modules && echo "[!] PANIC MODE - Rolling back to GitHub..." && echo 7 | sudo -S git fetch origin && echo 7 | sudo -S git reset --hard origin/main && echo "[*] Rebuilding from clean state..." && echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure'';
+    "AAAAAA!" = ''cd /nix-modules && echo "[!] PANIC MODE - Rolling back to GitHub..." && echo 7 | sudo -S git fetch origin && echo 7 | sudo -S git reset --hard origin/main && echo "[*] Rebuilding from clean state..." && echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure'';
   };
 }
