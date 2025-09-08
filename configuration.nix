@@ -26,6 +26,7 @@ in
     inputs.hydenix.inputs.home-manager.nixosModules.home-manager
     inputs.hydenix.lib.nixOsModules
     ./modules/system # Your custom system modules
+    ./modules/system/auto-commit.nix # Auto-commit changes to GitHub
     ./hardware-config.nix # Hardware configuration wrapper
 
     # Hardware Configuration - Uncomment lines that match your hardware
