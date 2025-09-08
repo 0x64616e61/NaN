@@ -65,20 +65,23 @@
     timeout = 5;
   };
   
-  # Boot configuration with Plymouth
+  # Boot configuration with Plymouth - silent boot
   boot.initrd.verbose = false;
+  boot.consoleLogLevel = 3;  # NixOS silent boot setting
   boot.kernelParams = [
-    # Very quiet boot with Plymouth animation (ESC to toggle messages)  
+    # Silent boot with Plymouth (ESC to toggle messages)
+    # Order matters: quiet must come first
     "quiet"
+    "loglevel=0"  # Most aggressive suppression
     "splash"
     "boot.shell_on_fail"
-    "loglevel=1"  # Only emergency messages on console
-    "rd.udev.log_level=3"
     "udev.log_priority=3"
-    "systemd.show_status=no"  # Hide systemd messages from console
-    "rd.systemd.show_status=no"  # Hide initrd systemd from console
-    "rd.quiet"  # Quiet initrd
-    "printk.devkmsg=off"  # Disable kernel message buffer to console
+    "rd.udev.log_level=3"
+    "rd.systemd.show_status=auto"  # Auto mode for Plymouth compatibility
+    "systemd.show_status=auto"
+    "rd.quiet"
+    "printk.devkmsg=off"
+    "printk.time=0"  # Disable timestamps
     
     # Plymouth specific - animation mode with ESC toggle
     "plymouth.enable=1"
