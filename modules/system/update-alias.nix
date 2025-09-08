@@ -11,7 +11,7 @@
         echo 7 | sudo -S git add -A && \
         echo 7 | sudo -S git commit -m "Auto-commit: $(date '+%Y-%m-%d %H:%M:%S')" && \
         echo "[>] Pushing to GitHub..." && \
-        (echo 7 | sudo -S gh repo sync --branch main 2>/dev/null || echo "[!] Push failed - check gh auth status"); \
+        (echo 7 | sudo -S git push origin main 2>/dev/null || echo "[!] Push failed - check git credentials"); \
       fi && \
       echo "[*] Rebuilding NixOS..." && \
       echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure
