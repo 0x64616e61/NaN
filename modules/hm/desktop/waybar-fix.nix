@@ -11,18 +11,112 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Copy our custom waybar configuration
-    home.file = {
-      # Individual waybar files to ensure they're copied properly
-      ".local/share/waybar/styles/hyprdots.css" = {
-        text = builtins.readFile ../../../waybar-config/styles/hyprdots.css;
-        force = true;
-      };
-      
-      ".local/share/waybar/layouts/hyprdots/17.jsonc" = {
-        text = builtins.readFile ../../../waybar-config/layouts/hyprdots/17.jsonc;
-        force = true;
-      };
+    # Apply our custom waybar CSS with transparent backgrounds
+    home.file.".local/share/waybar/styles/hyprdots.css" = {
+      text = ''
+        /* Group Styles */
+        
+        /* Pill Styles */
+        @import "groups/pill.css";
+        @import "groups/pill-up.css";
+        @import "groups/pill-right.css";
+        @import "groups/pill-down.css";
+        @import "groups/pill-left.css";
+        @import "groups/pill-in.css";
+        @import "groups/pill-out.css";
+        /* Leaf Style */
+        @import "groups/leaf.css";
+        @import "groups/leaf-inverse.css";
+        
+        
+        /* Dynamic Stuff */
+        /*
+        "../../../" Use relative path to navigate $HOME $HOME/
+        */
+        @import "../../../../.config/waybar/includes/border-radius.css";
+        @import "../../../../.config/waybar/includes/global.css";
+        
+        /* Base HyDE Styles */
+        
+        window#waybar {
+            background: @bar-bg;
+        }
+        
+        /*
+         These are groups/islands configs
+        
+        */
+        #leaf,
+        #leaf-inverse,
+        #leaf-up,
+        #leaf-down,
+        #leaf-right,
+        #leaf-left,
+        #pill,
+        #pill-right,
+        #pill-left,
+        #pill-down,
+        #pill-up,
+        #pill-in,
+        #pill-out {
+            background-color: transparent;
+            border-style: solid;
+            border-color: transparent;
+        }
+        
+        
+        
+        
+        
+        #workspaces button {
+            box-shadow: none;
+            text-shadow: none;
+            padding: 0em;
+            margin-top: 0.3em;
+            margin-bottom: 0.3em;
+            margin-left: 0em;
+            padding-left: 0.3em;
+            padding-right: 0.3em;
+            margin-right: 0em;
+            color: @main-fg;
+            animation: ws_normal 20s ease-in-out 1;
+        }
+        
+        #workspaces button.active {
+            background: @wb-act-bg;
+            color: @wb-act-fg;
+            margin-left: 0.3em;
+            padding-left: 0.45em;
+            padding-right: 0.45em;
+            margin-right: 0.3em;
+            border-radius: 2px;
+            min-width: 1.5em;
+            animation: ws_active 20s ease-in-out 1;
+            transition: all 0.4s cubic-bezier(.55, -0.68, .48, 1.682);
+        }
+        
+        #workspaces button:hover {
+            background: @wb-hvr-bg;
+            color: @wb-hvr-fg;
+            animation: ws_hover 20s ease-in-out 1;
+            transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+        }
+        
+        #taskbar button {
+            box-shadow: none;
+            text-shadow: none;
+            padding: 0em;
+            margin-top: 0.3em;
+            margin-bottom: 0.3em;
+            margin-left: 0em;
+            padding-left: 0.3em;
+            padding-right: 0.3em;
+            margin-right: 0em;
+            color: @wb-color;
+            animation: tb_normal 20s ease-in-out 1;
+        }
+      '';
+      force = true;
     };
     # Override the hyde.conf to uncomment the waybar startup
     home.file.".config/hypr/hyde.conf".text = mkForce ''
