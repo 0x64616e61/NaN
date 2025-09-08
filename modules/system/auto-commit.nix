@@ -7,7 +7,7 @@
     echo "Checking for uncommitted changes in /nix-modules..."
     
     # Check if gh CLI is available
-    if ! command -v gh &> /dev/null; then
+    if ! command -v /run/current-system/sw/bin/gh &> /dev/null; then
       echo "GitHub CLI (gh) not found, skipping auto-commit"
       exit 0
     fi
@@ -35,7 +35,7 @@
       
       # Try to push using gh CLI (which handles authentication)
       echo "Pushing changes to GitHub..."
-      gh repo sync --branch main || {
+      /run/current-system/sw/bin/gh repo sync --branch main || {
         echo "Failed to push changes (may need authentication)"
         echo "Run 'gh auth login' to authenticate"
       }
