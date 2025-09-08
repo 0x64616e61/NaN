@@ -5,12 +5,12 @@ with lib;
 let
   cfg = config.custom.system.grubTheme;
   
-  # Globe theme package
-  globeGrubTheme = pkgs.stdenv.mkDerivation rec {
-    pname = "grub-theme-globe";
+  # Vimix rotated theme for GPD Pocket 3
+  vimixRotatedTheme = pkgs.stdenv.mkDerivation rec {
+    pname = "grub2-vimix-rotated-theme";
     version = "1.0";
     
-    src = ./grub-theme/globe-theme;
+    src = ./vimix-theme-rotated;
     
     installPhase = ''
       mkdir -p $out
@@ -25,17 +25,17 @@ let
 in
 {
   options.custom.system.grubTheme = {
-    enable = mkEnableOption "custom GRUB theme with globe animation style";
+    enable = mkEnableOption "custom GRUB theme for GPD Pocket 3";
   };
 
   config = mkIf cfg.enable {
-    # Configure GRUB to use our theme
+    # Configure GRUB to use Vimix rotated theme
     boot.loader.grub = {
-      theme = lib.mkForce globeGrubTheme;
+      theme = lib.mkForce vimixRotatedTheme;
       splashImage = lib.mkForce null; # We use the theme's background instead
       
       # Ensure fonts are loaded
-      font = lib.mkForce "${globeGrubTheme}/font.pf2";
+      font = lib.mkForce "${vimixRotatedTheme}/font.pf2";
       fontSize = lib.mkForce 16;
     };
   };

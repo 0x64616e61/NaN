@@ -6,6 +6,9 @@
     enable = false;
   };
 
+  # Early kernel modules for GPD Pocket 3 display
+  boot.initrd.kernelModules = [ "i915" ];
+
   boot.loader = {
     # Disable systemd-boot
     systemd-boot.enable = lib.mkForce false;
@@ -43,10 +46,10 @@
         # Adjust font size for readability
         loadfont unicode
         
-        # Hide menu by default, show only when shift/esc is held
-        set timeout_style=hidden
+        # Show menu with countdown
+        set timeout_style=menu
         
-        # Immediately boot and hand off to Plymouth
+        # Keep graphics mode through boot
         set linux_gfx_mode=keep
         set gfxpayload=keep
       '';
@@ -58,8 +61,8 @@
       efiSysMountPoint = "/boot";
     };
     
-    # Timeout for boot menu (0 for immediate boot, hold shift to show menu)
-    timeout = 0;
+    # Timeout for boot menu (5 seconds to see menu)
+    timeout = 5;
   };
   
   # Boot configuration with Plymouth (no early messages)
