@@ -6,19 +6,18 @@ title-text: ""
 desktop-color: "#000000"
 terminal-font: "Unifont Regular 16"
 
-# Globe image - rotated 90 degrees, positioned for portrait screen
-# When viewed in landscape orientation, appears centered-left
+# Globe image - rotated 90 degrees, positioned left side
 + image {
-  left = 20%
-  top = 50%-300
+  left = 10%
+  top = 50%-400
   file = "background.png"
 }
 
-# Boot menu - positioned for portrait, appears on right when rotated
-# Adjusted for 1200x1920 portrait coordinates
+# Boot menu - positioned to appear on right side when rotated
+# Bottom of portrait screen = right side in landscape
 + boot_menu {
-  left = 50%
-  top = 45%
+  left = 30%
+  top = 75%
   width = 40%
   height = 20%
   item_font = "Unifont Regular 16"
