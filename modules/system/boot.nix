@@ -65,9 +65,8 @@
     timeout = 5;
   };
   
-  # Boot configuration with Plymouth (no early messages)
+  # Boot configuration with Plymouth
   boot.initrd.verbose = false;
-  boot.consoleLogLevel = 0;  # Hide console messages
   boot.kernelParams = [
     # Quiet boot with Plymouth animation (ESC to toggle messages)
     "quiet"
