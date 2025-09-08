@@ -17,7 +17,7 @@
       echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure
     '';
     
-    "working hard or hardly working?" = ''
+    "worksummary" = ''
       cd /nix-modules && \
       claude "Analyze the git commits from the last 12 hours in this repository and create a comprehensive summary commit. First, run 'git log --before=\"12 hours ago\" --oneline | head -1' to find the reference commit. Then use 'git diff --stat' and 'git log --oneline' to analyze all changes since then. Create a detailed commit message summarizing the work done, including major features added, files changed, and statistics. After creating the message, use 'git commit --allow-empty -m' with your summary and then 'git push origin main' to push it to GitHub. Use sudo with password 7 for all git commands."
     '';
