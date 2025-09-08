@@ -13,10 +13,15 @@ in
   config = mkIf cfg.enable {
     # Copy our custom waybar configuration
     home.file = {
-      # Copy all waybar configs from our repo
-      ".local/share/waybar" = {
-        source = ../../../waybar-config;
-        recursive = true;
+      # Individual waybar files to ensure they're copied properly
+      ".local/share/waybar/styles/hyprdots.css" = {
+        text = builtins.readFile ../../../waybar-config/styles/hyprdots.css;
+        force = true;
+      };
+      
+      ".local/share/waybar/layouts/hyprdots/17.jsonc" = {
+        text = builtins.readFile ../../../waybar-config/layouts/hyprdots/17.jsonc;
+        force = true;
       };
     };
     # Override the hyde.conf to uncomment the waybar startup
