@@ -72,7 +72,7 @@
     # Silent boot with Plymouth (ESC to toggle messages)
     # Order matters: quiet must come first
     "quiet"
-    "loglevel=0"  # Most aggressive suppression
+    "loglevel=3"  # Balanced suppression - 0 might break Plymouth
     "splash"
     "boot.shell_on_fail"
     "udev.log_priority=3"
@@ -80,8 +80,6 @@
     "rd.systemd.show_status=auto"  # Auto mode for Plymouth compatibility
     "systemd.show_status=auto"
     "rd.quiet"
-    "printk.devkmsg=off"
-    "printk.time=0"  # Disable timestamps
     
     # Plymouth specific - animation mode with ESC toggle
     "plymouth.enable=1"
