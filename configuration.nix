@@ -26,7 +26,7 @@ in
     inputs.hydenix.inputs.home-manager.nixosModules.home-manager
     inputs.hydenix.lib.nixOsModules
     ./modules/system # Your custom system modules
-    ./modules/system/auto-commit.nix # Auto-commit changes to GitHub
+    ./modules/system/update-alias.nix # Update! command for quick commits and rebuilds
     ./hardware-config.nix # Hardware configuration wrapper
 
     # Hardware Configuration - Uncomment lines that match your hardware
@@ -104,6 +104,7 @@ in
     locale = "en_GB.UTF-8"; # REQUIRED: Set locale/language (examples: "en_US.UTF-8", "en_GB.UTF-8", "de_DE.UTF-8")
     # For more configuration options, see: ./docs/options.md
   };
+
 
   # System Version - Don't change unless you know what you're doing (helps with system upgrades and compatibility)
   system.stateVersion = "25.05";

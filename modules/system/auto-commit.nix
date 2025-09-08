@@ -2,22 +2,16 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Create a system activation script that runs before rebuild
-  system.activationScripts.autoCommitChanges = lib.mkAfter ''
+  # Create a PRE-activation script that runs BEFORE rebuild to fix dirty git tree
+  system.activationScripts.autoCommitChanges = lib.mkBefore ''
     echo "Checking for uncommitted changes in /nix-modules..."
-    
-    # Check if gh CLI is available
-    if ! command -v /run/current-system/sw/bin/gh &> /dev/null; then
-      echo "GitHub CLI (gh) not found, skipping auto-commit"
-      exit 0
-    fi
     
     # Change to the nix-modules directory
     cd /nix-modules
     
     # Check if there are any changes
     if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
-      echo "Found uncommitted changes, committing..."
+      echo "Found uncommitted changes, committing to fix dirty git tree..."
       
       # Configure git if needed
       git config user.email "noreply@github.com" 2>/dev/null || true
@@ -30,15 +24,23 @@
       TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
       git commit -m "Auto-commit: NixOS rebuild at $TIMESTAMP" || {
         echo "Failed to commit changes"
-        exit 0
       }
       
-      # Try to push using gh CLI (which handles authentication)
+      # Try to push using gh CLI from nixpkgs
       echo "Pushing changes to GitHub..."
-      /run/current-system/sw/bin/gh repo sync --branch main || {
-        echo "Failed to push changes (may need authentication)"
-        echo "Run 'gh auth login' to authenticate"
-      }
+      if command -v gh &> /dev/null; then
+        gh repo sync --branch main 2>/dev/null || {
+          echo "Failed to push (may need 'gh auth login')"
+        }
+      elif [ -f "${pkgs.gh}/bin/gh" ]; then
+        ${pkgs.gh}/bin/gh repo sync --branch main 2>/dev/null || {
+          echo "Failed to push (may need 'gh auth login')"
+        }
+      else
+        echo "gh CLI not available, skipping push"
+      fi
+      
+      echo "Git tree is now clean"
     else
       echo "No uncommitted changes found"
     fi
