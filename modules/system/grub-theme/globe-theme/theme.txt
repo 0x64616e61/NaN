@@ -6,11 +6,11 @@ title-text: ""
 desktop-color: "#000000"
 terminal-font: "Unifont Regular 16"
 
-# Globe image - rotated 90 degrees, matching Plymouth position
-# Centered horizontally, 35% from top (appears higher in landscape)
+# Globe image - rotated 90 degrees
+# Center then shift right (in portrait view)
 + image {
-  left = 50%-300
-  top = 35%-306
+  left = 60%-300
+  top = 50%-306
   file = "background.png"
 }
 
