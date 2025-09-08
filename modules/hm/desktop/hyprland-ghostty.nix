@@ -25,10 +25,11 @@ in
         exec-once = sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3
         
         # Override terminal keybindings to use Ghostty instead of Kitty
+        $TERMINAL = ghostty
         unbind = SUPER, T
         unbind = SUPER ALT, T
-        bind = SUPER, T, exec, ghostty
-        bind = SUPER ALT, T, exec, [float; move 20% 5%; size 60% 60%] ghostty
+        bindd = SUPER, T, [Launcher|Apps] terminal emulator, exec, $TERMINAL
+        bindd = SUPER ALT, T, [Launcher|Apps] dropdown terminal, exec, [float; move 20% 5%; size 60% 60%] $TERMINAL
       '';
     };
   };
