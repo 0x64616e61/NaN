@@ -69,18 +69,19 @@
   boot.initrd.verbose = false;
   boot.consoleLogLevel = 0;  # Hide console messages
   boot.kernelParams = [
-    # Quiet boot until Plymouth starts
+    # Quiet boot with Plymouth handling messages
     "quiet"
     "splash"
     "boot.shell_on_fail"
     "loglevel=3"
-    "systemd.show_status=plymouth"  # Send systemd messages to Plymouth
-    "rd.systemd.show_status=false"  # Hide direct console output
+    "systemd.show_status=auto"  # Let systemd send messages to Plymouth
+    "rd.systemd.show_status=auto"  # Show messages during initrd too
     "rd.udev.log_level=3"
     "udev.log_priority=3"
     
     # Plymouth specific - enable with messages
     "plymouth.enable=1"
+    "plymouth.ignore-serial-consoles"  # Ensure Plymouth gets messages
     "vt.global_cursor_default=0"  # Hide cursor
     
     # Fix console rotation for GPD Pocket 3

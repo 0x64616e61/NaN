@@ -30,6 +30,7 @@ in
       DeviceScale=1
       ShowDelay=0
       Device=/dev/dri/card1
+      ShowMessages=true
     '';
   };
   

@@ -141,10 +141,19 @@ Plymouth.SetMessageFunction(message_callback);
 fun update_status_callback(status) {
     if (status == "normal") {
         scroll_message("[ OK ] System initialization complete");
+    } else if (status == "failed") {
+        scroll_message("[FAILED] Service startup failed");
     }
 }
 
 Plymouth.SetUpdateStatusFunction(update_status_callback);
+
+# Service update callback - shows systemd service messages
+fun display_message_callback(text) {
+    scroll_message(text);
+}
+
+Plymouth.SetDisplayMessageFunction(display_message_callback);
 
 # Display mode callbacks
 fun display_normal_callback() {
