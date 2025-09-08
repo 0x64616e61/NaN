@@ -28,11 +28,11 @@ for (i = 0; i < animation.imagecount; i++) {
 # Create sprite for animation
 animation.sprite = Sprite();
 
-# Position animation in upper half of screen (600x612 native size)
+# Position animation centered on screen (600x612 native size)
 animation.width = 600;
 animation.height = 612;
 animation.x = screen.width / 2 - animation.width / 2;
-animation.y = screen.height * 0.35 - animation.height / 2;  # Lower position
+animation.y = screen.height * 0.5 - animation.height / 2;  # Centered vertically
 animation.sprite.SetPosition(animation.x, animation.y, 10);
 
 # Animation loop
@@ -158,6 +158,8 @@ Plymouth.SetDisplayMessageFunction(display_message_callback);
 # Display mode callbacks
 fun display_normal_callback() {
     global.status = "normal";
+    # Ensure animation is visible in normal mode
+    animation.sprite.SetOpacity(1.0);
 }
 
 fun display_password_callback(prompt, bullets) {
@@ -186,6 +188,24 @@ fun display_password_callback(prompt, bullets) {
 
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+# Keystroke handler for ESC toggle
+global.mode = "splash";
+
+fun keystroke_callback(key) {
+    if (key == "escape" || key == "\033") {
+        if (global.mode == "splash") {
+            global.mode = "details";
+            Plymouth.SetMode("details");
+        } else {
+            global.mode = "splash";
+            Plymouth.SetMode("splash");
+            animation.sprite.SetOpacity(1.0);
+        }
+    }
+}
+
+Plymouth.SetKeystrokeFunction(keystroke_callback);
 
 # Quit callback for cleanup
 fun quit_callback() {
