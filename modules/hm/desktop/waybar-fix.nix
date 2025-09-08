@@ -7,10 +7,18 @@ let
 in
 {
   options.custom.hm.desktop.waybarFix = {
-    enable = mkEnableOption "waybar startup fix for HyDE";
+    enable = mkEnableOption "waybar startup fix for HyDE with custom transparent theme";
   };
 
   config = mkIf cfg.enable {
+    # Copy our custom waybar configuration
+    home.file = {
+      # Copy all waybar configs from our repo
+      ".local/share/waybar" = {
+        source = ../../../waybar-config;
+        recursive = true;
+      };
+    };
     # Override the hyde.conf to uncomment the waybar startup
     home.file.".config/hypr/hyde.conf".text = mkForce ''
       #!      ░▒▒▒░░░▓▓           ___________
