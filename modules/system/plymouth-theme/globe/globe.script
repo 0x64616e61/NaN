@@ -189,23 +189,21 @@ fun display_password_callback(prompt, bullets) {
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
 
-# Keystroke handler for ESC toggle
-global.mode = "splash";
+# Let Plymouth handle ESC toggle natively
 
-fun keystroke_callback(key) {
-    if (key == "escape" || key == "\033") {
-        if (global.mode == "splash") {
-            global.mode = "details";
-            Plymouth.SetMode("details");
-        } else {
-            global.mode = "splash";
-            Plymouth.SetMode("splash");
-            animation.sprite.SetOpacity(1.0);
-        }
-    }
+# Mode switching callbacks for ESC toggle
+fun display_details_callback() {
+    # Hide animation when showing details
+    animation.sprite.SetOpacity(0);
 }
 
-Plymouth.SetKeystrokeFunction(keystroke_callback);
+fun display_splash_callback() {
+    # Show animation when in splash mode
+    animation.sprite.SetOpacity(1.0);
+}
+
+Plymouth.SetDisplayDetailsFunction(display_details_callback);
+Plymouth.SetDisplaySplashFunction(display_splash_callback);
 
 # Quit callback for cleanup
 fun quit_callback() {
