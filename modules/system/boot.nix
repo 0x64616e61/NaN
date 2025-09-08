@@ -68,13 +68,17 @@
   # Boot configuration with Plymouth
   boot.initrd.verbose = false;
   boot.kernelParams = [
-    # Quiet boot with Plymouth animation (ESC to toggle messages)
+    # Very quiet boot with Plymouth animation (ESC to toggle messages)  
     "quiet"
     "splash"
     "boot.shell_on_fail"
-    "loglevel=3"
+    "loglevel=1"  # Only emergency messages on console
     "rd.udev.log_level=3"
     "udev.log_priority=3"
+    "systemd.show_status=no"  # Hide systemd messages from console
+    "rd.systemd.show_status=no"  # Hide initrd systemd from console
+    "rd.quiet"  # Quiet initrd
+    "printk.devkmsg=off"  # Disable kernel message buffer to console
     
     # Plymouth specific - animation mode with ESC toggle
     "plymouth.enable=1"
