@@ -1,24 +1,26 @@
-# GRUB2 Globe Theme - Clean minimal design
-# Only globe and boot menu, no extra text
+# GRUB2 Globe Theme - Rotated for GPD Pocket 3
+# Portrait display (1200x1920) with rotated assets for landscape viewing
 
 # Global Properties
 title-text: ""
 desktop-color: "#000000"
 terminal-font: "Unifont Regular 16"
 
-# Globe image - centered
+# Globe image - rotated 90 degrees, positioned for portrait screen
+# When viewed in landscape orientation, appears centered-left
 + image {
-  left = 50%-306
+  left = 20%
   top = 50%-300
   file = "background.png"
 }
 
-# Boot menu - right side, clean appearance
+# Boot menu - positioned for portrait, appears on right when rotated
+# Adjusted for 1200x1920 portrait coordinates
 + boot_menu {
-  left = 60%
-  top = 40%
-  width = 35%
-  height = 30%
+  left = 50%
+  top = 45%
+  width = 40%
+  height = 20%
   item_font = "Unifont Regular 16"
   item_color = "#44C7F1"
   selected_item_color = "#ffffff"
