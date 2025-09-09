@@ -119,18 +119,18 @@ let
                     local position="auto"
                     case "$EXTERNAL_POSITION" in
                         "right")
-                            position="1280,0"
+                            position="1280x0"
                             ;;
                         "left") 
-                            position="0,0"
+                            position="0x0"
                             ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,2560x0,$SCALE,transform,$orientation
                             ;;
                         "above")
-                            position="0,0"
+                            position="0x0"
                             ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,0x1440,$SCALE,transform,$orientation
                             ;;
                         "below")
-                            position="0,1920"
+                            position="0x1920"
                             ;;
                     esac
                     
