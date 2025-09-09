@@ -97,6 +97,8 @@ let
             local width=$(echo "$monitor_info" | ${pkgs.jq}/bin/jq -r '.width')
             local height=$(echo "$monitor_info" | ${pkgs.jq}/bin/jq -r '.height')
             local refresh=$(echo "$monitor_info" | ${pkgs.jq}/bin/jq -r '.refreshRate')
+            # Format refresh rate to integer
+            refresh=$(echo "$refresh" | cut -d. -f1)
             
             # Use monitor-specific scale or default
             local monitor_scale=$SCALE
@@ -143,13 +145,13 @@ let
             
             # Apply rotation with sync mode consideration
             if [ "${if cfg.syncRotation then "true" else "false"}" = "true" ] || [ "$monitor" = "$PRIMARY_MONITOR" ]; then
-                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,$position,$monitor_scale,transform,$orientation"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor ""$monitor,$width"x"$height"@"$refresh",$position,$monitor_scale,transform,$orientation"
             elif [ "${toString cfg.externalRotation}" != "-1" ]; then
                 # Use fixed rotation for external monitor
-                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,$position,$monitor_scale,transform,${toString cfg.externalRotation}"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor ""$monitor,$width"x"$height"@"$refresh",$position,$monitor_scale,transform,${toString cfg.externalRotation}"
             else
                 # Keep external monitor at normal orientation
-                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,$position,$monitor_scale,transform,0"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor ""$monitor,$width"x"$height"@"$refresh",$position,$monitor_scale,transform,0"
             fi
         done
     }
