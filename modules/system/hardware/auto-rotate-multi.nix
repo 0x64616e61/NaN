@@ -12,6 +12,8 @@ let
     
     PRIMARY_MONITOR="''${1:-${cfg.primaryMonitor}}"
     SCALE="''${2:-${toString cfg.scale}}"
+    # Format primary scale for hyprctl
+    SCALE=$(echo "$SCALE" | sed 's/\.0*$//')
     DEVICE="/sys/bus/iio/devices/iio:device0"
     LOCK_FILE="/tmp/rotation-lock-state"
     
@@ -101,6 +103,9 @@ let
             if [ "$monitor" = "HDMI-A-1" ] && [ "${toString cfg.externalScale}" != "0" ]; then
                 monitor_scale="${toString cfg.externalScale}"
             fi
+            
+            # Format scale for hyprctl (remove decimal if it's .0)
+            monitor_scale=$(echo "$monitor_scale" | sed 's/\.0*$//')
             
             # Calculate position based on primary monitor and orientation
             local position="auto"
