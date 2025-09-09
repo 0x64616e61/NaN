@@ -105,6 +105,25 @@ let
   '';
   
   # Manual rotation control script
+  # Toggle rotation lock script
+  rotation-lock-toggle = pkgs.writeScriptBin "rotation-lock-toggle" ''
+    #!${pkgs.bash}/bin/bash
+    LOCK_FILE="/tmp/rotation-lock-state"
+    
+    if [ -f "$LOCK_FILE" ] && [ "$(cat $LOCK_FILE)" = "locked" ]; then
+        echo "unlocked" > "$LOCK_FILE"
+        echo "Rotation unlocked"
+        
+        # Restart auto-rotate service if it's running
+        if systemctl --user is-active auto-rotate-both.service >/dev/null 2>&1; then
+            systemctl --user restart auto-rotate-both.service
+        fi
+    else
+        echo "locked" > "$LOCK_FILE"
+        echo "Rotation locked"
+    fi
+  '';
+  
   rotate-displays = pkgs.writeScriptBin "rotate-displays" ''
     #!${pkgs.bash}/bin/bash
     # Manual display rotation control script
@@ -155,6 +174,7 @@ in
     environment.systemPackages = [
       auto-rotate-both
       rotate-displays
+      rotation-lock-toggle
     ];
   };
 }
