@@ -79,6 +79,10 @@
       enable = true;  # Add rotation lock button to waybar
     };
     
+    desktop.waybarRotationPatch = {
+      enable = true;  # Auto-patch waybar config to include rotation lock
+    };
+    
     desktop.workflowsGhostty = {
       enable = true;  # Persistent ghostty terminal configuration
     };
