@@ -52,9 +52,13 @@
     };
     
     desktop.autoRotate = {
-      enable = true;
+      enable = false;  # Disabled in favor of autoRotateService
       monitor = "DSI-1";  # GPD Pocket 3 DSI display
       scale = 1.5;  # Maintain 1.5x scale during rotation
+    };
+    
+    desktop.autoRotateService = {
+      enable = true;  # Enable dual-monitor auto-rotation service
     };
     
     desktop.libinputGestures = {

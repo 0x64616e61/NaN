@@ -93,6 +93,11 @@
       installGlobally = true;
     };
     
+    # Display rotation scripts
+    packages.displayRotation = {
+      enable = true;  # Enable display rotation scripts for dual monitor setup
+    };
+    
     # Keyboard remapping with keyd
     input.keyd = {
       enable = true;  # Enable keyd for advanced keyboard customization
