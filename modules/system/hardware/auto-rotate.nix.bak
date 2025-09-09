@@ -5,35 +5,22 @@ with lib;
 let
   cfg = config.custom.system.hardware.autoRotate;
   
-  # Enhanced auto-rotate script that handles multiple monitors
+  # Custom auto-rotate script for MXC4005 accelerometer (GPD Pocket 3)
   auto-rotate-script = pkgs.writeShellScriptBin "auto-rotate-gpd" ''
     # Auto-rotate script for GPD Pocket 3 with Hyprland
-    # Enhanced to support multiple monitors
+    # Uses raw accelerometer values from MXC4005
     
     MONITOR="''${1:-${cfg.monitor}}"
     SCALE="''${2:-${toString cfg.scale}}"
     DEVICE="/sys/bus/iio/devices/iio:device0"
-    LOCK_FILE="/tmp/rotation-lock-state"
-    
-    # Configuration for external monitors
-    SYNC_EXTERNAL="${if cfg.syncExternal then "true" else "false"}"
-    EXTERNAL_POSITION="${cfg.externalPosition}"
-    
-    # Check if rotation is locked
-    check_lock() {
-        if [ -f "$LOCK_FILE" ] && [ "$(cat $LOCK_FILE)" = "locked" ]; then
-            return 0  # Locked
-        fi
-        return 1  # Unlocked
-    }
     
     # Wait for accelerometer device to be available and properly initialized
     echo "Waiting for accelerometer device..."
     for i in {1..30}; do
         if [ -e "$DEVICE/name" ] && [ -e "$DEVICE/in_accel_x_raw" ]; then
             # Check if we can actually read valid values
-            test_x=$(cat $DEVICE/in_accel_x_raw 2>/dev/null)
-            test_y=$(cat $DEVICE/in_accel_y_raw 2>/dev/null)
+            local test_x=$(cat $DEVICE/in_accel_x_raw 2>/dev/null)
+            local test_y=$(cat $DEVICE/in_accel_y_raw 2>/dev/null)
             
             if [ -n "$test_x" ] && [ "$test_x" != "0" ] && [ -n "$test_y" ] && [ "$test_y" != "0" ]; then
                 echo "Accelerometer device found and initialized: $(cat $DEVICE/name)"
@@ -93,60 +80,12 @@ let
         ${pkgs.hyprland}/bin/hyprctl keyword "device[$touch_device]:transform" $orientation
     }
     
-    rotate_all_monitors() {
-        local orientation=$1
-        
-        # Always rotate primary monitor
-        echo "Rotating primary monitor $MONITOR to orientation: $orientation"
-        ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,auto,$SCALE,transform,$orientation
-        
-        # If external sync is enabled, rotate external monitors too
-        if [ "$SYNC_EXTERNAL" = "true" ]; then
-            # Get all connected monitors
-            local all_monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name')
-            
-            for mon in $all_monitors; do
-                if [ "$mon" != "$MONITOR" ]; then
-                    echo "Rotating external monitor $mon to orientation: $orientation"
-                    
-                    # Get monitor info
-                    local mon_info=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$mon\")")
-                    local width=$(echo "$mon_info" | ${pkgs.jq}/bin/jq -r '.width')
-                    local height=$(echo "$mon_info" | ${pkgs.jq}/bin/jq -r '.height')
-                    local refresh=$(echo "$mon_info" | ${pkgs.jq}/bin/jq -r '.refreshRate' | cut -d. -f1)
-                    
-                    # Calculate position based on configuration
-                    local position="auto"
-                    case "$EXTERNAL_POSITION" in
-                        "right")
-                            position="1280,0"
-                            ;;
-                        "left") 
-                            position="0,0"
-                            ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,2560x0,$SCALE,transform,$orientation
-                            ;;
-                        "above")
-                            position="0,0"
-                            ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,0x1440,$SCALE,transform,$orientation
-                            ;;
-                        "below")
-                            position="0,1920"
-                            ;;
-                    esac
-                    
-                    # Apply rotation to external monitor
-                    ${pkgs.hyprland}/bin/hyprctl keyword monitor "$mon,''${width}x''${height}@''${refresh},$position,1,transform,$orientation"
-                fi
-            done
-        fi
-        
-        # Rotate touch input
-        rotate_touch $orientation
-    }
-    
     # Initialize with landscape orientation (3 = 270 degrees for GPD Pocket 3)
+    # This ensures we always start in landscape mode regardless of device position
+    # Force landscape on every service start/restart
     echo "Forcing landscape orientation on service start (270 degrees)"
-    rotate_all_monitors 3
+    ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,auto,$SCALE,transform,3
+    rotate_touch 3
     
     # Set initial orientation to landscape, ignore actual sensor reading
     last_orientation="3"
@@ -168,18 +107,12 @@ let
     echo "Starting orientation monitoring..."
     
     while true; do
-        # Check if rotation is locked
-        if check_lock; then
-            echo "Rotation is locked, skipping..." >&2
-            ${pkgs.coreutils}/bin/sleep 2
-            continue
-        fi
-        
         orientation=$(get_orientation)
         
         if [ "$orientation" != "-1" ] && [ "$orientation" != "$last_orientation" ]; then
             echo "Rotating to orientation: $orientation"
-            rotate_all_monitors $orientation
+            ${pkgs.hyprland}/bin/hyprctl keyword monitor $MONITOR,preferred,auto,$SCALE,transform,$orientation
+            rotate_touch $orientation
             last_orientation=$orientation
         fi
         
@@ -208,26 +141,13 @@ in
       default = false;
       description = "Use left master layout";
     };
-    
-    syncExternal = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Synchronize rotation with external monitors";
-    };
-    
-    externalPosition = mkOption {
-      type = types.enum [ "right" "left" "above" "below" ];
-      default = "right";
-      description = "Position of external monitor relative to primary";
-    };
   };
 
   config = mkIf cfg.enable {
     # Install required packages
     environment.systemPackages = with pkgs; [
       iio-sensor-proxy  # Provides accelerometer data
-      auto-rotate-script  # Enhanced auto-rotation script for GPD Pocket 3
-      jq  # Required for parsing monitor info
+      auto-rotate-script  # Custom auto-rotation script for GPD Pocket 3
     ];
     
     # Enable the iio-sensor-proxy service (even though we don't use it directly)

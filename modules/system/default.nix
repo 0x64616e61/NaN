@@ -31,18 +31,11 @@
     
     # Hardware features
     hardware.autoRotate = {
-      enable = false;  # Disabled in favor of autoRotateMulti
+      enable = true;  # Enhanced auto-rotation with multi-monitor support
       monitor = "DSI-1";  # GPD Pocket 3 DSI display
       scale = 1.5;  # Maintain 1.5x scale during rotation
-    };
-    
-    hardware.autoRotateMulti = {
-      enable = true;  # Enable multi-monitor auto-rotation
-      primaryMonitor = "DSI-1";
-      scale = 1.5;
-      externalScale = 1.0;
-      syncRotation = true;  # Sync external monitor rotation
-      externalPosition = "right";
+      syncExternal = true;  # Sync external monitor rotation
+      externalPosition = "right";  # Position of external monitor
     };
     
     hardware.focaltechFingerprint = {

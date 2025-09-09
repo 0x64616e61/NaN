@@ -125,14 +125,5 @@ in
       rotation-lock = "rotation-lock-toggle";
     };
 
-    # Configure the enhanced multi-monitor auto-rotation if enabled
-    custom.system.hardware.autoRotateMulti = mkIf cfg.autoRotate.enable {
-      enable = true;
-      primaryMonitor = "DSI-1";
-      scale = 1.5;
-      externalScale = 1.0;
-      syncRotation = cfg.autoRotate.syncExternal;
-      externalPosition = cfg.autoRotate.externalPosition;
-    };
   };
 }
