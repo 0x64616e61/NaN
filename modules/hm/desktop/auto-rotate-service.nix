@@ -32,8 +32,5 @@ in
         WantedBy = [ "default.target" ];
       };
     };
-    
-    # Stop the old auto-rotate-gpd service if it exists
-    systemd.user.services.auto-rotate-gpd.enable = false;
   };
 }
