@@ -135,7 +135,7 @@ let
                     esac
                     
                     # Apply rotation to external monitor
-                    ${pkgs.hyprland}/bin/hyprctl keyword monitor "$mon,${width}x${height}@${refresh},$position,1,transform,$orientation"
+                    ${pkgs.hyprland}/bin/hyprctl keyword monitor "$mon,''${width}x''${height}@''${refresh},$position,1,transform,$orientation"
                 fi
             done
         fi
