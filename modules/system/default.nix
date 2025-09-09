@@ -13,7 +13,6 @@
     ./monitor-config.nix
     ./grub-theme.nix
     ./mpd.nix
-    ./workflows-symlink.nix
   ];
 
   # Enable custom modules with clean configuration

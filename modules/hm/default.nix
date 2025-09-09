@@ -71,8 +71,9 @@
       enable = true;  # Fix waybar startup by uncommenting $start.BAR
     };
     
-    desktop.hyprlandGhostty = {
-      enable = true;  # Override Hyprland keybindings to use Ghostty
+    
+    desktop.workflowsGhostty = {
+      enable = true;  # Persistent ghostty terminal configuration
     };
     
     # Monitor configuration now handled at system level in modules/system/monitor-config.nix

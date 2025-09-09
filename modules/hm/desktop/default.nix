@@ -7,5 +7,6 @@
     ./waybar-fix.nix
     ./libinput-gestures.nix
     ./hyprland-ghostty.nix
+    ./workflows-ghostty.nix
   ];
 }
