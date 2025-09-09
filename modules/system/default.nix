@@ -12,6 +12,7 @@
     ./plymouth.nix
     ./monitor-config.nix
     ./grub-theme.nix
+    ./mpd.nix
     ./workflows-symlink.nix
   ];
 
@@ -88,10 +89,16 @@
     grubTheme = {
       enable = true;  # Enable custom GRUB theme matching Plymouth globe animation
     };
-  };
+    
+    # MPD (Music Player Daemon)
+    mpd = {
+      enable = true;  # Enable MPD music server
+    };
 
+  };
   # Packages that don't fit into modules
   environment.systemPackages = with pkgs; [
+    krita  # Digital painting application
     ghostty
     youtube-tui
     openvpn
