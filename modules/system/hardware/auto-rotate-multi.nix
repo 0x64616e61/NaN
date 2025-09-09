@@ -138,13 +138,13 @@ let
             
             # Apply rotation with sync mode consideration
             if [ "${if cfg.syncRotation then "true" else "false"}" = "true" ] || [ "$monitor" = "$PRIMARY_MONITOR" ]; then
-                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,${position},${monitor_scale},transform,${orientation}"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,$position,$monitor_scale,transform,$orientation"
             elif [ "${toString cfg.externalRotation}" != "-1" ]; then
                 # Use fixed rotation for external monitor
-                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,${position},${monitor_scale},transform,${toString cfg.externalRotation}"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,$position,$monitor_scale,transform,${toString cfg.externalRotation}"
             else
                 # Keep external monitor at normal orientation
-                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,${position},${monitor_scale},transform,0"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor "$monitor,preferred,$position,$monitor_scale,transform,0"
             fi
         done
     }
