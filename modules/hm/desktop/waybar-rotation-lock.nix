@@ -25,16 +25,6 @@ in
           "return-type": ""
         }
       }
-    ''';
-    
-    # Ensure the module is loaded by waybar
-    home.activation.waybarRotationLock = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      # Add rotation lock to waybar if not already present
-      if [ -f "$HOME/.config/waybar/config.jsonc" ]; then
-        if ! grep -q "custom/rotation-lock" "$HOME/.config/waybar/config.jsonc"; then
-          echo "Note: Add 'custom/rotation-lock' to your waybar modules-right array"
-        fi
-      fi
-    ''';
+    '';
   };
 }
