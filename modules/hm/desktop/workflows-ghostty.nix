@@ -7,21 +7,18 @@ let
 in
 {
   options.custom.hm.desktop.workflowsGhostty = {
-    enable = mkEnableOption "Ghostty terminal in workflows.conf";
+    enable = mkEnableOption "Ghostty terminal in workflows";
   };
 
   config = mkIf cfg.enable {
-    # Create workflows.conf for Ghostty
-    home.file.".config/hypr/workflows.conf" = {
+    # Override the default workflow to include ghostty settings
+    home.file.".config/hypr/workflows/default.conf" = {
       text = ''
         # // █▀▄ █▀▀ █▀▀ ▄▀█ █░█ █░░ ▀█▀
         # // █▄▀ ██▄ █▀░ █▀█ █▄█ █▄▄ ░█░
 
         $WORKFLOW_ICON=
-        $WORKFLOW_DESCRIPTION = Ghostty terminal configuration
-
-        # Force landscape orientation on startup for GPD Pocket 3
-        exec-once = sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3
+        $WORKFLOW_DESCRIPTION = Default with Ghostty terminal
 
         # Override terminal to use ghostty
         $TERMINAL = ghostty
