@@ -8,5 +8,6 @@
     ./libinput-gestures.nix
     ./hyprland-ghostty.nix
     ./workflows-ghostty.nix
+    ./hyde-ghostty.nix
   ];
 }

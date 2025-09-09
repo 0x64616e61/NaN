@@ -76,6 +76,10 @@
       enable = true;  # Persistent ghostty terminal configuration
     };
     
+    desktop.hydeGhostty = {
+      enable = true;  # Configure HyDE to use ghostty
+    };
+    
     # Monitor configuration now handled at system level in modules/system/monitor-config.nix
   };
 
