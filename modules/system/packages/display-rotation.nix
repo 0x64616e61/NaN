@@ -11,11 +11,12 @@ let
     # Auto-rotation for GPD Pocket 3 with synchronized external monitor
     
     DEVICE="/sys/bus/iio/devices/iio:device0"
-    LOCK_FILE="/tmp/rotation-lock-state"
     THRESHOLD=500
     
     check_lock() {
-        if [ -f "$LOCK_FILE" ] && [ "$(cat $LOCK_FILE)" = "locked" ]; then
+        local display="$1"
+        local lock_file="/tmp/rotation-lock-$display"
+        if [ -f "$lock_file" ] && [ "$(cat $lock_file)" = "locked" ]; then
             return 0  # Locked
         fi
         return 1  # Unlocked
@@ -62,7 +63,7 @@ let
     
     rotate_all() {
         local orientation=$1
-        echo "Rotating to orientation: $orientation"
+        echo "Checking rotation locks for displays..."
         
         # External monitor needs different transform to match GPD visually
         local external_orientation=$orientation
@@ -73,10 +74,24 @@ let
             2) external_orientation=3 ;;  # GPD 180° -> External 270°
         esac
         
-        # Rotate displays
-        ${pkgs.hyprland}/bin/hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.5,transform,$orientation
-        ${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1,2560x1440@59,1280x0,1,transform,$external_orientation
-        ${pkgs.hyprland}/bin/hyprctl keyword "device[gxtp7380:00-27c6:0113]:transform" $orientation
+        # Rotate GPD display if not locked
+        if ! check_lock "DSI-1"; then
+            echo "Rotating DSI-1 to orientation $orientation"
+            ${pkgs.hyprland}/bin/hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.5,transform,$orientation
+            ${pkgs.hyprland}/bin/hyprctl keyword "device[gxtp7380:00-27c6:0113]:transform" $orientation
+        else
+            echo "DSI-1 is locked, skipping rotation"
+        fi
+        
+        # Rotate external display if connected and not locked
+        if ${pkgs.hyprland}/bin/hyprctl monitors | grep -q "HDMI-A-1"; then
+            if ! check_lock "HDMI-A-1"; then
+                echo "Rotating HDMI-A-1 to orientation $external_orientation"
+                ${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1,2560x1440@59,1280x0,1,transform,$external_orientation
+            else
+                echo "HDMI-A-1 is locked, skipping rotation"
+            fi
+        fi
     }
     
     # Force landscape on start
@@ -88,11 +103,6 @@ let
     
     # Main loop
     while true; do
-        if check_lock; then
-            sleep 2
-            continue
-        fi
-        
         orientation=$(get_orientation)
         
         if [ "$orientation" != "-1" ] && [ "$orientation" != "$last_orientation" ]; then
@@ -105,22 +115,30 @@ let
   '';
   
   # Manual rotation control script
-  # Toggle rotation lock script
+  # Toggle rotation lock script (per-display)
   rotation-lock-toggle = pkgs.writeScriptBin "rotation-lock-toggle" ''
     #!${pkgs.bash}/bin/bash
-    LOCK_FILE="/tmp/rotation-lock-state"
+    # Get the display name from environment variable or argument
+    DISPLAY_NAME="''${1:-$WAYBAR_OUTPUT_NAME}"
+    
+    if [ -z "$DISPLAY_NAME" ]; then
+        # Try to detect from Hyprland active monitor
+        DISPLAY_NAME=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | .name')
+    fi
+    
+    if [ -z "$DISPLAY_NAME" ]; then
+        echo "Error: Could not determine display name"
+        exit 1
+    fi
+    
+    LOCK_FILE="/tmp/rotation-lock-$DISPLAY_NAME"
     
     if [ -f "$LOCK_FILE" ] && [ "$(cat $LOCK_FILE)" = "locked" ]; then
         echo "unlocked" > "$LOCK_FILE"
-        echo "Rotation unlocked"
-        
-        # Restart auto-rotate service if it's running
-        if systemctl --user is-active auto-rotate-both.service >/dev/null 2>&1; then
-            systemctl --user restart auto-rotate-both.service
-        fi
+        echo "Rotation unlocked for $DISPLAY_NAME"
     else
         echo "locked" > "$LOCK_FILE"
-        echo "Rotation locked"
+        echo "Rotation locked for $DISPLAY_NAME"
     fi
   '';
   
