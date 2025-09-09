@@ -11,6 +11,7 @@
     ./boot.nix
     ./plymouth.nix
     ./monitor-config.nix
+    ./display-management.nix
     ./grub-theme.nix
     ./mpd.nix
     ./ghostty-terminal.nix
@@ -30,9 +31,18 @@
     
     # Hardware features
     hardware.autoRotate = {
-      enable = true;  # Enable auto-rotation for GPD Pocket 3
+      enable = false;  # Disabled in favor of autoRotateMulti
       monitor = "DSI-1";  # GPD Pocket 3 DSI display
       scale = 1.5;  # Maintain 1.5x scale during rotation
+    };
+    
+    hardware.autoRotateMulti = {
+      enable = true;  # Enable multi-monitor auto-rotation
+      primaryMonitor = "DSI-1";
+      scale = 1.5;
+      externalScale = 1.0;
+      syncRotation = true;  # Sync external monitor rotation
+      externalPosition = "right";
     };
     
     hardware.focaltechFingerprint = {
@@ -62,6 +72,21 @@
     security.secrets = {
       enable = true;
       provider = "keepassxc";
+    };
+    
+    # Display management tools
+    displayManagement = {
+      enable = true;  # Enable display management tools and rotation lock
+      tools = {
+        wlrRandr = true;
+        wdisplays = true;
+        kanshi = true;
+      };
+      autoRotate = {
+        enable = true;
+        syncExternal = true;
+        externalPosition = "right";
+      };
     };
     
     # Email packages
