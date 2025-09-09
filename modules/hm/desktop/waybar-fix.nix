@@ -428,7 +428,7 @@ WAYBAR_EOF
       # $BROWSER = firefox # default browser, if commented out , will use the default browser
       # $EDITOR = code # default editor, if commented out , will use the default editor
       # $EXPLORER= dolphin # default file manager, if commented out , will use the default file manager
-      $TERMINAL = ghostty # default terminal, changed from kitty to ghostty
+$TERMINAL = ghostty # default terminal, changed from kitty to ghostty
       # $LOCKSCREEN=hyprlock # default lockscreen, you can use any lockscreen you want, eg swaylock
       # $IDLE=hypridle # default idle manager, you can use any idle manager you want,eg swayidle
 

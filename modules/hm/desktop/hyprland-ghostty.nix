@@ -21,8 +21,8 @@ in
       unbind = SUPER ALT, T
       
       # Bind new keybindings to use Ghostty
-      bindd = SUPER, T, [Launcher|Apps] terminal emulator, exec, $TERMINAL
-      bindd = SUPER ALT, T, [Launcher|Apps] dropdown terminal, exec, [float; move 20% 5%; size 60% 60%] $TERMINAL
+      bindd = SUPER, T, [Launcher|Apps] terminal emulator, exec, ghostty
+      bindd = SUPER ALT, T, [Launcher|Apps] dropdown terminal, exec, [float; move 20% 5%; size 60% 60%] ghostty
     '';
   };
 }
