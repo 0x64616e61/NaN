@@ -75,6 +75,9 @@
       enable = true;  # Fix waybar startup by uncommenting $start.BAR
     };
     
+    desktop.waybarRotationLock = {
+      enable = true;  # Add rotation lock button to waybar
+    };
     
     desktop.workflowsGhostty = {
       enable = true;  # Persistent ghostty terminal configuration

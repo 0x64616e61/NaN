@@ -182,6 +182,42 @@ let
             ;;
     esac
   '';
+  
+  # Rotation lock status script for waybar (shows focused monitor)
+  rotation-lock-status = pkgs.writeScriptBin "rotation-lock-status" ''
+    #!${pkgs.bash}/bin/bash
+    # Show lock status for the focused monitor
+    FOCUSED_MONITOR=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | .name')
+    
+    if [ -z "$FOCUSED_MONITOR" ]; then
+        echo "❓"
+        exit 0
+    fi
+    
+    LOCK_FILE="/tmp/rotation-lock-$FOCUSED_MONITOR"
+    
+    if [ -f "$LOCK_FILE" ] && [ "$(cat $LOCK_FILE)" = "locked" ]; then
+        echo "🔒 $FOCUSED_MONITOR"
+    else
+        echo "🔓 $FOCUSED_MONITOR"
+    fi
+  '';
+  
+  # Simple rotation lock toggle for waybar (toggles focused monitor)
+  rotation-lock-simple = pkgs.writeScriptBin "rotation-lock-simple" ''
+    #!${pkgs.bash}/bin/bash
+    # Toggle rotation lock for the focused monitor
+    FOCUSED_MONITOR=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | .name')
+    
+    if [ -z "$FOCUSED_MONITOR" ]; then
+        echo "Error: Could not determine focused monitor"
+        exit 1
+    fi
+    
+    rotation-lock-toggle "$FOCUSED_MONITOR"
+    # Force waybar to refresh
+    ${pkgs.procps}/bin/pkill -RTMIN+8 waybar
+  '';
 in
 {
   options.custom.system.packages.displayRotation = {
@@ -193,6 +229,8 @@ in
       auto-rotate-both
       rotate-displays
       rotation-lock-toggle
+      rotation-lock-status
+      rotation-lock-simple
     ];
   };
 }
