@@ -29,11 +29,11 @@
     };
     
     applications.kitty = {
-      enable = true;  # Enable Kitty terminal with touchscreen scrolling support
+      enable = false;  # Disabled - using Ghostty as main terminal
     };
     
     applications.ghostty = {
-      enable = true;  # Enable Ghostty terminal with adapted Kitty configuration
+      enable = true;  # Enable Ghostty terminal as main shell
     };
     
     # Audio processing
