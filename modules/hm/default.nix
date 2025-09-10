@@ -68,7 +68,7 @@
     # Gesture support disabled - removed from configuration
     
     desktop.waybarFix = {
-      enable = true;  # Fix waybar startup by uncommenting $start.BAR
+      enable = false;  # Disabled - waybar customization removed
     };
     
     
@@ -123,5 +123,12 @@
     globalInstall = true;
     autoUpdate = true;
     shellAliases = true;
+  };
+
+  # Git configuration using Hydenix module
+  hydenix.hm.git = {
+    enable = true;
+    name = "a";
+    email = "mini@nix";
   };
 }

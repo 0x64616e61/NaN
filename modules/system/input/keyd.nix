@@ -25,31 +25,69 @@ in
               # Right Alt as Compose key for special characters
               rightalt = "compose";
               
-              # Example: Make Tab act as Tab on tap, navigation layer on hold
-              # tab = "overload(nav, tab)";
+              # Space bar tap dance: tap for space, hold 150ms for nav layer
+              space = "overloadt2(nav, space, 150)";
             };
             
-            # Example navigation layer (uncomment to use)
-            # "nav:C" = {
-            #   h = "left";
-            #   j = "down";
-            #   k = "up";
-            #   l = "right";
-            #   u = "pageup";
-            #   d = "pagedown";
-            #   "0" = "home";
-            #   "4" = "end";  # $ doesn't work well in Nix attrsets
-            # };
+            # Navigation layer - activated by holding space
+            "nav:M" = {
+              # Keys 1-0 mapped to most useful Hyprland shortcuts
+              "1" = "macro(meta+t)";        # Terminal
+              "2" = "macro(meta+a)";        # App Launcher
+              "3" = "macro(meta+v)";        # Clipboard
+              "4" = "macro(meta+p)";        # Screenshot
+              "5" = "macro(meta+q)";        # Close Window
+              "6" = "macro(meta+w)";        # Toggle Floating
+              "7" = "macro(meta+l)";        # Lock Screen
+              "8" = "macro(meta+e)";        # File Explorer
+              "9" = "macro(meta+tab)";      # Window Switcher
+              "0" = "macro(meta+b)";        # Browser
+              
+              # vim-like navigation
+              h = "left";
+              j = "down";
+              k = "up";
+              l = "right";
+              
+              # Window focus navigation (Super + arrows)
+              w = "macro(meta+up)";         # Focus up
+              a = "macro(meta+left)";       # Focus left
+              s = "macro(meta+down)";       # Focus down
+              d = "macro(meta+right)";      # Focus right
+              
+              # Workspace navigation
+              q = "macro(meta+control+left)";   # Previous workspace
+              e = "macro(meta+control+right)";  # Next workspace
+              
+              # Volume controls
+              minus = "macro(f11)";         # Volume down
+              equal = "macro(f12)";         # Volume up
+              backspace = "macro(f10)";     # Mute
+              
+              # Escape to exit layer early
+              esc = "esc";
+            };
           };
           
-          # Additional config can be added with extraConfig
+          # Additional config for complex macros
           extraConfig = ''
-            # Example macro: Alt+M types your email
-            # [main]
-            # alt.m = macro(myemail@example.com)
+            # Quick text snippets in nav layer
+            [nav:M]
+            m = macro(mini@nix)           # Your email
+            t = macro(Thanks!)            # Common phrase
+            g = macro(git status)         # Common git command
             
-            # You can add more complex configurations here
-            # that don't fit well in the settings structure
+            # Display what each number does (for reference)
+            # 1 = Terminal (Super+T)
+            # 2 = App Launcher (Super+A)
+            # 3 = Clipboard (Super+V)
+            # 4 = Screenshot (Super+P)
+            # 5 = Close Window (Super+Q)
+            # 6 = Toggle Floating (Super+W)
+            # 7 = Lock Screen (Super+L)
+            # 8 = File Explorer (Super+E)
+            # 9 = Window Switcher (Super+Tab)
+            # 0 = Browser (Super+B)
           '';
         };
       };
