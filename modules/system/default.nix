@@ -126,6 +126,8 @@
   };
   # Packages that don't fit into modules
   environment.systemPackages = with pkgs; [
+    pandoc
+    texlive.combined.scheme-full  #  scheme-full for complete LaTeX support
     krita  # Digital painting application
     ghostty
     youtube-tui

@@ -16,7 +16,7 @@ let
     LOCK_FILE="/tmp/rotation-lock-state"
     
     # Configuration for external monitors
-    SYNC_EXTERNAL="${if cfg.syncExternal then "true" else "false"}"
+    SYNC_EXTERNAL="false"  # Never sync external monitors - they should stay in normal orientation
     EXTERNAL_POSITION="${cfg.externalPosition}"
     
     # Check if rotation is locked

@@ -98,7 +98,8 @@
   wayland.windowManager.hyprland.settings.exec-once = [
     # waybar is managed by HyDE's waybar.py script - don't start it directly
     "keepassxc ~/Documents/Passwords.kdbx"  # For secret service
-    # Auto-rotate is now handled by systemd service
+    # Ensure auto-rotate service starts
+    "systemctl --user start auto-rotate-both"
   ];
   
   # Ensure monitor is set to landscape in Hyprland config directly
