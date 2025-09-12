@@ -6,5 +6,6 @@
     ./mpv.nix
     ./kitty.nix
     ./ghostty.nix
+    ./btop.nix
   ];
 }

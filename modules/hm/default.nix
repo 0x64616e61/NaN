@@ -36,6 +36,10 @@
       enable = true;  # Enable Ghostty terminal as main shell
     };
     
+    applications.btop = {
+      enable = true;  # Enable btop++ with persistent configuration
+    };
+    
     # Audio processing
     audio.easyeffects = {
       enable = true;

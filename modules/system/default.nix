@@ -7,6 +7,7 @@
     ./security
     ./packages
     ./input
+    ./services
     ./wayland-screenshare.nix
     ./boot.nix
     ./plymouth.nix
@@ -126,6 +127,14 @@
     # Ghostty terminal persistence
     ghosttyTerminal = {
       enable = true;  # Ensure ghostty remains default terminal
+    };
+    
+    # Unified Remote server
+    services.unifiedRemote = {
+      enable = true;  # Enable Unified Remote server for mobile control
+      port = 9512;
+      openFirewall = true;
+      autoStart = true;
     };
 
   };
