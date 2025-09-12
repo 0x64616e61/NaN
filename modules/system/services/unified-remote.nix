@@ -12,7 +12,7 @@ let
     
     src = pkgs.fetchurl {
       url = "https://www.unifiedremote.com/download/linux-x64-deb";
-      sha256 = "0vygxwz2d9xrq51xa29nhzgvb2ws1bgmrk3fn1p8zkqykpkficrv";
+      sha256 = "sha256-TkRxHntInkz406VDlOpadzWOTeU+CgkXQNcHZwfZOsg=";
       name = "urserver.deb";
     };
     
@@ -55,7 +55,7 @@ let
       
       cat > $out/bin/urserver-stop <<EOF
       #!/bin/sh
-      pkill -f urserver || true
+      ${pkgs.procps}/bin/pkill -f urserver || true
       EOF
       
       chmod +x $out/bin/urserver-start
@@ -127,7 +127,8 @@ in
         {
           "network": {
             "port": ${toString cfg.port},
-            "port_http": ${toString (cfg.port + 1)}
+            "port_http": 9510,
+            "bind": "0.0.0.0"
           },
           "security": {
             "enable_password": false
@@ -141,12 +142,17 @@ in
     # Open firewall ports if requested
     networking.firewall = mkIf cfg.openFirewall {
       allowedTCPPorts = [ 
-        cfg.port           # Main server port
-        (cfg.port + 1)     # HTTP web interface port
-        9510 9511          # Discovery ports
+        cfg.port           # Main server port (9512)
+        9510               # HTTP web interface port
+        9511               # Discovery port
       ];
       allowedUDPPorts = [ 
-        9512               # Broadcast port
+        cfg.port           # UDP broadcast port (9512)
+        9510               # Additional UDP port
+        9511               # UDP discovery port
+      ];
+      allowedUDPPortRanges = [
+        { from = 9510; to = 9512; }  # Range for all Unified Remote UDP traffic
       ];
     };
     

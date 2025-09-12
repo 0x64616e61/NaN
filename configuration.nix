@@ -106,6 +106,19 @@ in
     locale = "en_GB.UTF-8"; # REQUIRED: Set locale/language (examples: "en_US.UTF-8", "en_GB.UTF-8", "de_DE.UTF-8")
     # For more configuration options, see: ./docs/options.md
   };
+  
+  # Firewall configuration for Unified Remote
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 9510 9511 9512 ];  # Unified Remote ports
+    allowedUDPPorts = [ 9510 9511 9512 ];  # Unified Remote discovery
+  };
+  
+  # iPhone USB tethering support
+  services.usbmuxd = {
+    enable = true;
+    package = pkgs.usbmuxd2;  # Use newer implementation for better iOS 14+ support
+  };
 
 
   # System Version - Don't change unless you know what you're doing (helps with system upgrades and compatibility)

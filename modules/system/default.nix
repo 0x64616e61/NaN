@@ -151,6 +151,8 @@
     gh
     chromium
     btop  # Beautiful system monitor (btop++) 
+    libimobiledevice  # iPhone USB support
+    ifuse  # Mount iPhone filesystem
     disko
     zfstools
     zfs
