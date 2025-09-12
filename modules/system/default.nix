@@ -103,6 +103,11 @@
       enable = true;  # Enable keyd for advanced keyboard customization
     };
     
+    # Vial keyboard configurator
+    input.vial = {
+      enable = true;  # Enable Vial with proper udev rules for keyboard configuration
+    };
+    
     # Wayland screen sharing support
     waylandScreenshare = {
       enable = true;  # Enable screen sharing for Electron apps (Slack, Teams, etc.)
@@ -133,10 +138,10 @@
     youtube-tui
     openvpn
     gptfdisk
-    vial
     parted
     gh
-    chromium 
+    chromium
+    btop  # Beautiful system monitor (btop++) 
     disko
     zfstools
     zfs

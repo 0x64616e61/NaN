@@ -92,6 +92,7 @@ in
       "networkmanager"
       "video"
       "input"  # Required for gesture recognition
+      "users"  # Required for Vial keyboard access
     ]; # User groups (determines permissions)
     shell = pkgs.zsh; # Default shell (options: pkgs.bash, pkgs.zsh, pkgs.fish)
   };

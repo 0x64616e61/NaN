@@ -66,8 +66,10 @@ in
 # GPD Pocket 3 DSI display - landscape orientation
 # Transform 3 = 270 degrees rotation (landscape mode)
 monitor = ${cfg.name}, ${cfg.resolution}, ${cfg.position}, ${toString cfg.scale}, transform, ${toString cfg.transform}
-# External monitor - also landscape by default to match GPD orientation
-monitor = HDMI-A-1, preferred, 1280x0, 1, transform, 3
+# External monitor - ultrawide at native resolution, positioned above main display
+monitor = DP-1, 3440x1440@98, 0x-1440, 1, transform, 0
+# Fallback for HDMI if used
+monitor = HDMI-A-1, preferred, auto, 1, transform, 0
 EOF
               chown $(basename "$USER_HOME"):users "$USER_HOME/.config/hypr/monitors.conf"
               
@@ -89,7 +91,8 @@ EOF
             HYPR_USER=$(ps aux | grep "[H]yprland" | head -1 | awk '{print $1}')
             if [ -n "$HYPR_USER" ]; then
               su - "$HYPR_USER" -c "${pkgs.hyprland}/bin/hyprctl keyword monitor ${cfg.name},${cfg.resolution},${cfg.position},${toString cfg.scale},transform,${toString cfg.transform}" || true
-              su - "$HYPR_USER" -c "${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1,preferred,1280x0,1,transform,3" || true
+              su - "$HYPR_USER" -c "${pkgs.hyprland}/bin/hyprctl keyword monitor DP-1,3440x1440@98,0x-1440,1,transform,0" || true
+              su - "$HYPR_USER" -c "${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1,preferred,auto,1,transform,0" || true
               su - "$HYPR_USER" -c "${pkgs.hyprland}/bin/hyprctl reload" || true
             fi
           fi
