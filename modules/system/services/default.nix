@@ -1,6 +1,0 @@
-{ ... }:
-{
-  imports = [
-    ./unified-remote.nix
-  ];
-}

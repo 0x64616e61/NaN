@@ -7,7 +7,6 @@
     ./security
     ./packages
     ./input
-    ./services
     ./wayland-screenshare.nix
     ./boot.nix
     ./plymouth.nix
@@ -128,15 +127,6 @@
     ghosttyTerminal = {
       enable = true;  # Ensure ghostty remains default terminal
     };
-    
-    # Unified Remote server
-    services.unifiedRemote = {
-      enable = true;  # Enable Unified Remote server for mobile control
-      port = 9512;
-      openFirewall = true;
-      autoStart = true;
-    };
-
   };
   # Packages that don't fit into modules
   environment.systemPackages = with pkgs; [

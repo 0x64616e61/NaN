@@ -107,14 +107,7 @@ in
     # For more configuration options, see: ./docs/options.md
   };
   
-  # Firewall configuration for Unified Remote
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 9510 9511 9512 ];  # Unified Remote ports
-    allowedUDPPorts = [ 9510 9511 9512 ];  # Unified Remote discovery
-  };
-  
-  # iPhone USB tethering support
+  # iPhone USB tethering support (keeping this as it's useful)
   services.usbmuxd = {
     enable = true;
     package = pkgs.usbmuxd2;  # Use newer implementation for better iOS 14+ support
