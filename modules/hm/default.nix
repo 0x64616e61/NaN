@@ -136,9 +136,7 @@
   # Claude-code configuration
   hydenix.hm.claude-code = {
     enable = true;
-    globalInstall = true;
-    autoUpdate = true;
-    shellAliases = true;
+    shellAliases = true;  # Only option that still exists
   };
 
   # Git configuration using Hydenix module
