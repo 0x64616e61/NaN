@@ -4,97 +4,112 @@ with lib;
 
 let
   cfg = config.hydenix.hm.claude-code;
+
+  # Create a proper Nix package for claude-code that fetches latest from npm
+  claude-code-pkg = pkgs.stdenv.mkDerivation rec {
+    pname = "claude-code";
+    version = "latest";
+
+    # We don't need a src since we'll fetch from npm
+    dontUnpack = true;
+
+    nativeBuildInputs = with pkgs; [
+      nodejs
+      makeWrapper
+      cacert  # Needed for npm to fetch over HTTPS
+    ];
+
+    buildPhase = ''
+      # Create a temporary directory for npm
+      export HOME=$TMPDIR
+      mkdir -p $TMPDIR/npm-cache
+      export npm_config_cache=$TMPDIR/npm-cache
+
+      # Create package directory structure
+      mkdir -p package
+      cd package
+
+      # Create a minimal package.json to fetch claude-code
+      cat > package.json <<EOF
+      {
+        "name": "claude-code-nix",
+        "version": "1.0.0",
+        "dependencies": {
+          "@anthropic-ai/claude-code": "latest"
+        }
+      }
+      EOF
+
+      # Install claude-code (this fetches latest version each rebuild)
+      npm install --production --no-save
+    '';
+
+    installPhase = ''
+      # Create the output directory structure
+      mkdir -p $out/lib/node_modules
+
+      # Copy the installed modules
+      cp -r node_modules/* $out/lib/node_modules/
+
+      # Create bin directory
+      mkdir -p $out/bin
+
+      # Find the claude executable and create wrapper
+      if [ -f "$out/lib/node_modules/@anthropic-ai/claude-code/bin/claude" ]; then
+        makeWrapper ${pkgs.nodejs}/bin/node $out/bin/claude \
+          --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/bin/claude" \
+          --prefix NODE_PATH : "$out/lib/node_modules"
+      elif [ -f "$out/lib/node_modules/.bin/claude" ]; then
+        # npm might create symlinks in .bin
+        makeWrapper $out/lib/node_modules/.bin/claude $out/bin/claude \
+          --prefix NODE_PATH : "$out/lib/node_modules"
+      else
+        # Fallback: create direct node wrapper
+        makeWrapper ${pkgs.nodejs}/bin/node $out/bin/claude \
+          --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/dist/index.js" \
+          --prefix NODE_PATH : "$out/lib/node_modules"
+      fi
+
+      # Create claude-code alias
+      ln -s $out/bin/claude $out/bin/claude-code
+    '';
+
+    # Mark as impure since it fetches latest from network
+    __noChroot = true;
+
+    meta = {
+      description = "Claude Code - AI pair programming in your terminal";
+      homepage = "https://claude.ai/code";
+      platforms = lib.platforms.all;
+    };
+  };
 in
 {
   options.hydenix.hm.claude-code = {
     enable = mkEnableOption "claude-code CLI from Anthropic";
 
-    package = mkOption {
-      type = types.package;
-      default = pkgs.writeScriptBin "claude-code-installer" ''
-        #!${pkgs.bash}/bin/bash
-        echo "Installing claude-code globally..."
-        ${pkgs.nodejs}/bin/npm install -g @anthropic-ai/claude-code
-      '';
-      description = "The claude-code installation script";
-    };
-
-    globalInstall = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Whether to install claude-code globally for CLI access";
-    };
-
-    autoUpdate = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Whether to automatically update to the latest version";
-    };
-
     shellAliases = mkOption {
       type = types.bool;
       default = true;
-      description = "Whether to create shell aliases for claude-code";
+      description = "Whether to create shell alias 'cc' for claude command";
     };
   };
 
   config = mkIf cfg.enable {
-    # Set up npm global directory
-    home.sessionVariables = {
-      NPM_CONFIG_PREFIX = "$HOME/.npm-global";
-    };
+    # Simply add the claude-code package - it's all in the Nix store now!
+    home.packages = [ claude-code-pkg ];
 
-    # Add npm global bin to PATH
-    home.sessionPath = [ "$HOME/.npm-global/bin" ];
-
-    # Create .npm-global directory
-    home.file.".npm-global/.keep".text = "";
-
-    # Create a manual install script instead of running during boot
-    home.packages = [
-      pkgs.nodejs
-      (pkgs.writeScriptBin "install-claude-code" ''
-        #!${pkgs.bash}/bin/bash
-        export NPM_CONFIG_PREFIX="$HOME/.npm-global"
-        export PATH="$HOME/.npm-global/bin:$PATH"
-
-        if [ ! -f "$HOME/.npm-global/bin/claude-code" ]; then
-          echo "Installing claude-code..."
-          ${pkgs.nodejs}/bin/npm install -g @anthropic-ai/claude-code
-        else
-          echo "claude-code already installed"
-          ${optionalString cfg.autoUpdate ''
-            echo "Updating claude-code..."
-            ${pkgs.nodejs}/bin/npm update -g @anthropic-ai/claude-code
-          ''}
-        fi
-      '')
-    ];
-
-    # Create shell aliases for convenience  
+    # Create shell aliases for convenience if requested
     programs.bash.shellAliases = mkIf (cfg.shellAliases && config.programs.bash.enable) {
-      claude-code = "claude";
+      cc = "claude";
     };
 
     programs.zsh.shellAliases = mkIf (cfg.shellAliases && config.programs.zsh.enable) {
-      claude-code = "claude";
+      cc = "claude";
     };
 
     programs.fish.shellAliases = mkIf (cfg.shellAliases && config.programs.fish.enable) {
-      claude-code = "claude";
+      cc = "claude";
     };
-
-    # Ensure PATH is updated in shell configs
-    programs.bash.initExtra = mkIf config.programs.bash.enable ''
-      export PATH="$HOME/.npm-global/bin:$PATH"
-    '';
-    
-    programs.zsh.initContent = mkIf config.programs.zsh.enable ''
-      export PATH="$HOME/.npm-global/bin:$PATH"
-    '';
-    
-    programs.fish.shellInit = mkIf config.programs.fish.enable ''
-      set -gx PATH $HOME/.npm-global/bin $PATH
-    '';
   };
 }
