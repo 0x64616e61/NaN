@@ -39,9 +39,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Add nodejs and npm to packages
-    home.packages = [ pkgs.nodejs cfg.package ];
-
     # Set up npm global directory
     home.sessionVariables = {
       NPM_CONFIG_PREFIX = "$HOME/.npm-global";
@@ -53,22 +50,26 @@ in
     # Create .npm-global directory
     home.file.".npm-global/.keep".text = "";
 
-    # Install claude-code via home activation
-    home.activation.installClaudeCode = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      export NPM_CONFIG_PREFIX="$HOME/.npm-global"
-      export PATH="$HOME/.npm-global/bin:$PATH"
-      
-      if [ ! -f "$HOME/.npm-global/bin/claude-code" ]; then
-        echo "Installing claude-code..."
-        $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm install -g @anthropic-ai/claude-code
-      else
-        echo "claude-code already installed"
-        ${optionalString cfg.autoUpdate ''
-          echo "Updating claude-code..."
-          $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm update -g @anthropic-ai/claude-code
-        ''}
-      fi
-    '';
+    # Create a manual install script instead of running during boot
+    home.packages = [
+      pkgs.nodejs
+      (pkgs.writeScriptBin "install-claude-code" ''
+        #!${pkgs.bash}/bin/bash
+        export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+        export PATH="$HOME/.npm-global/bin:$PATH"
+
+        if [ ! -f "$HOME/.npm-global/bin/claude-code" ]; then
+          echo "Installing claude-code..."
+          ${pkgs.nodejs}/bin/npm install -g @anthropic-ai/claude-code
+        else
+          echo "claude-code already installed"
+          ${optionalString cfg.autoUpdate ''
+            echo "Updating claude-code..."
+            ${pkgs.nodejs}/bin/npm update -g @anthropic-ai/claude-code
+          ''}
+        fi
+      '')
+    ];
 
     # Create shell aliases for convenience  
     programs.bash.shellAliases = mkIf (cfg.shellAliases && config.programs.bash.enable) {
