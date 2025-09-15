@@ -14,7 +14,6 @@
     ./display-management.nix
     ./grub-theme.nix
     ./mpd.nix
-    ./ghostty-terminal.nix
   ];
 
   # Enable custom modules with clean configuration
@@ -121,11 +120,6 @@
     # MPD (Music Player Daemon)
     mpd = {
       enable = true;  # Enable MPD music server
-    };
-    
-    # Ghostty terminal persistence
-    ghosttyTerminal = {
-      enable = true;  # Ensure ghostty remains default terminal
     };
   };
   # Packages that don't fit into modules
