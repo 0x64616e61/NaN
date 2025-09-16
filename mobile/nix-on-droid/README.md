@@ -33,7 +33,7 @@ Optimized mobile development environment that complements the GPD Pocket 3 setup
 1. Install Nix-on-Droid from F-Droid
 2. In Nix-on-Droid terminal, run:
    ```bash
-   nix-on-droid switch --flake "github:0x64616e61/nix-modules?dir=nix-on-droid#default"
+   nix-on-droid switch --flake "github:0x64616e61/nix-modules?dir=mobile/nix-on-droid#default"
    ```
 3. Restart terminal session
 
