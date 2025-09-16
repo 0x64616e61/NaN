@@ -342,20 +342,6 @@
     nix-direnv.enable = true;
   };
 
-  # Enhanced Git configuration
-  programs.git = {
-    enable = true;
-    lfs.enable = true;
-    config = {
-      user.name = "a";
-      user.email = "mini@nix";
-      init.defaultBranch = "main";
-      pull.rebase = false;
-      push.autoSetupRemote = true;
-      diff.colorMoved = "default";
-      merge.conflictstyle = "diff3";
-    };
-  };
 
   # Tmux configuration
   programs.tmux = {
