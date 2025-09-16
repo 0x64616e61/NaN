@@ -29,16 +29,24 @@ Optimized mobile development environment that complements the GPD Pocket 3 setup
 
 ## 🚀 Installation
 
+### Quick Setup (Recommended)
+1. Install Nix-on-Droid from F-Droid
+2. In Nix-on-Droid terminal, run:
+   ```bash
+   nix-on-droid switch --flake "github:0x64616e61/nix-modules?dir=nix-on-droid#default"
+   ```
+3. Restart terminal session
+
+### Alternative: Local Setup
 1. Install Nix-on-Droid from F-Droid
 2. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/nix-modules.git
+   git clone https://github.com/0x64616e61/nix-modules.git
    cd nix-modules/nix-on-droid
    ```
-
 3. Build and switch:
    ```bash
-   nix-on-droid switch --flake .#pixel9pro
+   nix-on-droid switch --flake .#default
    ```
 
 ## ⚙️ Usage

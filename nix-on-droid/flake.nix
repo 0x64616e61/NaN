@@ -10,10 +10,20 @@
   };
 
   outputs = { self, nixpkgs, nix-on-droid }: {
-    nixOnDroidConfigurations.pixel9pro = nix-on-droid.lib.nixOnDroidConfiguration {
-      modules = [
-        ./configuration.nix
-      ];
+    nixOnDroidConfigurations = {
+      # Named configuration
+      pixel9pro = nix-on-droid.lib.nixOnDroidConfiguration {
+        modules = [
+          ./configuration.nix
+        ];
+      };
+
+      # Default configuration (same as pixel9pro)
+      default = nix-on-droid.lib.nixOnDroidConfiguration {
+        modules = [
+          ./configuration.nix
+        ];
+      };
     };
   };
 }
