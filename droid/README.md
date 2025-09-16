@@ -27,15 +27,48 @@ That's it! You'll be in a NixOS container with all your CLI tools.
 
 ## 📦 What's Included
 
-Packages extracted from your existing configuration:
-- **Core Dev**: git, neovim, tmux, gh
-- **Modern CLI**: ripgrep, fd, bat, eza, zoxide, fzf, starship
-- **Languages**: nodejs, python3, gcc
-- **Network**: curl, wget, ssh, nmap
-- **File Sync**: syncthing, rclone
-- **System**: btop, htop, neofetch
+**100+ CLI tools** extracted from your main configuration:
 
-All with your familiar aliases and configurations!
+### Development Environment
+- **Version Control**: git, gh, lazygit
+- **Editors**: neovim (fully configured), tmux
+- **Languages**: Node.js, Python3, Go, Rust, GCC
+- **Package Managers**: npm, yarn, pnpm, pip, cargo
+- **Build Tools**: cmake, make, autoconf, automake
+- **Debuggers**: gdb, strace, ltrace, valgrind, delve
+
+### Modern CLI Tools
+- **Search**: ripgrep, fd, ack, silver-searcher
+- **File Viewing**: bat, eza, tree, duf
+- **Navigation**: zoxide, fzf, starship prompt
+- **System Monitoring**: btop, htop, iotop, iftop, nethogs
+
+### DevOps & Infrastructure
+- **Containers**: podman, buildah, docker-compose, lazydocker
+- **Orchestration**: kubectl, k9s, terraform, ansible
+- **Databases**: pgcli, mycli, redis
+
+### Network & Security
+- **Network Tools**: nmap, netcat, mtr, iperf3, dig, whois
+- **VPN**: openvpn, wireguard-tools
+- **Security**: gnupg, age, pass, sops
+
+### File Management
+- **Sync**: syncthing, rclone, rsync
+- **Archives**: zip, unzip, p7zip, tar
+- **Disk Tools**: gptfdisk, parted, disko, zfs, zfstools
+
+### Media & Data
+- **Media CLI**: youtube-tui, yt-dlp, ffmpeg, imagemagick
+- **Data Processing**: jq, yq, xsv, pandoc
+
+### Language-Specific Tools
+- **Python**: ipython, black, pylint, pytest, virtualenv
+- **Node**: typescript, prettier, eslint, nodemon
+- **Rust**: rust-analyzer, cargo-edit, cargo-watch
+- **Go**: gopls, gotools, go-tools
+
+All with your familiar aliases and enhanced configurations!
 
 ## 📝 Configuration
 
