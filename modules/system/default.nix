@@ -124,6 +124,7 @@
   };
   # Packages that don't fit into modules
   environment.systemPackages = with pkgs; [
+    x2goclient
     pandoc
     texlive.combined.scheme-full  #  scheme-full for complete LaTeX support
     krita  # Digital painting application
