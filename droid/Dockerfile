@@ -1,4 +1,4 @@
-FROM nixos/nix:latest
+FROM docker.io/nixos/nix:latest
 
 # Enable experimental features for flakes
 RUN mkdir -p /etc/nix && \
