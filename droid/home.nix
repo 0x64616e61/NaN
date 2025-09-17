@@ -206,6 +206,10 @@
       # Task management (if you install task-master)
       tm = "task-master 2>/dev/null || echo 'task-master not installed'";
 
+      # Music player
+      music = "ncmpcpp";
+      tidal = "ncmpcpp";  # Alias for Tidal via mopidy
+
       # Quick update command (adapted for Nix-on-Droid)
       "update!" = ''
         cd ~/nix-modules 2>/dev/null || cd ~ && \
@@ -447,35 +451,53 @@
     signal-cli
 
     # Music streaming and players
-    mopidy  # Music server with Tidal support via extensions
+    mopidy  # Music server with Tidal support
     mopidy-mpd  # MPD interface for mopidy
+    mopidy-tidal  # Tidal backend for mopidy
     # ncmpcpp is already in nix-on-droid.nix
 
     # Task management tools
     nodejs
 
-    # Tidal CLI client wrapper
-    (writeScriptBin "tidal-cli" ''
+    # Mopidy service starter script
+    (writeScriptBin "mopidy-start" ''
       #!${bash}/bin/bash
-      TIDAL_DIR="$HOME/.local/share/tidal-cli"
-      TIDAL_BIN="$TIDAL_DIR/node_modules/.bin/tidal-cli-client"
+      echo "Starting Mopidy with Tidal support..."
+      mkdir -p ~/.config/mopidy
+      mopidy --config ~/.config/mopidy/mopidy.conf
+    '')
 
-      if [ ! -f "$TIDAL_BIN" ]; then
-        echo "Tidal CLI not found. Installing..."
-        mkdir -p "$TIDAL_DIR"
-        cd "$TIDAL_DIR"
-        ${nodejs}/bin/npm install tidal-cli-client@latest --prefix .
+    # Mopidy config setup helper
+    (writeScriptBin "mopidy-setup" ''
+      #!${bash}/bin/bash
+      mkdir -p ~/.config/mopidy
 
-        if [ -f "$TIDAL_BIN" ]; then
-          echo "Tidal CLI installed successfully!"
-          echo "Run 'tidal-cli' again to start."
-        else
-          echo "Failed to install Tidal CLI"
-          exit 1
-        fi
+      if [ ! -f ~/.config/mopidy/mopidy.conf ]; then
+        echo "Creating Mopidy configuration..."
+        cat > ~/.config/mopidy/mopidy.conf <<'EOF'
+      [core]
+      restore_state = true
+
+      [mpd]
+      enabled = true
+      hostname = 127.0.0.1
+      port = 6600
+
+      [tidal]
+      enabled = true
+      # You need to add your Tidal credentials:
+      # username = YOUR_TIDAL_USERNAME
+      # password = YOUR_TIDAL_PASSWORD
+      # quality = LOSSLESS
+
+      [audio]
+      output = autoaudiosink
+      EOF
+        echo "Configuration created at ~/.config/mopidy/mopidy.conf"
+        echo "Please edit it and add your Tidal credentials!"
+        echo "Then run 'mopidy-start' to start the server"
       else
-        export NODE_PATH="$TIDAL_DIR/node_modules"
-        exec "$TIDAL_BIN" "$@"
+        echo "Config already exists at ~/.config/mopidy/mopidy.conf"
       fi
     '')
 
