@@ -467,7 +467,7 @@ in {
       };
 
       environment = {
-        PATH = "/run/current-system/sw/bin";
+        PATH = mkDefault "/run/current-system/sw/bin";
       };
     };
 
@@ -502,7 +502,7 @@ in {
       };
 
       environment = {
-        PATH = "/run/current-system/sw/bin";
+        PATH = mkDefault "/run/current-system/sw/bin";
       };
     };
 

@@ -17,6 +17,15 @@ in
 {
   options.custom.system.hardware.focaltechFingerprint = {
     enable = mkEnableOption "FocalTech FTE3600 fingerprint reader support";
+
+    debug = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Enable verbose debug logging for fingerprint service.
+        WARNING: Generates excessive logs, use only for troubleshooting.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {

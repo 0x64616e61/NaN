@@ -68,7 +68,7 @@
       disableCompletely = false;
       disableLowBatterySuspend = false;
     };
-    
+
     # Security
     security.fingerprint = {
       enable = true;

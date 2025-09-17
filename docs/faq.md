@@ -295,7 +295,13 @@ see [home.file options](https://home-manager-options.extranix.com/?query=home.fi
 
 ### how do I add a new theme?
 
-<!-- TODO: docs: Add a guide on how to add a new theme -->
+Themes in Hydenix are managed through the HyDE configuration system. To add a new theme:
+
+1. **Create theme directory**: Add your theme files to the HyDE themes directory
+2. **Configure in flake**: Reference the theme in your `hydenix` configuration options
+3. **Rebuild system**: Apply changes with `sudo nixos-rebuild switch --flake .#hydenix --impure`
+
+For detailed theme customization, refer to the HyDE documentation or examine existing theme configurations in the Hydenix repository.
 
 ### what is mutable.nix?
 

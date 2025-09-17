@@ -9,9 +9,11 @@ Personal NixOS configuration for GPD Pocket 3 device using Hydenix (Hyprland-bas
 ## Critical Context
 
 - **Repository Location**: `/nix-modules/` (system-wide, requires sudo for modifications)
-- **Flake System**: `hydenix` - the only nixosConfiguration defined in flake.nix
+- **Flake System**: `hydenix` and `mini` (alias) - both nixosConfigurations point to same config
 - **Module System**: Two-tier option system with `hydenix.*` (core) and `custom.*` (extensions)
 - **Sudo Password**: `7` (for system operations)
+- **Total Module Count**: 58 Nix files across system and home-manager modules
+- **Follow RULES.md**: Always delegate todos and use parallel operations where possible
 
 ## Key Commands
 
@@ -29,6 +31,8 @@ panic
 
 # Standard rebuild (always use --impure for hardware detection)
 sudo nixos-rebuild switch --flake .#hydenix --impure
+# Alternative using hostname alias:
+sudo nixos-rebuild switch --flake .#mini --impure
 
 # Test configuration without switching
 sudo nixos-rebuild test --flake .#hydenix --impure
@@ -55,6 +59,8 @@ nix flake check
 
 # View system generation differences
 nixos-rebuild build --flake .#hydenix --impure && nvd diff /run/current-system result
+# Or using hostname alias:
+nixos-rebuild build --flake .#mini --impure && nvd diff /run/current-system result
 ```
 
 ### Debugging Commands
@@ -85,36 +91,66 @@ nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
 ### Configuration Hierarchy
 ```
 /nix-modules/
-├── flake.nix                    # Flake inputs (hydenix, nixpkgs, grub2-themes)
+├── flake.nix                    # Flake inputs (hydenix, nixpkgs, grub2-themes, nix-index-database)
 ├── configuration.nix            # Main system config (user: a, host: mini)
 ├── hardware-config.nix          # Smart hardware detection wrapper
+├── RULES.md                     # Claude behavioral rules and guidelines
+├── docs/faq.md                  # Hydenix FAQ and troubleshooting
+├── droid/configuration.nix      # Android/Nix-on-Droid config
 └── modules/
     ├── system/                  # System-level modules (custom.system.*)
     │   ├── hardware/            # GPD Pocket 3 hardware support
     │   │   ├── auto-rotate.nix # Screen rotation service
-    │   │   └── focal-spi/       # FTE3600 fingerprint reader
+    │   │   ├── focal-spi/       # FTE3600 fingerprint reader
+    │   │   └── default.nix     # Hardware module aggregation
     │   ├── power/               # Power management
     │   │   ├── lid-behavior.nix # Lid close handling (set to ignore)
-    │   │   └── suspend-control.nix
+    │   │   ├── suspend-control.nix
+    │   │   └── default.nix     # Power module aggregation
     │   ├── security/            # Security features
     │   │   ├── fingerprint.nix # fprintd configuration
-    │   │   └── secrets.nix     # KeePassXC integration
+    │   │   ├── secrets.nix     # KeePassXC integration
+    │   │   └── default.nix     # Security module aggregation
     │   ├── packages/            # Custom packages
     │   │   ├── superclaude.nix # SuperClaude AI framework
-    │   │   └── email.nix       # Proton Bridge + Thunderbird
+    │   │   ├── email.nix       # Proton Bridge + Thunderbird
+    │   │   └── default.nix     # Package module aggregation
+    │   ├── input/               # Input device configuration
+    │   ├── wayland-screenshare.nix # Screen sharing support
+    │   ├── boot.nix            # Boot configuration
+    │   ├── plymouth.nix        # Boot splash
+    │   ├── monitor-config.nix  # Display settings
+    │   ├── display-management.nix # Display management
+    │   ├── grub-theme.nix      # GRUB theming
+    │   ├── mpd.nix             # Music Player Daemon
     │   ├── auto-commit.nix     # Auto-commit on rebuild
-    │   └── update-alias.nix    # update!, panic, worksummary commands
+    │   ├── update-alias.nix    # update!, panic, worksummary commands
+    │   └── default.nix         # System module aggregation (58 total modules)
     └── hm/                      # Home Manager modules (custom.hm.*)
         ├── applications/        # User applications
         │   ├── firefox.nix     # Firefox with Cascade theme
         │   ├── ghostty.nix     # Main terminal emulator
-        │   └── mpv.nix         # Video player config
+        │   ├── mpv.nix         # Video player config
+        │   ├── btop.nix        # System monitor
+        │   └── default.nix     # Application module aggregation
         ├── audio/               # Audio configuration
-        │   └── easyeffects.nix # Meze_109_Pro preset
-        └── desktop/             # Desktop environment
-            ├── auto-rotate.nix # User-level rotation
+        │   ├── easyeffects.nix # Meze_109_Pro preset
+        │   └── default.nix     # Audio module aggregation
+        └── desktop/             # Desktop environment (12+ modules)
+            ├── auto-rotate-service.nix # Dual-monitor rotation
             ├── hypridle.nix    # Idle management
-            └── waybar-fix.nix  # Waybar startup fix
+            ├── waybar-rotation-patch.nix # Rotation lock button
+            ├── hyprgrass-config.nix # Gesture configuration
+            ├── gestures.nix    # Touch gesture handling
+            ├── fusuma.nix      # Alternative gesture engine (disabled)
+            ├── libinput-gestures.nix # libinput gesture support
+            ├── theme.nix       # Desktop theming
+            ├── workflows-ghostty.nix # Workflow automation
+            ├── hyprland-ghostty.nix # Hyprland terminal integration
+            ├── hyde-ghostty.nix # HyDE theme integration
+            ├── waybar-fix.nix  # Waybar configuration fixes
+            ├── waybar-rotation-lock.nix # Rotation control
+            └── default.nix     # Desktop module aggregation
 ```
 
 ### Module Namespaces
@@ -155,8 +191,8 @@ nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
 
 ### Making Configuration Changes
 1. Edit relevant module file (use `sudo` for files in `/nix-modules/`)
-2. Test with: `sudo nixos-rebuild test --flake .#hydenix --impure`
-3. Apply permanently: `sudo nixos-rebuild switch --flake .#hydenix --impure`
+2. Test with: `sudo nixos-rebuild test --flake .#hydenix --impure` (or `.#mini`)
+3. Apply permanently: `sudo nixos-rebuild switch --flake .#hydenix --impure` (or `.#mini`)
 4. Changes auto-commit to GitHub (or use `update!`)
 5. If issues occur: `sudo nixos-rebuild switch --rollback`
 
@@ -171,8 +207,8 @@ nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
 4. Enable in respective `default.nix` or configuration
 
 ### Package Management
-- **System packages**: Add to `environment.systemPackages` in `modules/system/default.nix:105`
-- **User packages**: Add to `home.packages` in `modules/hm/default.nix:106`
+- **System packages**: Add to `environment.systemPackages` in `modules/system/default.nix:126`
+- **User packages**: Add to `home.packages` in `modules/hm/default.nix:122`
 - **Custom derivations**: Create in `modules/system/packages/` (see superclaude.nix example)
 
 ### Testing and Validation
@@ -194,12 +230,12 @@ nixos-rebuild build --flake .#hydenix --impure && nvd diff /run/current-system r
 
 ### Hardware Detection (CRITICAL)
 - **Always use `--impure` flag** for nixos-rebuild commands
-- Hardware configuration uses smart detection via `hardware-config.nix:1`
+- Hardware configuration uses smart detection via `hardware-config.nix:10-13`
 - Falls back to placeholder when `/etc/nixos/hardware-configuration.nix` unavailable
 - This allows GitHub sync without breaking local hardware config
 
 ### Auto-commit System
-- Runs pre-activation before each rebuild (`modules/system/auto-commit.nix:6`)
+- Runs pre-activation before each rebuild (`modules/system/auto-commit.nix:6-46`)
 - Commits all changes with timestamp
 - Pushes to GitHub using `gh` CLI
 - Prevents "dirty git tree" warnings during flake evaluation
@@ -227,7 +263,7 @@ custom.hm.feature = {
 - `modules/hm/default.nix:13-84` - All user module toggles
 - `hardware-config.nix:10-13` - Hardware detection logic
 - `modules/system/update-alias.nix:6-46` - Quick command definitions
-- `flake.nix:10-20` - Flake inputs and nixosConfiguration
+- `flake.nix:47-48` - Flake inputs and nixosConfiguration
 
 ## Tips and Warnings
 
@@ -237,6 +273,9 @@ custom.hm.feature = {
 - ✅ Check `journalctl -xe --user` when services fail
 - ✅ Use `panic` or `A!` to quickly reset to GitHub state
 - ✅ Use `sudo` when modifying files in `/nix-modules/`
+- ✅ Follow RULES.md for task management and delegation
+- ✅ Create todos for complex tasks (>3 steps) and delegate in parallel
+- ✅ Use proper module namespaces (`custom.system.*` or `custom.hm.*`)
 
 ### DON'Ts
 - ❌ Never rebuild without `--impure` (breaks hardware detection)
@@ -244,3 +283,27 @@ custom.hm.feature = {
 - ❌ Don't modify hardware-configuration.nix directly (use hardware-config.nix wrapper)
 - ❌ Don't start waybar manually in exec-once (managed by HyDE)
 - ❌ Don't forget to use sudo for system-level file edits
+- ❌ Don't work on production branch directly (per RULES.md git workflow)
+- ❌ Don't ignore module aggregation patterns in default.nix files
+
+## Quick Reference
+
+### Emergency Recovery
+```bash
+# PANIC MODE - reset to GitHub state
+panic  # or A!, AA!, AAA! (up to 20 A's)
+
+# Rollback to previous working generation
+sudo nixos-rebuild switch --rollback
+
+# Check what broke
+journalctl -b -p err
+```
+
+### Module Development Pattern
+1. Create module in appropriate directory (`modules/system/` or `modules/hm/`)
+2. Define options under correct namespace (`custom.system.*` or `custom.hm.*`)
+3. Add to parent `default.nix` imports
+4. Enable in configuration with `enable = true;`
+5. Test with `sudo nixos-rebuild test --flake .#hydenix --impure`
+6. Apply with `sudo nixos-rebuild switch --flake .#hydenix --impure`
