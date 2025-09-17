@@ -190,11 +190,9 @@ in
           CPU_SCALING_GOVERNOR_ON_AC = cfg.tlp.cpuGovernor.onAC;
           CPU_SCALING_GOVERNOR_ON_BAT = cfg.tlp.cpuGovernor.onBattery;
 
-          # Intel P-states configuration for i3-1125G4
-          CPU_SCALING_MIN_FREQ_ON_AC = if cfg.tlp.intelCpuSettings.enablePstates then cfg.tlp.intelCpuSettings.minFreqPercent else null;
-          CPU_SCALING_MAX_FREQ_ON_AC = if cfg.tlp.intelCpuSettings.enablePstates then cfg.tlp.intelCpuSettings.maxFreqPercentAC else null;
-          CPU_SCALING_MIN_FREQ_ON_BAT = if cfg.tlp.intelCpuSettings.enablePstates then cfg.tlp.intelCpuSettings.minFreqPercent else null;
-          CPU_SCALING_MAX_FREQ_ON_BAT = if cfg.tlp.intelCpuSettings.enablePstates then cfg.tlp.intelCpuSettings.maxFreqPercentBattery else null;
+          # REMOVED PROBLEMATIC FREQUENCY SETTINGS
+          # CPU frequency scaling is now handled by governors only
+          # This prevents invalid frequency values from causing boot failures
 
           # Intel CPU energy performance preferences
           CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
@@ -300,6 +298,7 @@ in
         percentageCritical = cfg.monitoring.alertThresholds.criticalBattery;
         percentageAction = cfg.monitoring.alertThresholds.criticalBattery;
         criticalPowerAction = "Suspend";
+        allowRiskyCriticalPowerAction = true;
       };
 
       # System packages for monitoring

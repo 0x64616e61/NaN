@@ -10,9 +10,11 @@ Personal NixOS configuration for GPD Pocket 3 device using Hydenix (Hyprland-bas
 
 - **Repository Location**: `/nix-modules/` (system-wide, requires sudo for modifications)
 - **Flake System**: `hydenix` and `mini` (alias) - both nixosConfigurations point to same config
-- **Module System**: Two-tier option system with `hydenix.*` (core) and `custom.*` (extensions)
+- **Module System**: Three-tier option system with `hydenix.*` (core), `custom.system.*` (system), and `custom.hm.*` (user)
 - **Sudo Password**: `7` (for system operations)
-- **Total Module Count**: 58 Nix files across system and home-manager modules
+- **Total Module Count**: 61 Nix files across system and home-manager modules
+- **Configuration Flow**: flake.nix:47-48 → configuration.nix:28-30 → modules/system & modules/hm
+- **Hardware Detection**: Smart wrapper in hardware-config.nix:10-13 with impure fallback
 - **Follow RULES.md**: Always delegate todos and use parallel operations where possible
 
 ## Key Commands
@@ -84,6 +86,13 @@ waybar &                   # Start waybar manually
 # Check Nix evaluation errors
 nix flake check --show-trace
 nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
+
+# Battery and power management
+battery-status                  # Show comprehensive battery info and health
+power-profile performance       # Switch to performance mode (AC power profile)
+power-profile powersave        # Switch to power save mode (battery profile)
+tlp-stat -s                    # Show TLP power management status
+upower -i /org/freedesktop/UPower/devices/battery_BAT0  # Detailed battery info
 ```
 
 ## Architecture
@@ -106,6 +115,7 @@ nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
     │   ├── power/               # Power management
     │   │   ├── lid-behavior.nix # Lid close handling (set to ignore)
     │   │   ├── suspend-control.nix
+    │   │   ├── battery-optimization.nix # Comprehensive TLP battery management
     │   │   └── default.nix     # Power module aggregation
     │   ├── security/            # Security features
     │   │   ├── fingerprint.nix # fprintd configuration
@@ -125,7 +135,7 @@ nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
     │   ├── mpd.nix             # Music Player Daemon
     │   ├── auto-commit.nix     # Auto-commit on rebuild
     │   ├── update-alias.nix    # update!, panic, worksummary commands
-    │   └── default.nix         # System module aggregation (58 total modules)
+    │   └── default.nix         # System module aggregation (61 total modules)
     └── hm/                      # Home Manager modules (custom.hm.*)
         ├── applications/        # User applications
         │   ├── firefox.nix     # Firefox with Cascade theme
@@ -167,25 +177,77 @@ nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
 
 ## Hardware-Specific Features
 
-### GPD Pocket 3 Support
+### GPD Pocket 3 Hardware Configuration
+Optimized for Intel i3-1125G4 (Tiger Lake) handheld PC with comprehensive hardware support.
+
+#### Display & Input
+- **Primary Display**: DSI-1, 1200x1920@60Hz, 1.5x scale, transform 3 (270° rotation)
+- **Touchscreen**: GXTP7380:00 27C6:0113 on `/dev/input/event18`
+- **Auto-Rotation**: Accelerometer-based via `/sys/bus/iio/devices/iio:device0`
+- **Multi-Monitor**: Supports DP-1, HDMI-A-1 with independent orientation
+- **Touch Transform**: Synchronized with display rotation
+- **Configuration**: `modules/system/monitor-config.nix`
+
+#### Fingerprint Authentication (FTE3600)
+- **Reader**: FocalTech FTE3600 SPI scanner
+- **Kernel Module**: Custom `focal_spi` module
+- **Library**: Patched libfprint with FocalTech support
+- **PAM Integration**: SDDM login, sudo, swaylock authentication
+- **Device**: `/dev/focal_moh_spi`
+- **Configuration**: `modules/system/hardware/focal-spi/`
+
+#### Gesture Support (Hyprgrass)
+- **Plugin**: hyprgrass for Hyprland touchscreen gestures
+- **Sensitivity**: 4.0 (optimized for touchscreen)
+- **Working Gestures**: 3-finger horizontal swipe for workspace switching
+- **Bindings**: 3-finger left/right (workspaces), up/down (fullscreen toggle)
+- **Configuration**: `modules/hm/desktop/hyprgrass-config.nix`
+
+#### Power & Thermal Management
+- **CPU**: Intel i3-1125G4 (4C/8T, 2.0-3.3GHz)
+- **Lid Behavior**: Set to "ignore" (prevents unwanted suspend)
+- **Thermald**: Enabled for critical thermal protection
+- **Temperature Monitoring**: `/sys/class/thermal/thermal_zone0/temp`
+- **Battery Optimization**: TLP available but disabled (conflicts with power-profiles-daemon)
+- **Configuration**: `modules/system/power/`
+
+### Working Features Status
+
+#### ✅ Fully Functional
 - **Display**: DSI-1 with auto-rotation service
-- **Touchscreen**: GXTP7380:00 27C6:0113 (event18)
-- **Fingerprint**: FTE3600 via focal-spi kernel module
-- **Gestures**: 3-finger swipe via hyprgrass plugin
-- **Power**: Lid close ignored (prevents unwanted suspend)
+- **Touch**: 3-finger horizontal swipe for workspace switching
+- **Fingerprint**: SDDM login, sudo, swaylock authentication
+- **Auto-Rotation**: Accelerometer-based screen orientation
+- **Audio**: EasyEffects with Meze_109_Pro preset
+- **Security**: KeePassXC auto-start for secret management
+- **Development**: Auto-commit to GitHub on rebuild
+- **Thermal**: Thermald protection for critical temperatures
 
-### Working Features
-- ✅ 3-finger horizontal swipe for workspace switching
-- ✅ Fingerprint auth (SDDM login, sudo, swaylock)
-- ✅ Screen auto-rotation based on device orientation
-- ✅ Audio processing with EasyEffects (Meze_109_Pro preset)
-- ✅ KeePassXC auto-start for secret management
-- ✅ Auto-commit to GitHub on rebuild
+#### ⚠️ Known Issues
+- **Hyprgrass**: Only 3-finger gestures work (2/4-finger not responding)
+- **Power Management**: TLP disabled due to power-profiles-daemon conflicts
+- **Hardware Monitoring**: Disabled due to permission conflicts
+- **Home Manager**: Service may show failed status but configuration applies
+- **Fusuma**: Disabled due to Ruby gem installation failures in Nix
 
-### Known Issues
-- ⚠️ Hyprgrass: Only 3-finger gestures work (2/4-finger not responding)
-- ⚠️ Home Manager service may show as failed (config still applies)
-- ⚠️ Fusuma disabled (Ruby gem installation failures in Nix)
+### Hardware Testing Commands
+
+```bash
+# Display & Touch
+hyprctl monitors                                      # Check monitor setup
+sudo libinput debug-events --device /dev/input/event18  # Monitor touchscreen
+cat /sys/bus/iio/devices/iio:device0/in_accel_*_raw   # Test accelerometer
+
+# Fingerprint & Thermal
+systemctl status fprintd                             # Check fingerprint service
+fprintd-enroll                                       # Enroll fingerprint
+cat /sys/class/thermal/thermal_zone0/temp            # Check CPU temperature
+systemctl status thermald                            # Monitor thermal daemon
+
+# Gestures & Services
+hyprctl plugins list                                 # Check hyprgrass plugin
+journalctl -u fix-hyprland-monitor -f               # Monitor rotation service
+```
 
 ## Development Workflow
 
