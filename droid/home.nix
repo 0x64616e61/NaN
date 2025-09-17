@@ -558,8 +558,6 @@
     enableZshIntegration = true;
   };
 
-  programs.nix-index-database.comma.enable = true;
-
   # Fastfetch configuration
   programs.fastfetch = {
     enable = true;
