@@ -94,7 +94,11 @@
     desktop.hydeGhostty = {
       enable = true;  # Configure HyDE to use ghostty
     };
-    
+
+    desktop.hyprlandGhostty = {
+      enable = true;  # Enable Hyprland keybinding override for ghostty
+    };
+
     # Monitor configuration now handled at system level in modules/system/monitor-config.nix
   };
 
