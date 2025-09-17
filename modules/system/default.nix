@@ -27,7 +27,7 @@
       scale = 1.5;  # 150% scaling for GPD Pocket 3
       transform = 3;  # 270 degree rotation (landscape mode)
     };
-    
+
     # Hardware features
     hardware.autoRotate = {
       enable = true;  # Enhanced auto-rotation with multi-monitor support
@@ -36,37 +36,75 @@
       syncExternal = true;  # Sync external monitor rotation
       externalPosition = "right";  # Position of external monitor
     };
-    
+
     hardware.focaltechFingerprint = {
       enable = true;  # Enable FTE3600 fingerprint reader support
     };
 
-    # Hardware monitoring
-    hardware.monitoring = {
-      enable = true;  # Enable comprehensive hardware monitoring
-      checkInterval = 30;  # Check every 30 seconds
-      alerts = {
-        temperatureHigh = 80;  # Alert at 80°C
-        batteryLow = 15;  # Alert at 15% battery
-        method = "all";  # Use all notification methods
-      };
-      logging = {
-        enable = true;  # Enable logging
-        logFile = "/var/log/gpd-hardware-monitor.log";  # Log file location
-        level = "info";  # Info level logging
-      };
-    };
-    
+    # Hardware monitoring - COMMENTED OUT: Module disabled to prevent crashes
+    # hardware.monitoring = {
+    #   enable = false;  # DISABLED: Service permission conflicts
+    #   checkInterval = 30;  # Check every 30 seconds
+    #   alerts = {
+    #     temperatureHigh = 80;  # Alert at 80°C
+    #     batteryLow = 15;  # Alert at 15% battery
+    #     method = "all";  # Use all notification methods
+    #   };
+    #   logging = {
+    #     enable = true;  # Enable logging
+    #     logFile = "/var/log/gpd-hardware-monitor.log";  # Log file location
+    #     level = "info";  # Info level logging
+    #   };
+    # };
+
     # Power management
     power.lidBehavior = {
       enable = true;  # Customize lid behavior to not lock/suspend
       action = "ignore";  # Ignore lid close events (don't suspend)
     };
-    
+
     power.suspendControl = {
       enable = false;  # Set to true for advanced suspend control
       disableCompletely = false;
       disableLowBatterySuspend = false;
+    };
+
+    # Battery optimization for GPD Pocket 3
+    power.battery = {
+      enable = false;  # DISABLED: TLP conflicts with power-profiles-daemon
+      tlp = {
+        enable = false;  # DISABLED: Conflicts cause system crash
+        chargeThresholds = {
+          startThreshold = 20;  # Start charging at 20%
+          stopThreshold = 80;   # Stop charging at 80% for battery longevity
+        };
+        cpuGovernor = {
+          onAC = "performance";     # Performance mode when plugged in
+          onBattery = "powersave";  # Power save mode on battery
+        };
+        intelCpuSettings = {
+          enablePstates = true;           # Enable Intel P-states for i3-1125G4
+          enableTurboBoost = true;        # Enable Turbo Boost on AC
+          disableTurboOnBattery = true;   # Disable Turbo on battery to save power
+          maxFreqPercentAC = 100;         # Full performance on AC
+          maxFreqPercentBattery = 80;     # Limit to 80% on battery
+        };
+      };
+      monitoring = {
+        enable = true;           # Enable battery health monitoring
+        enableUpower = true;     # UPower for detailed battery stats
+        enableAcpi = true;       # ACPI tools for battery info
+        alertThresholds = {
+          lowBattery = 15;       # Warning at 15%
+          criticalBattery = 5;   # Critical at 5%
+        };
+      };
+      additionalOptimizations = {
+        disableWakeOnLan = true;         # Disable WOL to save power
+        enableWifiPowerSave = true;      # Enable WiFi power saving
+        reduceSwappiness = true;         # Reduce disk swap usage
+        enableKernelPowerSaving = true;  # Enable kernel power optimizations
+      };
     };
 
     # Security
@@ -76,12 +114,12 @@
       enableSudo = true;
       enableSwaylock = true;
     };
-    
+
     security.secrets = {
       enable = true;
       provider = "keepassxc";
     };
-    
+
     # Display management tools
     displayManagement = {
       enable = true;  # Enable display management tools and rotation lock
@@ -96,43 +134,43 @@
         externalPosition = "right";
       };
     };
-    
+
     # Email packages
     packages.email = {
       enable = true;  # Enable Proton Bridge and Thunderbird
     };
-    
+
     # SuperClaude Framework
     packages.superclaude = {
       enable = true;  # Enable SuperClaude AI-enhanced development framework
       installGlobally = true;
     };
-    
+
     # Display rotation scripts
     packages.displayRotation = {
       enable = true;  # Enable display rotation scripts for dual monitor setup
     };
-    
+
     # Keyboard remapping with keyd
     input.keyd = {
       enable = true;  # Enable keyd for advanced keyboard customization
     };
-    
+
     # Vial keyboard configurator
     input.vial = {
-      enable = true;  # Enable Vial with proper udev rules for keyboard configuration
+      enable = true;  # Enable Vial with Vial udev rules for keyboard configuration
     };
-    
+
     # Wayland screen sharing support
     waylandScreenshare = {
       enable = true;  # Enable screen sharing for Electron apps (Slack, Teams, etc.)
     };
-    
+
     # GRUB theme with globe style
     grubTheme = {
       enable = true;  # Enable custom GRUB theme matching Plymouth globe animation
     };
-    
+
     # MPD (Music Player Daemon)
     mpd = {
       enable = true;  # Enable MPD music server
