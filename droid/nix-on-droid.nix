@@ -10,6 +10,7 @@
     # Version control and development
     git
     gh  # GitHub CLI
+    openssh  # SSH client for git operations
 
     # System utilities from your config
     procps
