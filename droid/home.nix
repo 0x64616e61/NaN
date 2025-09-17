@@ -109,6 +109,27 @@
 
       # Task management (if you install task-master)
       tm = "task-master 2>/dev/null || echo 'task-master not installed'";
+
+      # Quick update command (adapted for Nix-on-Droid)
+      "update!" = ''
+        cd ~/nix-modules 2>/dev/null || cd ~ && \
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then \
+          echo "[+] Committing changes..." && \
+          git add -A && \
+          git commit -m "Auto-commit: $(date '+%Y-%m-%d %H:%M:%S')" && \
+          echo "[>] Pushing to GitHub..." && \
+          git push origin main 2>/dev/null || echo "[!] Push failed - check git credentials"; \
+        fi && \
+        echo "[*] Rebuilding Nix-on-Droid..." && \
+        nix-on-droid switch --flake .
+      '';
+
+      # Work summary using available tools
+      worksummary = ''
+        cd ~/nix-modules 2>/dev/null || cd ~ && \
+        echo "Creating work summary..." && \
+        git log --since="12 hours ago" --oneline
+      '';
     };
   };
 
