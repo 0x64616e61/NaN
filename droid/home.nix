@@ -309,15 +309,16 @@
 
   # Additional packages for home environment
   home.packages = with pkgs; [
-    # Python packages for development
-    python3
-    python3Packages.pip
-    python3Packages.setuptools
-    python3Packages.wheel
-    python3Packages.requests
-    python3Packages.click
-    python3Packages.pyyaml
-    python3Packages.rich
+    # Python with packages (avoids collision)
+    (python3.withPackages (ps: with ps; [
+      pip
+      setuptools
+      wheel
+      requests
+      click
+      pyyaml
+      rich
+    ]))
 
     # Additional CLI tools
     signal-cli  # From your desktop config

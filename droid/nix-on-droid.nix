@@ -94,16 +94,7 @@
     ifuse  # Mount iPhone filesystem (if supported on Android)
     zfstools  # ZFS tools (may have limited use on Android)
 
-    # Python for SuperClaude (if you want to add it later)
-    (python3.withPackages (ps: with ps; [
-      pip
-      setuptools
-      wheel
-      requests
-      click
-      pyyaml
-      rich
-    ]))
+    # Python is provided in home.nix with packages
   ];
 
   # Backup etc files instead of failing to activate generation if a file already exists in /etc
