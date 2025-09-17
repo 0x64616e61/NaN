@@ -41,21 +41,21 @@
       enable = true;  # Enable FTE3600 fingerprint reader support
     };
 
-    # Hardware monitoring - COMMENTED OUT: Module disabled to prevent crashes
-    # hardware.monitoring = {
-    #   enable = false;  # DISABLED: Service permission conflicts
-    #   checkInterval = 30;  # Check every 30 seconds
-    #   alerts = {
-    #     temperatureHigh = 80;  # Alert at 80°C
-    #     batteryLow = 15;  # Alert at 15% battery
-    #     method = "all";  # Use all notification methods
-    #   };
-    #   logging = {
-    #     enable = true;  # Enable logging
-    #     logFile = "/var/log/gpd-hardware-monitor.log";  # Log file location
-    #     level = "info";  # Info level logging
-    #   };
-    # };
+    # Hardware monitoring
+    hardware.monitoring = {
+      enable = true;  # Enable hardware monitoring for GPD Pocket 3
+      checkInterval = 30;  # Check every 30 seconds
+      alerts = {
+        temperatureHigh = 80;  # Alert at 80°C
+        batteryLow = 15;  # Alert at 15% battery
+        method = "all";  # Use all notification methods
+      };
+      logging = {
+        enable = true;  # Enable logging
+        logFile = "/var/log/gpd-hardware-monitor.log";  # Log file location
+        level = "info";  # Info level logging
+      };
+    };
 
     # Power management
     power.lidBehavior = {
