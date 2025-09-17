@@ -8,7 +8,7 @@
     # neovim is configured in home.nix with programs.neovim
 
     # Version control and development
-    git
+    # git is configured in home.nix with programs.git
     gh  # GitHub CLI
     openssh  # SSH client for git operations
 
@@ -32,7 +32,7 @@
     unzip
 
     # From your NixOS config
-    btop  # Beautiful system monitor
+    # btop is configured in home.nix with programs.btop
     pandoc
     openvpn
     gptfdisk
@@ -40,7 +40,7 @@
     disko
 
     # Media tools (CLI only)
-    mpv  # Can work in terminal with --vo=tct
+    # mpv is configured in home.nix with programs.mpv
     yt-dlp  # YouTube downloader
     youtube-tui  # Terminal YouTube interface
 
@@ -50,11 +50,11 @@
     jq
     ripgrep
     fd
-    bat
+    # bat is configured in home.nix with programs.bat
     eza  # Modern ls replacement
-    zoxide  # Smart cd
-    fzf  # Fuzzy finder
-    tmux  # Terminal multiplexer
+    # zoxide is configured in home.nix with programs.zoxide
+    # fzf is configured in home.nix with programs.fzf
+    # tmux is configured in home.nix with programs.tmux
 
     # Archive tools
     p7zip
