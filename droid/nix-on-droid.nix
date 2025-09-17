@@ -5,7 +5,7 @@
   environment.packages = with pkgs; [
     # Core essentials
     vim
-    neovim
+    # neovim is configured in home.nix with programs.neovim
 
     # Version control and development
     git
