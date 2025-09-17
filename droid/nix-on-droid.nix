@@ -87,7 +87,7 @@
 
     # Music server (from mpd.nix)
     mpd
-    mpc  # MPD command-line client
+    mpc-cli  # MPD command-line client
 
     # Additional tools from your configuration
     libimobiledevice  # iPhone USB support (CLI tools work)
