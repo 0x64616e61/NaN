@@ -446,6 +446,9 @@
     # Additional CLI tools
     signal-cli
 
+    # Music streaming
+    tidal-hifi  # Tidal music client (TUI/CLI capable)
+
     # Task management tools
     nodejs
 
