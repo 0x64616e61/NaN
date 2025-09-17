@@ -446,11 +446,38 @@
     # Additional CLI tools
     signal-cli
 
-    # Music streaming
-    tidal-hifi  # Tidal music client (TUI/CLI capable)
+    # Music streaming and players
+    mopidy  # Music server with Tidal support via extensions
+    mopidy-mpd  # MPD interface for mopidy
+    # ncmpcpp is already in nix-on-droid.nix
 
     # Task management tools
     nodejs
+
+    # Tidal CLI client wrapper
+    (writeScriptBin "tidal-cli" ''
+      #!${bash}/bin/bash
+      TIDAL_DIR="$HOME/.local/share/tidal-cli"
+      TIDAL_BIN="$TIDAL_DIR/node_modules/.bin/tidal-cli-client"
+
+      if [ ! -f "$TIDAL_BIN" ]; then
+        echo "Tidal CLI not found. Installing..."
+        mkdir -p "$TIDAL_DIR"
+        cd "$TIDAL_DIR"
+        ${nodejs}/bin/npm install tidal-cli-client@latest --prefix .
+
+        if [ -f "$TIDAL_BIN" ]; then
+          echo "Tidal CLI installed successfully!"
+          echo "Run 'tidal-cli' again to start."
+        else
+          echo "Failed to install Tidal CLI"
+          exit 1
+        fi
+      else
+        export NODE_PATH="$TIDAL_DIR/node_modules"
+        exec "$TIDAL_BIN" "$@"
+      fi
+    '')
 
     # Claude Code wrapper script (adapted from claude-code.nix)
     (writeScriptBin "claude" ''
