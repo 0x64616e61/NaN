@@ -40,6 +40,22 @@
     hardware.focaltechFingerprint = {
       enable = true;  # Enable FTE3600 fingerprint reader support
     };
+
+    # Hardware monitoring
+    hardware.monitoring = {
+      enable = true;  # Enable comprehensive hardware monitoring
+      checkInterval = 30;  # Check every 30 seconds
+      alerts = {
+        temperatureHigh = 80;  # Alert at 80°C
+        batteryLow = 15;  # Alert at 15% battery
+        method = "all";  # Use all notification methods
+      };
+      logging = {
+        enable = true;  # Enable logging
+        logFile = "/var/log/gpd-hardware-monitor.log";  # Log file location
+        level = "info";  # Info level logging
+      };
+    };
     
     # Power management
     power.lidBehavior = {
@@ -135,7 +151,7 @@
     parted
     gh
     chromium
-    btop  # Beautiful system monitor (btop++) 
+    btop  # Beautiful system monitor (btop++)
     libimobiledevice  # iPhone USB support
     ifuse  # Mount iPhone filesystem
     disko
