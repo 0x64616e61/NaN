@@ -451,19 +451,29 @@
     signal-cli
 
     # Music streaming and players
-    mopidy  # Music server with Tidal support
+    mopidy  # Music server
     mopidy-mpd  # MPD interface for mopidy
-    mopidy-tidal  # Tidal backend for mopidy
     # ncmpcpp is already in nix-on-droid.nix
 
     # Task management tools
     nodejs
+
+    # Mopidy Tidal installer and starter
+    (writeScriptBin "mopidy-tidal-install" ''
+      #!${bash}/bin/bash
+      echo "Installing Mopidy-Tidal extension..."
+      ${python3}/bin/pip install --user Mopidy-Tidal
+      echo "Mopidy-Tidal installed to ~/.local"
+      echo "Run mopidy-setup to configure, then mopidy-start to begin"
+    '')
 
     # Mopidy service starter script
     (writeScriptBin "mopidy-start" ''
       #!${bash}/bin/bash
       echo "Starting Mopidy with Tidal support..."
       mkdir -p ~/.config/mopidy
+      export PATH="$HOME/.local/bin:$PATH"
+      export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
       mopidy --config ~/.config/mopidy/mopidy.conf
     '')
 
@@ -472,33 +482,32 @@
       #!${bash}/bin/bash
       mkdir -p ~/.config/mopidy
 
-      if [ ! -f ~/.config/mopidy/mopidy.conf ]; then
-        echo "Creating Mopidy configuration..."
-        cat > ~/.config/mopidy/mopidy.conf <<'EOF'
-      [core]
-      restore_state = true
+      echo "Creating/updating Mopidy configuration..."
+      cat > ~/.config/mopidy/mopidy.conf <<'EOF'
+[core]
+restore_state = true
 
-      [mpd]
-      enabled = true
-      hostname = 127.0.0.1
-      port = 6600
+[mpd]
+enabled = true
+hostname = 127.0.0.1
+port = 6600
 
-      [tidal]
-      enabled = true
-      # You need to add your Tidal credentials:
-      # username = YOUR_TIDAL_USERNAME
-      # password = YOUR_TIDAL_PASSWORD
-      # quality = LOSSLESS
+[tidal]
+enabled = true
+# Edit these with your Tidal credentials:
+username = YOUR_EMAIL
+password = YOUR_PASSWORD
+quality = LOSSLESS
 
-      [audio]
-      output = autoaudiosink
-      EOF
-        echo "Configuration created at ~/.config/mopidy/mopidy.conf"
-        echo "Please edit it and add your Tidal credentials!"
-        echo "Then run 'mopidy-start' to start the server"
-      else
-        echo "Config already exists at ~/.config/mopidy/mopidy.conf"
-      fi
+[audio]
+output = autoaudiosink
+
+[file]
+enabled = false
+EOF
+      echo "Configuration created at ~/.config/mopidy/mopidy.conf"
+      echo "Please edit it and add your Tidal credentials!"
+      echo "Run: nvim ~/.config/mopidy/mopidy.conf"
     '')
 
     # Claude Code wrapper script (adapted from claude-code.nix)
