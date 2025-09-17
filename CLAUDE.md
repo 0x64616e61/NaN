@@ -17,6 +17,45 @@ Personal NixOS configuration for GPD Pocket 3 device using Hydenix (Hyprland-bas
 - **Hardware Detection**: Smart wrapper in hardware-config.nix:10-13 with impure fallback
 - **Follow RULES.md**: Always delegate todos and use parallel operations where possible
 
+## SuperClaude Framework Integration
+
+This repository is enhanced with the SuperClaude framework for advanced Claude Code operations. The framework provides intelligent task management, parallel execution capabilities, and specialized MCP server integration.
+
+### Framework Components
+
+- **Core Framework**: FLAGS.md, PRINCIPLES.md, RULES.md - Behavioral rules and operational patterns
+- **Task Management**: TodoWrite tool for complex multi-step NixOS configurations with delegation support
+- **MCP Servers**: Specialized tools for different aspects of NixOS development:
+  - **Sequential MCP**: For complex system analysis and debugging multi-component issues
+  - **Morphllm MCP**: For bulk configuration changes across multiple modules
+  - **Context7 MCP**: For official NixOS/Nix documentation and pattern guidance
+
+### SuperClaude Operational Patterns
+
+**Task Delegation for Complex Rebuilds**:
+```bash
+# Instead of sequential operations, use parallel delegation:
+# 1. Create todos for: hardware test, configuration validation, service verification
+# 2. Delegate each todo to specialized agents running in parallel
+# 3. Cross-validate results across agents for redundancy
+```
+
+**NixOS-Specific SuperClaude Usage**:
+- **Module Development**: Use TodoWrite for >3 step module creation tasks
+- **Hardware Debugging**: Delegate hardware tests to parallel agents (fingerprint, gestures, thermal)
+- **System Recovery**: Use agent delegation for comprehensive system diagnosis
+- **Configuration Changes**: Break large config changes into parallel validation tasks
+
+### Framework Integration with NixOS Workflows
+
+The framework enhances standard NixOS operations:
+- **Rebuild workflows**: Parallel validation and testing phases
+- **Module testing**: Delegated hardware verification across multiple agents
+- **System diagnosis**: Multi-agent parallel analysis for complex issues
+- **Configuration management**: Systematic task tracking for large changes
+
+See `.claude/` directory for complete framework documentation and operational rules.
+
 ## Key Commands
 
 ### Quick System Management
@@ -274,6 +313,8 @@ journalctl -u fix-hyprland-monitor -f               # Monitor rotation service
 - **Custom derivations**: Create in `modules/system/packages/` (see superclaude.nix example)
 
 ### Testing and Validation
+
+**Standard Validation Commands**:
 ```bash
 # Validate configuration syntax
 nix flake check
@@ -287,6 +328,92 @@ sudo nixos-rebuild dry-build --flake .#hydenix --impure
 # Build and compare with current system
 nixos-rebuild build --flake .#hydenix --impure && nvd diff /run/current-system result
 ```
+
+**SuperClaude Enhanced Validation Workflows**:
+```bash
+# For complex system changes, use TodoWrite and agent delegation:
+# 1. Create todos for parallel validation tasks:
+#    - Hardware compatibility check
+#    - Service configuration validation
+#    - Module dependency verification
+#    - Configuration syntax validation
+# 2. Delegate each validation to parallel agents
+# 3. Cross-validate results for consistency
+
+# Example parallel validation pattern:
+# TodoWrite: [
+#   "Validate flake syntax and dependencies",
+#   "Test hardware module configurations",
+#   "Verify service integration",
+#   "Check module namespace consistency"
+# ]
+# Each todo delegated to specialized agent for parallel execution
+```
+
+## SuperClaude Task Management Integration
+
+### Complex Configuration Management
+
+**TodoWrite Patterns for NixOS Development**:
+- **Multi-Module Changes**: Break large configuration updates into tracked, parallel tasks
+- **Hardware Integration**: Delegate hardware testing to specialized agents
+- **Service Validation**: Parallel verification of system services and dependencies
+- **Cross-Agent Validation**: Use redundant agent execution for critical system changes
+
+**Task Delegation Examples**:
+
+**Example 1: New Module Development**
+```
+TodoWrite: [
+  "Create module structure in modules/system/newfeature/",
+  "Define module options with custom.system.newfeature namespace",
+  "Add imports to modules/system/default.nix",
+  "Test module configuration with nixos-rebuild test",
+  "Validate module integration with existing services"
+]
+# Delegate tasks 1-3 to Agent A1, task 4 to Agent A2, task 5 to Agent A3
+# Cross-validate results across all agents for consistency
+```
+
+**Example 2: Hardware Issue Diagnosis**
+```
+TodoWrite: [
+  "Test fingerprint authentication service",
+  "Verify touchscreen gesture functionality",
+  "Check auto-rotation service status",
+  "Validate power management configuration",
+  "Confirm thermal management setup"
+]
+# Each todo delegated to separate agent for parallel hardware testing
+# Results cross-validated for comprehensive system health assessment
+```
+
+**Example 3: System Recovery Operations**
+```
+TodoWrite: [
+  "Analyze system errors and failure patterns",
+  "Check git repository status and integrity",
+  "Validate hardware configuration compatibility",
+  "Test critical services functionality",
+  "Verify NixOS generation status"
+]
+# Parallel agent execution for comprehensive system diagnosis
+# Triple redundancy validation for critical recovery decisions
+```
+
+### Framework Integration with .todo File
+
+The repository maintains a persistent `.todo` file for tracking complex operations:
+- **Agent Results**: All delegated task results documented with timestamps
+- **Cross-Validation**: Multiple agent findings compared for consistency
+- **Session Persistence**: Task state maintained across Claude Code sessions
+- **Recovery Tracking**: System recovery operations fully documented
+
+**Todo File Management**:
+- Never delete todos - save progress to `.todo` file in nix-modules/
+- Mark progress as tasks complete with agent attribution
+- Use parallel agent execution rather than sequential processing
+- Document agent redundancy results for critical system operations
 
 ## Important Implementation Details
 
@@ -338,6 +465,12 @@ custom.hm.feature = {
 - ✅ Follow RULES.md for task management and delegation
 - ✅ Create todos for complex tasks (>3 steps) and delegate in parallel
 - ✅ Use proper module namespaces (`custom.system.*` or `custom.hm.*`)
+- ✅ **SuperClaude**: Use TodoWrite for multi-step NixOS configurations
+- ✅ **SuperClaude**: Delegate hardware tests to parallel agents for redundancy
+- ✅ **SuperClaude**: Cross-validate critical system changes across multiple agents
+- ✅ **SuperClaude**: Document agent results in .todo file for session persistence
+- ✅ **SuperClaude**: Use Sequential MCP for complex system analysis
+- ✅ **SuperClaude**: Apply Morphllm MCP for bulk configuration changes
 
 ### DON'Ts
 - ❌ Never rebuild without `--impure` (breaks hardware detection)
@@ -347,8 +480,49 @@ custom.hm.feature = {
 - ❌ Don't forget to use sudo for system-level file edits
 - ❌ Don't work on production branch directly (per RULES.md git workflow)
 - ❌ Don't ignore module aggregation patterns in default.nix files
+- ❌ **SuperClaude**: Don't delete todos from .todo file (save progress instead)
+- ❌ **SuperClaude**: Don't execute tasks sequentially when parallel delegation is possible
+- ❌ **SuperClaude**: Don't skip agent cross-validation for critical system changes
+- ❌ **SuperClaude**: Don't ignore RULES.md behavioral patterns for task management
 
 ## Quick Reference
+
+### SuperClaude Framework Quick Patterns
+
+**Multi-Agent Hardware Testing**:
+```bash
+# Pattern for comprehensive hardware validation
+TodoWrite: ["Test fingerprint service", "Check gesture support", "Verify thermal management"]
+# → Delegate each todo to Agent A1, A2, A3 for parallel execution
+# → Cross-validate results for redundancy and consistency
+```
+
+**Complex Module Development**:
+```bash
+# Pattern for new module creation with validation
+TodoWrite: ["Create module structure", "Define options", "Add imports", "Test integration"]
+# → Use Sequential MCP for architectural planning
+# → Delegate implementation tasks to parallel agents
+# → Cross-validate module integration across agents
+```
+
+**System Recovery with Agent Redundancy**:
+```bash
+# Pattern for comprehensive system diagnosis
+TodoWrite: ["Analyze errors", "Check git status", "Validate config", "Test services"]
+# → Use 3+ agents for each critical task
+# → Compare results across agents for consensus
+# → Document findings in .todo file for persistence
+```
+
+**Bulk Configuration Changes**:
+```bash
+# Pattern for large-scale configuration updates
+# → Use Morphllm MCP for consistent pattern application
+# → Sequential MCP for change impact analysis
+# → TodoWrite for tracking multi-file modifications
+# → Agent delegation for parallel validation
+```
 
 ### Emergency Recovery
 ```bash

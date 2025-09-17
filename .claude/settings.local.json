@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(systemctl status:*)",
+      "Bash(systemctl:*)",
+      "Bash(nix-shell:*)",
+      "Bash(sudo dmesg:*)",
+      "Bash(journalctl:*)",
+      "Read(//home/a/.local/share/hyde/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
