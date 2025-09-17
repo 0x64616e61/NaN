@@ -130,6 +130,9 @@
         echo "Creating work summary..." && \
         git log --since="12 hours ago" --oneline
       '';
+
+      # Claude code alias
+      cc = "claude";  # Alias for claude-code
     };
   };
 
@@ -398,8 +401,4 @@
     ];
   };
 
-  # Add claude code alias to shell aliases
-  programs.zsh.shellAliases = programs.zsh.shellAliases // {
-    cc = "claude";  # Alias for claude-code
-  };
 }
