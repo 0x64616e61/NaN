@@ -17,9 +17,17 @@
     };
   };
 
-  # Zsh configuration with your aliases
+  # Zsh configuration with enhanced features
   programs.zsh = {
     enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "sudo" "git" "docker" "kubectl" ];
+    };
 
     initExtra = ''
       # Set default editor
@@ -64,6 +72,82 @@
 
       # Zoxide init if available
       command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+
+      # Fuzzy search functions
+      _fuzzy_change_directory() {
+        local initial_query="$1"
+        local selected_dir
+        local fzf_options=('--preview=ls -p {}' '--preview-window=right:60%')
+        fzf_options+=(--height "80%" --layout=reverse --preview-window right:60% --cycle)
+        local max_depth=7
+
+        if [[ -n "$initial_query" ]]; then
+          fzf_options+=("--query=$initial_query")
+        fi
+
+        selected_dir=$(find . -maxdepth $max_depth \( -name .git -o -name node_modules -o -name .venv -o -name target -o -name .cache \) -prune -o -type d -print 2>/dev/null | fzf "''${fzf_options[@]}")
+
+        if [[ -n "$selected_dir" && -d "$selected_dir" ]]; then
+          cd "$selected_dir" || return 1
+        else
+          return 1
+        fi
+      }
+
+      _fuzzy_edit_search_file_content() {
+        local selected_file
+        selected_file=$(grep -irl "''${1:-}" ./ | fzf --height "80%" --layout=reverse --preview-window right:60% --cycle --preview 'cat {}' --preview-window right:60%)
+
+        if [[ -n "$selected_file" ]]; then
+          if command -v "$EDITOR" &>/dev/null; then
+            "$EDITOR" "$selected_file"
+          else
+            echo "EDITOR is not specified. using vim."
+            vim "$selected_file"
+          fi
+        else
+          echo "No file selected or search returned no results."
+        fi
+      }
+
+      _fuzzy_edit_search_file() {
+        local initial_query="$1"
+        local selected_file
+        local fzf_options=()
+        fzf_options+=(--height "80%" --layout=reverse --preview-window right:60% --cycle)
+        local max_depth=5
+
+        if [[ -n "$initial_query" ]]; then
+          fzf_options+=("--query=$initial_query")
+        fi
+
+        selected_file=$(find . -maxdepth $max_depth -type f 2>/dev/null | fzf "''${fzf_options[@]}")
+
+        if [[ -n "$selected_file" && -f "$selected_file" ]]; then
+          if command -v "$EDITOR" &>/dev/null; then
+            "$EDITOR" "$selected_file"
+          else
+            echo "EDITOR is not specified. using vim."
+            vim "$selected_file"
+          fi
+        else
+          return 1
+        fi
+      }
+
+      _df() {
+        if [[ $# -ge 1 && -e "''${@: -1}" ]]; then
+          duf "''${@: -1}"
+        else
+          duf
+        fi
+      }
+
+      # Starship prompt
+      eval "$(${pkgs.starship}/bin/starship init zsh)"
+
+      # Fastfetch on startup
+      fastfetch --logo none
     '';
 
     shellAliases = {
@@ -79,6 +163,9 @@
       # Navigation
       ".." = "cd ..";
       "..." = "cd ../..";
+      ".3" = "cd ../../..";
+      ".4" = "cd ../../../..";
+      ".5" = "cd ../../../../..";
       "...." = "cd ../../..";
 
       # Common commands
@@ -92,6 +179,15 @@
       vim = "nvim";
       vi = "nvim";
       cat = "bat";
+      c = "clear";
+      vc = "code";
+      mkdir = "mkdir -p";
+
+      # Fuzzy search aliases
+      ffec = "_fuzzy_edit_search_file_content";
+      ffcd = "_fuzzy_change_directory";
+      ffe = "_fuzzy_edit_search_file";
+      df = "_df";
 
       # Clipboard (if termux-api is available)
       pbcopy = "termux-clipboard-set 2>/dev/null || echo 'termux-api not installed'";
@@ -320,11 +416,38 @@
       rich
     ]))
 
-    # Additional CLI tools
-    signal-cli  # From your desktop config
+    # Shell enhancements
+    oh-my-zsh
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    zsh-powerlevel10k
+    starship
+    fastfetch
+    duf
 
-    # Task management tools (from task-master.nix)
-    nodejs  # Required for task-master and claude-code
+    # CLI power tools
+    parallel
+    imagemagick
+    envsubst
+    trash-cli
+    gawk
+    cava
+    cliphist
+    coreutils
+    bash-completion
+
+    # Developer tools
+    direnv
+    nix-direnv
+    commitlint
+    nix-index
+    comma
+
+    # Additional CLI tools
+    signal-cli
+
+    # Task management tools
+    nodejs
 
     # Claude Code wrapper script (adapted from claude-code.nix)
     (writeScriptBin "claude" ''
@@ -400,6 +523,68 @@
       mpris  # Media controls
       quality-menu  # YouTube quality selection
     ];
+  };
+
+  # Starship prompt configuration
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      format = "$all$character";
+      character = {
+        success_symbol = "[➜](bold green)";
+        error_symbol = "[➜](bold red)";
+      };
+      directory = {
+        truncate_to_repo = false;
+        truncation_length = 3;
+      };
+      git_status = {
+        disabled = false;
+      };
+    };
+  };
+
+  # Direnv configuration
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+  };
+
+  # Nix-index and comma configuration
+  programs.nix-index = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  programs.nix-index-database.comma.enable = true;
+
+  # Fastfetch configuration
+  programs.fastfetch = {
+    enable = true;
+    settings = {
+      logo = {
+        type = "none";
+      };
+      display = {
+        separator = " : ";
+      };
+      modules = [
+        "title"
+        "separator"
+        "os"
+        "host"
+        "kernel"
+        "uptime"
+        "packages"
+        "shell"
+        "memory"
+        "disk"
+        "battery"
+        "poweradapter"
+      ];
+    };
   };
 
 }
