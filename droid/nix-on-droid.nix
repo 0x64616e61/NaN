@@ -1,6 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
+  # Enable chroot mode instead of proot
+  system.chroot.enable = true;
+
   # System packages - CLI tools from your NixOS config
   environment.packages = with pkgs; [
     # Core essentials
