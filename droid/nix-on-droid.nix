@@ -66,6 +66,8 @@
     nmap
     dig
     traceroute
+    iproute2  # For ip command
+    nettools  # For ifconfig
 
     # Security tools
     keepassxc  # CLI mode available
@@ -88,6 +90,14 @@
     # Music server (from mpd.nix)
     mpd
     mpc-cli  # MPD command-line client
+
+    # Audio support for Nix-on-Droid
+    pulseaudio  # Audio daemon
+    gst_all_1.gstreamer  # GStreamer core
+    gst_all_1.gst-plugins-base  # Base plugins
+    gst_all_1.gst-plugins-good  # Good plugins
+    gst_all_1.gst-plugins-bad  # Additional plugins
+    gst_all_1.gst-plugins-ugly  # Codec plugins
 
     # Additional tools from your configuration
     libimobiledevice  # iPhone USB support (CLI tools work)

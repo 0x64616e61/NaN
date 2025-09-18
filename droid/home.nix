@@ -34,6 +34,9 @@
       export EDITOR=nvim
       export VISUAL=nvim
 
+      # Ensure SHELL is set for Claude
+      export SHELL=${pkgs.bash}/bin/bash
+
       # Panic rollback function (adapted for Nix-on-Droid)
       panic() {
         cd ~/nix-modules 2>/dev/null || cd ~
@@ -206,9 +209,9 @@
       # Task management (if you install task-master)
       tm = "task-master 2>/dev/null || echo 'task-master not installed'";
 
-      # Music player
-      music = "ncmpcpp";
-      tidal = "ncmpcpp";  # Alias for Tidal via mopidy
+      # Music player (suppress non-critical errors)
+      music = "ncmpcpp 2>/dev/null";
+      tidal = "ncmpcpp 2>/dev/null";  # Alias for Tidal via mopidy
 
       # Quick update command (adapted for Nix-on-Droid)
       "update!" = ''
@@ -398,6 +401,9 @@
     PAGER = "less";
     LESS = "-R";
 
+    # Shell for Claude and other tools
+    SHELL = "${pkgs.bash}/bin/bash";
+
     # For better compatibility
     TERM = "xterm-256color";
     COLORTERM = "truecolor";
@@ -449,22 +455,72 @@
 
     # Additional CLI tools
     signal-cli
+    netcat  # For network checks
+
+    # Audio tools for direct Android playback
+    sox  # Play audio directly
+    ffmpeg  # Audio/video processing
+    alsa-utils  # ALSA utilities
 
     # Music streaming and players
-    mopidy  # Music server
-    mopidy-mpd  # MPD interface for mopidy
-    # ncmpcpp is already in nix-on-droid.nix
+    # Install the packages directly
+    mopidy
+    mopidy-mpd
+    mopidy-tidal
+    mopidy-iris  # Web interface for Mopidy
+    python3Packages.tidalapi  # Required dependency for mopidy-tidal
+    python3Packages.isodate  # Required by tidalapi
+    python3Packages.mpegdash  # Required by tidalapi
+    python3Packages.python-dateutil  # Required by tidalapi
+    python3Packages.six  # Required by isodate
+    python3Packages.typing-extensions  # Required by tidalapi
+    python3Packages.ratelimit  # Required by tidalapi for API rate limiting
+    # Note: setuptools, requests, urllib3, certifi, charset-normalizer, idna
+    # are already included in the Python environment above or as dependencies
 
     # Task management tools
     nodejs
 
-    # Mopidy Tidal installer and starter
-    (writeScriptBin "mopidy-tidal-install" ''
+    # Mopidy wrapper that sets up Python paths correctly
+    (writeScriptBin "mopidy-with-extensions" ''
       #!${bash}/bin/bash
-      echo "Installing Mopidy-Tidal extension..."
-      ${python3}/bin/pip install --user Mopidy-Tidal
-      echo "Mopidy-Tidal installed to ~/.local"
-      echo "Run mopidy-setup to configure, then mopidy-start to begin"
+
+      # Set up Python path with all extensions and dependencies
+      DEPS="${pkgs.python3Packages.setuptools}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.six}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.typing-extensions}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.isodate}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.mpegdash}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.python-dateutil}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.requests}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.ratelimit}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.urllib3}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.certifi}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.charset-normalizer}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.idna}/lib/python3.11/site-packages"
+      DEPS="$DEPS:${pkgs.python3Packages.tidalapi}/lib/python3.11/site-packages"
+
+      MOPIDY="${pkgs.mopidy-tidal}/lib/python3.11/site-packages"
+      MOPIDY="$MOPIDY:${pkgs.mopidy-mpd}/lib/python3.11/site-packages"
+      MOPIDY="$MOPIDY:${pkgs.mopidy-iris}/lib/python3.11/site-packages"
+      MOPIDY="$MOPIDY:${pkgs.mopidy}/lib/python3.11/site-packages"
+
+      export PYTHONPATH="$DEPS:$MOPIDY''${PYTHONPATH:+:$PYTHONPATH}"
+
+      # Show debug info if requested
+      if [ "$1" = "--debug-paths" ]; then
+        echo "PYTHONPATH entries:"
+        echo "$PYTHONPATH" | tr ':' '\n' | while read -r path; do
+          [ -n "$path" ] && echo "  - $path"
+        done
+        echo ""
+        echo "Checking for mopidy_tidal module..."
+        ${pkgs.python3}/bin/python -c "import sys; sys.path = '$PYTHONPATH'.split(':') + sys.path; import mopidy_tidal; print(f'Found: {mopidy_tidal.__file__}')" 2>&1
+        exit 0
+      fi
+
+      # Run mopidy with the environment
+      exec ${pkgs.mopidy}/bin/mopidy "$@"
     '')
 
     # Mopidy service starter script
@@ -472,42 +528,735 @@
       #!${bash}/bin/bash
       echo "Starting Mopidy with Tidal support..."
       mkdir -p ~/.config/mopidy
-      export PATH="$HOME/.local/bin:$PATH"
-      export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
-      mopidy --config ~/.config/mopidy/mopidy.conf
+      mkdir -p ~/.cache/mopidy
+      mkdir -p ~/.local/share/mopidy
+
+      # Check if config exists
+      if [ ! -f ~/.config/mopidy/mopidy.conf ]; then
+        echo "No configuration found. Running mopidy-setup first..."
+        mopidy-setup
+        echo ""
+        echo "Please edit ~/.config/mopidy/mopidy.conf and add your Tidal credentials"
+        exit 1
+      fi
+
+      # Run mopidy with extensions
+      exec mopidy-with-extensions --config ~/.config/mopidy/mopidy.conf
+    '')
+
+    # Start mopidy in background
+    (writeScriptBin "mopidy-bg" ''
+      #!${bash}/bin/bash
+      # Check if already running
+      if ps aux | grep -v grep | grep -q "mopidy"; then
+        echo "Mopidy is already running. Use 'mopidy-stop' to stop it first."
+        exit 1
+      fi
+
+      echo "Starting Mopidy in background..."
+      mkdir -p ~/.config/mopidy
+      mkdir -p ~/.cache/mopidy
+      mkdir -p ~/.local/share/mopidy
+      mkdir -p ~/.local/share/mopidy/logs
+
+      # Start in background with logging
+      nohup mopidy-with-extensions --config ~/.config/mopidy/mopidy.conf \
+        > ~/.local/share/mopidy/logs/mopidy.log 2>&1 &
+
+      echo "Mopidy started with PID $!"
+      echo "Logs: ~/.local/share/mopidy/logs/mopidy.log"
+      echo "Use 'mopidy-status' to check status"
+      echo "Use 'mopidy-stop' to stop"
+    '')
+
+    # Stop mopidy
+    (writeScriptBin "mopidy-stop" ''
+      #!${bash}/bin/bash
+      echo "Stopping Mopidy..."
+      # Kill mopidy processes (using ps instead of pkill)
+      for pid in $(ps aux | grep mopidy | grep -v grep | awk '{print $2}'); do
+        kill $pid 2>/dev/null
+      done
+
+      if [ $? -eq 0 ]; then
+        echo "Mopidy stopped successfully"
+      else
+        echo "Mopidy was not running"
+      fi
+    '')
+
+    # Check mopidy status
+    (writeScriptBin "mopidy-status" ''
+      #!${bash}/bin/bash
+      if ps aux | grep -v grep | grep -q "mopidy"; then
+        echo "✓ Mopidy is running"
+        echo ""
+        echo "Process details:"
+        ps aux | grep "mopidy" | grep -v grep | grep -v mopidy-status
+        echo ""
+
+        # Check if MPD port is listening
+        if ${pkgs.netcat}/bin/nc -z 127.0.0.1 6600 2>/dev/null; then
+          echo "✓ MPD interface is available on port 6600"
+          echo "  Connect with: ncmpcpp"
+        else
+          echo "⚠ MPD interface is not responding on port 6600"
+        fi
+      else
+        echo "✗ Mopidy is not running"
+        echo "  Start with: mopidy-bg (background) or mopidy-start (foreground)"
+      fi
+    '')
+
+    # View mopidy logs
+    (writeScriptBin "mopidy-logs" ''
+      #!${bash}/bin/bash
+      LOG_FILE=~/.local/share/mopidy/logs/mopidy.log
+
+      if [ -f "$LOG_FILE" ]; then
+        echo "=== Mopidy Logs ==="
+        tail -n 50 "$LOG_FILE"
+        echo ""
+        echo "Full log: $LOG_FILE"
+      else
+        echo "No log file found. Start mopidy with 'mopidy-bg' to create logs."
+      fi
+    '')
+
+    # Restart mopidy
+    (writeScriptBin "mopidy-restart" ''
+      #!${bash}/bin/bash
+      echo "Restarting Mopidy..."
+      mopidy-stop
+      sleep 2
+      mopidy-bg
+    '')
+
+    # Audio Share server setup script
+    (writeScriptBin "audio-share-setup" ''
+      #!${bash}/bin/bash
+      echo "Setting up Audio Share server..."
+
+      # Download Audio Share server for Linux
+      mkdir -p ~/.local/bin
+      cd ~/.local/bin
+
+      if [ ! -f "as-cmd" ]; then
+        echo "Downloading Audio Share server..."
+        wget -q https://github.com/mkckr0/audio-share/releases/latest/download/audio-share-server-cmd-linux.tar.gz
+        tar -xzf audio-share-server-cmd-linux.tar.gz
+        chmod +x as-cmd
+        rm audio-share-server-cmd-linux.tar.gz
+      fi
+
+      # Create PulseAudio virtual sink
+      ${pkgs.pulseaudio}/bin/pactl load-module module-null-sink sink_name=audioshare_sink sink_properties=device.description="AudioShare"
+
+      echo "✓ Audio Share server ready"
+      echo ""
+      echo "To start streaming:"
+      echo "1. Run: audio-share-start"
+      echo "2. Install 'Audio Share' from F-Droid"
+      echo "3. Connect to this device's IP on port 65530"
+    '')
+
+    # Get device IP address
+    (writeScriptBin "get-ip" ''
+      #!${bash}/bin/bash
+      echo "Finding your IP address..."
+
+      # Method 1: Parse from /proc/net (no permissions needed)
+      IP=$(cat /proc/net/fib_trie 2>/dev/null | grep -oP '192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+' | grep -v "\.255" | grep -v "\.0$" | head -1)
+
+      # Method 2: Try getprop (Android specific)
+      if [ -z "$IP" ]; then
+        IP=$(getprop dhcp.wlan0.ipaddress 2>/dev/null)
+      fi
+
+      if [ -n "$IP" ]; then
+        echo "Your IP address: $IP"
+      else
+        echo "Could not determine IP automatically."
+        echo ""
+        echo "Find it manually:"
+        echo "1. Go to Settings → WiFi"
+        echo "2. Tap on your connected network"
+        echo "3. Look for 'IP address'"
+        echo ""
+        echo "It will be something like 192.168.1.xxx"
+      fi
+    '')
+
+    # Start Audio Share server
+    (writeScriptBin "audio-share-start" ''
+      #!${bash}/bin/bash
+      # Start PulseAudio if needed
+      if ! ${pkgs.pulseaudio}/bin/pactl info >/dev/null 2>&1; then
+        ${pkgs.pulseaudio}/bin/pulseaudio --start --exit-idle-time=-1
+        sleep 2
+      fi
+
+      # Get local IP
+      IP=$(cat /proc/net/fib_trie 2>/dev/null | grep -oP '192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+' | grep -v "\.255" | grep -v "\.0$" | head -1)
+
+      if [ -z "$IP" ]; then
+        echo "Enter your device IP manually (check WiFi settings):"
+        read IP
+      fi
+
+      echo "Starting Audio Share server..."
+      echo "Connect Audio Share app to: $IP:65530"
+
+      # Start server with PulseAudio monitor
+      ~/.local/bin/as-cmd -h $IP -p 65530 --encoding ENCODING_PCM_16BIT --channels 2 --sample-rate 44100
+    '')
+
+    # Simple audio start for MPV
+    (writeScriptBin "audio-mpv" ''
+      #!${bash}/bin/bash
+      echo "═══════════════════════════════════════════════════════"
+      echo "    Tidal LOSSLESS Audio - Direct to Phone Speakers"
+      echo "═══════════════════════════════════════════════════════"
+      echo ""
+      echo "🎵 Simple 3-Step Setup:"
+      echo ""
+      echo "1. Start Mopidy (this terminal):"
+      echo "   $ mopidy-bg"
+      echo ""
+      echo "2. Open new terminal and run:"
+      echo "   $ mpv-audio"
+      echo ""
+      echo "3. Open third terminal for control:"
+      echo "   $ ncmpcpp"
+      echo "   - Press 4: Search"
+      echo "   - Press Enter: Add song"
+      echo "   - Press p: Play"
+      echo ""
+      echo "💯 Audio Quality:"
+      echo "   Tidal LOSSLESS → Direct HTTP → MPV → Phone Speakers"
+      echo "   No quality loss, perfect CD quality!"
+      echo "═══════════════════════════════════════════════════════"
+    '')
+
+    # Start PulseAudio for network streaming (optimized for GrapheneOS)
+    (writeScriptBin "audio-start" ''
+      #!${bash}/bin/bash
+      echo "═══════════════════════════════════════════════════════"
+      echo "       Tidal Audio Streaming for GrapheneOS"
+      echo "═══════════════════════════════════════════════════════"
+
+      # Create PulseAudio config directory
+      mkdir -p ~/.config/pulse
+
+      # Create daemon.conf with optimized settings
+      cat > ~/.config/pulse/daemon.conf <<EOF
+exit-idle-time = -1
+flat-volumes = no
+default-sample-rate = 44100
+default-sample-channels = 2
+resample-method = speex-float-5
+default-fragments = 4
+default-fragment-size-msec = 25
+EOF
+
+      # Create default.pa with Simple Protocol TCP streaming
+      cat > ~/.config/pulse/default.pa <<EOF
+.include ${pkgs.pulseaudio}/etc/pulse/default.pa
+load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1;192.168.0.0/16;10.0.0.0/8 auth-anonymous=1 port=4713
+load-module module-simple-protocol-tcp rate=44100 format=s16le channels=2 port=12345 record=false playback=true listen=0.0.0.0
+EOF
+
+      # Kill any existing PulseAudio
+      ${pkgs.pulseaudio}/bin/pulseaudio --kill 2>/dev/null
+
+      # Start PulseAudio
+      echo "[*] Starting high-quality audio stream..."
+      HOME=$HOME ${pkgs.pulseaudio}/bin/pulseaudio --start --exit-idle-time=-1
+
+      sleep 2
+
+      if ${pkgs.pulseaudio}/bin/pactl info >/dev/null 2>&1; then
+        # Ensure module is loaded
+        MODULE_ID=$(${pkgs.pulseaudio}/bin/pactl load-module module-simple-protocol-tcp \
+          rate=44100 format=s16le channels=2 port=12345 \
+          record=false playback=true listen=0.0.0.0 2>/dev/null) || {
+          echo "[!] Module may already be loaded"
+          MODULE_ID=$(${pkgs.pulseaudio}/bin/pactl list modules short | grep simple-protocol-tcp | awk '{print $1}' | head -1)
+        }
+
+        # Get IP address
+        IP=$(get-ip)
+
+        echo ""
+        echo "✅ Audio server ready! (Module ID: $MODULE_ID)"
+        echo "───────────────────────────────────────────────────────"
+        echo ""
+        echo "📱 Simple Protocol Player Setup:"
+        echo ""
+        echo "1. Download APK (ARM64):"
+        echo "   https://github.com/kaytat/SimpleProtocolPlayer/releases"
+        echo ""
+        echo "2. App Configuration:"
+        echo "   • Server: $IP"
+        echo "   • Port: 12345"
+        echo "   • Sample Rate: 44100 Hz"
+        echo "   • Audio Format: 16-bit PCM"
+        echo "   • Channels: Stereo"
+        echo "   • Buffer: 100-200ms (adjust for latency)"
+        echo ""
+        echo "3. Start playing:"
+        echo "   • Run: mopidy-bg"
+        echo "   • Open: ncmpcpp or music"
+        echo "   • Press: 2 (browse), 4 (search)"
+        echo ""
+        echo "───────────────────────────────────────────────────────"
+        echo "💡 Tips:"
+        echo "  • Keep phone and terminal on same WiFi"
+        echo "  • Audio quality: CD (16-bit/44.1kHz)"
+        echo "  • Use audio-check to test connection"
+        echo "  • Run audio-stop when done"
+        echo "═══════════════════════════════════════════════════════"
+      else
+        echo "✗ Failed to start PulseAudio"
+        echo "Check logs: journalctl -xe --user"
+      fi
+    '')
+
+
+    # Check audio streaming status
+    (writeScriptBin "audio-check" ''
+      #!${bash}/bin/bash
+      echo "Checking audio streaming status..."
+      echo ""
+
+      # Check PulseAudio daemon
+      if ${pkgs.pulseaudio}/bin/pactl info >/dev/null 2>&1; then
+        echo "✅ PulseAudio daemon running"
+        PID=$(ps aux | grep -v grep | grep pulseaudio | awk '{print $2}' | head -1)
+        echo "   PID: $PID"
+      else
+        echo "❌ PulseAudio not running"
+        echo "   Run: audio-start"
+        exit 1
+      fi
+
+      # Check if Simple Protocol module is loaded
+      if ${pkgs.pulseaudio}/bin/pactl list modules short | grep -q simple-protocol-tcp; then
+        echo "✅ Audio streaming module loaded"
+        MODULE_ID=$(${pkgs.pulseaudio}/bin/pactl list modules short | grep simple-protocol-tcp | awk '{print $1}')
+        echo "   Module ID: $MODULE_ID"
+      else
+        echo "❌ Audio module not loaded"
+        echo "   Run: audio-start"
+      fi
+
+      # Check if port is listening
+      if ${pkgs.netcat}/bin/nc -z localhost 12345 2>/dev/null; then
+        echo "✅ Port 12345 is open"
+      else
+        echo "❌ Port 12345 not listening"
+      fi
+
+      # Check mopidy status
+      if ps aux | grep -v grep | grep -q mopidy; then
+        echo "✅ Mopidy is running"
+      else
+        echo "⚠️  Mopidy not running"
+        echo "   Run: mopidy-bg"
+      fi
+
+      # Show connection info
+      echo ""
+      echo "Connection details:"
+      IP=$(get-ip)
+      echo "  Server: $IP:12345"
+      echo "  Protocol: Simple Protocol (TCP)"
+      echo "  Quality: 16-bit/44.1kHz Stereo"
+    '')
+
+    # Stop audio streaming
+    (writeScriptBin "audio-stop" ''
+      #!${bash}/bin/bash
+      echo "Stopping audio streaming..."
+
+      # Stop PulseAudio
+      ${pkgs.pulseaudio}/bin/pulseaudio --kill 2>/dev/null && \
+        echo "✅ PulseAudio stopped" || \
+        echo "⚠️  PulseAudio was not running"
+
+      # Stop mopidy if running
+      if ps aux | grep -v grep | grep -q mopidy; then
+        mopidy-stop
+      fi
+    '')
+
+    # Audio troubleshooting helper
+    (writeScriptBin "audio-debug" ''
+      #!${bash}/bin/bash
+      echo "═══════════════════════════════════════════════════════"
+      echo "          Audio Streaming Troubleshooting"
+      echo "═══════════════════════════════════════════════════════"
+      echo ""
+
+      # System info
+      echo "📱 System Information:"
+      echo "  • Device: $(getprop ro.product.model 2>/dev/null || echo 'Unknown')"
+      echo "  • Android: $(getprop ro.build.version.release 2>/dev/null || echo 'Unknown')"
+      echo "  • Kernel: $(uname -r)"
+      echo ""
+
+      # Network info
+      echo "🌐 Network Status:"
+      IP=$(get-ip)
+      echo "  • IP Address: $IP"
+      echo "  • WiFi: $(getprop wlan.driver.status 2>/dev/null || echo 'Check Settings')"
+      echo ""
+
+      # PulseAudio detailed check
+      echo "🔊 PulseAudio Status:"
+      if ${pkgs.pulseaudio}/bin/pactl info >/dev/null 2>&1; then
+        echo "  ✅ Daemon running"
+        echo ""
+        echo "  Server Info:"
+        ${pkgs.pulseaudio}/bin/pactl info 2>/dev/null | sed 's/^/    /'
+        echo ""
+        echo "  Loaded Modules:"
+        ${pkgs.pulseaudio}/bin/pactl list modules short | grep -E "(simple-protocol|native-protocol)" | sed 's/^/    /'
+      else
+        echo "  ❌ Not running"
+        echo "  Try: pulseaudio -vvv (for debug output)"
+      fi
+      echo ""
+
+      # Port check
+      echo "🔌 Port Status:"
+      for port in 12345 6600 6680 4713; do
+        if ${pkgs.netcat}/bin/nc -z localhost $port 2>/dev/null; then
+          echo "  ✅ Port $port: Open"
+        else
+          echo "  ❌ Port $port: Closed"
+        fi
+      done
+      echo ""
+
+      # Process check
+      echo "⚙️ Running Processes:"
+      echo "  • Mopidy: $(ps aux | grep -v grep | grep -q mopidy && echo '✅ Running' || echo '❌ Not running')"
+      echo "  • PulseAudio: $(${pkgs.pulseaudio}/bin/pactl info >/dev/null 2>&1 && echo '✅ Running' || echo '❌ Not running')"
+      echo ""
+
+      # Quick fixes
+      echo "🔧 Quick Fixes:"
+      echo "  1. Restart everything: audio-stop && audio-start && mopidy-restart"
+      echo "  2. Check logs: mopidy-logs"
+      echo "  3. Test audio: pactl play-sample bell"
+      echo "  4. Debug mode: pulseaudio -vvv"
+      echo "═══════════════════════════════════════════════════════"
+    '')
+
+    # All-in-one Tidal audio player (runs everything in background)
+    (writeScriptBin "tidal" ''
+      #!${bash}/bin/bash
+      echo "═══════════════════════════════════════════════════════"
+      echo "             🎵 Tidal Music Player 🎵"
+      echo "═══════════════════════════════════════════════════════"
+
+      # Stop any existing instances
+      echo "[*] Cleaning up old processes..."
+      for pid in $(ps aux | grep mopidy | grep -v grep | awk '{print $2}'); do
+        kill $pid 2>/dev/null
+      done
+      pkill -f mpv-audio 2>/dev/null
+      sleep 1
+
+      # Start mopidy in background
+      echo "[1/3] Starting Mopidy server..."
+      nohup mopidy-with-extensions --config ~/.config/mopidy/mopidy.conf \
+        > ~/.local/share/mopidy/logs/mopidy.log 2>&1 &
+      MOPIDY_PID=$!
+      echo "    ✅ Mopidy started (PID: $MOPIDY_PID)"
+
+      # Wait for mopidy to be ready
+      echo "[2/3] Waiting for Mopidy to initialize..."
+      sleep 5
+      while ! nc -z localhost 6600 2>/dev/null; do
+        echo -n "."
+        sleep 1
+      done
+      echo ""
+      echo "    ✅ Mopidy is ready"
+
+      # Start MPV in background
+      echo "[3/3] Starting audio output (MPV)..."
+      nohup ${pkgs.mpv}/bin/mpv --no-video --audio-display=no \
+        --no-terminal-title --really-quiet \
+        --cache=yes --cache-secs=10 \
+        --volume=100 \
+        http://localhost:6680/mopidy/stream \
+        > ~/.local/share/mopidy/logs/mpv.log 2>&1 &
+      MPV_PID=$!
+      echo "    ✅ Audio output ready (PID: $MPV_PID)"
+
+      echo ""
+      echo "───────────────────────────────────────────────────────"
+      echo "✅ Everything is running! Now open ncmpcpp:"
+      echo "───────────────────────────────────────────────────────"
+      echo ""
+
+      # Launch ncmpcpp
+      echo "Launching music player interface..."
+      echo ""
+      echo "Controls:"
+      echo "  4 - Search for music"
+      echo "  Enter - Add to playlist"
+      echo "  p - Play/Pause"
+      echo "  ] - Next track"
+      echo "  [ - Previous track"
+      echo "  q - Quit player (music keeps playing)"
+      echo ""
+      echo "To stop everything later: tidal-stop"
+      echo "═══════════════════════════════════════════════════════"
+      echo ""
+
+      # Run ncmpcpp in foreground
+      ncmpcpp
+    '')
+
+    # Stop all Tidal processes
+    (writeScriptBin "tidal-stop" ''
+      #!${bash}/bin/bash
+      echo "Stopping Tidal music player..."
+
+      # Kill MPV
+      pkill -f "mpv.*mopidy/stream" 2>/dev/null && echo "✅ Stopped audio output"
+
+      # Kill Mopidy
+      for pid in $(ps aux | grep mopidy | grep -v grep | awk '{print $2}'); do
+        kill $pid 2>/dev/null
+      done
+      echo "✅ Stopped Mopidy server"
+
+      echo "All services stopped."
+    '')
+
+    # Start MPV audio player for Mopidy stream
+    (writeScriptBin "mpv-audio" ''
+      #!${bash}/bin/bash
+      echo "Starting MPV audio player for Mopidy stream..."
+      echo ""
+
+      # Check if mopidy is running
+      if ! ps aux | grep -v grep | grep -q mopidy; then
+        echo "⚠️  Mopidy is not running!"
+        echo "Start it with: mopidy-bg"
+        exit 1
+      fi
+
+      echo "📱 MPV Audio Player"
+      echo "═══════════════════════"
+      echo "Connecting to Mopidy HTTP stream..."
+      echo "This will play audio directly through your phone speakers!"
+      echo ""
+      echo "Controls:"
+      echo "  Space - Pause/Resume"
+      echo "  q - Quit"
+      echo "  9/0 - Volume down/up"
+      echo "  < > - Seek backward/forward"
+      echo ""
+      echo "Use ncmpcpp in another terminal to control playback"
+      echo "───────────────────────────────────────────────────"
+
+      # Start MPV with audio-only mode, connecting to Mopidy's HTTP stream
+      ${pkgs.mpv}/bin/mpv --no-video --audio-display=no --no-terminal-title \
+        --cache=yes --cache-secs=10 \
+        --volume=100 \
+        http://localhost:6680/mopidy/stream
+    '')
+
+    # Quick start guide for Tidal streaming
+    (writeScriptBin "tidal-quickstart" ''
+      #!${bash}/bin/bash
+      echo "═══════════════════════════════════════════════════════"
+      echo "          Tidal Music Streaming Quick Start"
+      echo "═══════════════════════════════════════════════════════"
+      echo ""
+      echo "📝 Prerequisites:"
+      echo "  • Tidal account (subscription required)"
+      echo "  • Simple Protocol Player app"
+      echo "  • WiFi connection"
+      echo ""
+      echo "🚀 Setup Steps:"
+      echo ""
+      echo "1️⃣  Start audio streaming:"
+      echo "    $ audio-start"
+      echo ""
+      echo "2️⃣  Install Simple Protocol Player:"
+      echo "    Download from: https://github.com/kaytat/SimpleProtocolPlayer/releases"
+      echo "    Choose: SimpleProtocolPlayer-<version>-arm64-v8a.apk"
+      echo ""
+      echo "3️⃣  Configure the app:"
+      IP=$(get-ip 2>/dev/null || echo "<your-ip>")
+      echo "    • Server: $IP"
+      echo "    • Port: 12345"
+      echo "    • Sample Rate: 44100 Hz"
+      echo "    • Format: 16-bit PCM"
+      echo "    • Channels: Stereo"
+      echo ""
+      echo "4️⃣  Start Mopidy:"
+      echo "    $ mopidy-bg"
+      echo ""
+      echo "5️⃣  Open music player:"
+      echo "    $ ncmpcpp  (or $ music)"
+      echo ""
+      echo "🎵 Using ncmpcpp:"
+      echo "  • Press 2: Browse library"
+      echo "  • Press 4: Search for songs"
+      echo "  • Press Enter: Add to playlist"
+      echo "  • Press p: Play/pause"
+      echo "  • Press s: Stop"
+      echo "  • Press ]: Next track"
+      echo "  • Press [: Previous track"
+      echo "  • Press q: Quit"
+      echo ""
+      echo "🔍 Troubleshooting:"
+      echo "  • Check status: audio-check"
+      echo "  • View logs: mopidy-logs"
+      echo "  • Debug mode: audio-debug"
+      echo "  • Restart all: audio-stop && audio-start && mopidy-restart"
+      echo ""
+      echo "📱 Remember:"
+      echo "  • Keep phone and terminal on same WiFi"
+      echo "  • Simple Protocol Player must be running"
+      echo "  • Audio quality: CD (16-bit/44.1kHz)"
+      echo "═══════════════════════════════════════════════════════"
+    '')
+
+    # Debug helper to check extension loading
+    (writeScriptBin "mopidy-debug" ''
+      #!${bash}/bin/bash
+      echo "=== Mopidy Extension Debug ==="
+      echo ""
+
+      echo "1. Checking package locations:"
+      echo "   mopidy: ${pkgs.mopidy}"
+      echo "   mopidy-mpd: ${pkgs.mopidy-mpd}"
+      echo "   mopidy-tidal: ${pkgs.mopidy-tidal}"
+      echo ""
+
+      echo "2. Checking Python paths in packages:"
+      for pkg in ${pkgs.mopidy-tidal} ${pkgs.mopidy-mpd}; do
+        echo "   Package: $pkg"
+        ls -la $pkg/lib/python*/site-packages 2>/dev/null || echo "     No site-packages found"
+      done
+      echo ""
+
+      echo "3. Running path debug:"
+      mopidy-with-extensions --debug-paths
+      echo ""
+
+      echo "4. Checking mopidy extension discovery:"
+      mopidy-with-extensions deps 2>&1 | head -20
     '')
 
     # Mopidy config setup helper
     (writeScriptBin "mopidy-setup" ''
       #!${bash}/bin/bash
       mkdir -p ~/.config/mopidy
+      mkdir -p ~/.local/share/mopidy
 
-      echo "Creating/updating Mopidy configuration..."
-      cat > ~/.config/mopidy/mopidy.conf <<'EOF'
+      if [ -f ~/.config/mopidy/mopidy.conf ]; then
+        echo "Mopidy configuration already exists at ~/.config/mopidy/mopidy.conf"
+        echo "Edit it with: nvim ~/.config/mopidy/mopidy.conf"
+      else
+        echo "Creating Mopidy configuration..."
+        cat > ~/.config/mopidy/mopidy.conf <<'EOF'
 [core]
 restore_state = true
+cache_dir = ~/.cache/mopidy
+data_dir = ~/.local/share/mopidy
 
 [mpd]
 enabled = true
 hostname = 127.0.0.1
 port = 6600
+password =
+max_connections = 20
+connection_timeout = 60
 
 [tidal]
 enabled = true
-# Edit these with your Tidal credentials:
+# IMPORTANT: Edit these with your Tidal credentials:
 username = YOUR_EMAIL
 password = YOUR_PASSWORD
 quality = LOSSLESS
+# Optional: OAuth login (if you have issues with username/password)
+# client_id = YOUR_CLIENT_ID
+# client_secret = YOUR_CLIENT_SECRET
 
 [audio]
-output = autoaudiosink
+mixer = software
+mixer_volume =
+output = pulsesink
 
 [file]
 enabled = false
 EOF
-      echo "Configuration created at ~/.config/mopidy/mopidy.conf"
-      echo "Please edit it and add your Tidal credentials!"
-      echo "Run: nvim ~/.config/mopidy/mopidy.conf"
+        echo ""
+        echo "✓ Configuration created at ~/.config/mopidy/mopidy.conf"
+        echo ""
+        echo "NEXT STEPS:"
+        echo "1. Edit the config and add your Tidal credentials:"
+        echo "   nvim ~/.config/mopidy/mopidy.conf"
+        echo ""
+        echo "2. Start mopidy:"
+        echo "   mopidy-start"
+        echo ""
+        echo "3. Connect with ncmpcpp:"
+        echo "   ncmpcpp"
+      fi
+    '')
+
+    # Mopidy check/debug script
+    (writeScriptBin "mopidy-check" ''
+      #!${bash}/bin/bash
+      echo "Checking Mopidy installation..."
+      echo ""
+
+      echo "✓ Mopidy version:"
+      ${pkgs.mopidy}/bin/mopidy --version
+      echo ""
+
+      echo "✓ Available extensions:"
+      ${pkgs.mopidy}/bin/mopidy deps | grep -E "Mopidy-|Found"
+      echo ""
+
+      echo "✓ Checking for mopidy-tidal:"
+      if ${pkgs.python3}/bin/python -c "import sys; sys.path.extend(['${pkgs.mopidy-tidal}/${pkgs.python3.sitePackages}']); import mopidy_tidal" 2>/dev/null; then
+        echo "  mopidy-tidal is installed correctly"
+      else
+        echo "  WARNING: mopidy-tidal not found"
+      fi
+      echo ""
+
+      echo "✓ Configuration status:"
+      if [ -f ~/.config/mopidy/mopidy.conf ]; then
+        echo "  Config exists at ~/.config/mopidy/mopidy.conf"
+        if grep -q "YOUR_EMAIL" ~/.config/mopidy/mopidy.conf; then
+          echo "  ⚠ WARNING: Tidal credentials not configured yet!"
+        else
+          echo "  Tidal credentials appear to be configured"
+        fi
+      else
+        echo "  No config found - run 'mopidy-setup' first"
+      fi
+      echo ""
+
+      echo "✓ MPD port status (6600):"
+      if ${pkgs.netcat}/bin/nc -z 127.0.0.1 6600 2>/dev/null; then
+        echo "  Port 6600 is in use (mopidy may be running)"
+      else
+        echo "  Port 6600 is free"
+      fi
     '')
 
     # Claude Code wrapper script (adapted from claude-code.nix)
