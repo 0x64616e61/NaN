@@ -415,6 +415,9 @@
 
   # Additional packages for home environment
   home.packages = with pkgs; [
+    # System utilities
+    busybox
+
     # Python with packages (avoids collision)
     (python3.withPackages (ps: with ps; [
       pip
@@ -507,6 +510,9 @@
 
       export PYTHONPATH="$DEPS:$MOPIDY''${PYTHONPATH:+:$PYTHONPATH}"
 
+      # Set up OAuth token path for mopidy-tidal
+      export TIDAL_OAUTH_TOKEN_PATH="$HOME/.local/share/mopidy/tidal_oauth_token.json"
+
       # Show debug info if requested
       if [ "$1" = "--debug-paths" ]; then
         echo "PYTHONPATH entries:"
@@ -516,6 +522,14 @@
         echo ""
         echo "Checking for mopidy_tidal module..."
         ${pkgs.python3}/bin/python -c "import sys; sys.path = '$PYTHONPATH'.split(':') + sys.path; import mopidy_tidal; print(f'Found: {mopidy_tidal.__file__}')" 2>&1
+
+        echo ""
+        echo "OAuth token status:"
+        if [ -f "$TIDAL_OAUTH_TOKEN_PATH" ]; then
+          echo "  ✓ Token file exists: $TIDAL_OAUTH_TOKEN_PATH"
+        else
+          echo "  ✗ No token file found. Run: mopidy-tidal-auth"
+        fi
         exit 0
       fi
 
@@ -547,8 +561,8 @@
     # Start mopidy in background
     (writeScriptBin "mopidy-bg" ''
       #!${bash}/bin/bash
-      # Check if already running
-      if ps aux | grep -v grep | grep -q "mopidy"; then
+      # Check if already running - look for any mopidy process
+      if ps aux | grep "mopidy" | grep -v grep | grep -v "mopidy-bg" | grep -v "mopidy-stop" | grep -v "mopidy-status" > /dev/null 2>&1; then
         echo "Mopidy is already running. Use 'mopidy-stop' to stop it first."
         exit 1
       fi
@@ -573,15 +587,33 @@
     (writeScriptBin "mopidy-stop" ''
       #!${bash}/bin/bash
       echo "Stopping Mopidy..."
-      # Kill mopidy processes (using ps instead of pkill)
-      for pid in $(ps aux | grep mopidy | grep -v grep | awk '{print $2}'); do
-        kill $pid 2>/dev/null
-      done
 
-      if [ $? -eq 0 ]; then
-        echo "Mopidy stopped successfully"
+      # Find all mopidy processes (including wrapped ones)
+      PIDS=$(ps aux | grep "mopidy" | grep -v grep | grep -v "mopidy-stop" | grep -v "mopidy-status" | awk '{print $2}')
+
+      if [ -n "$PIDS" ]; then
+        echo "Found mopidy processes: $PIDS"
+
+        # First try graceful shutdown
+        for pid in $PIDS; do
+          kill $pid 2>/dev/null
+        done
+
+        echo "Waiting for graceful shutdown..."
+        sleep 2
+
+        # Check if any still running and force kill
+        REMAINING=$(ps aux | grep "mopidy" | grep -v grep | grep -v "mopidy-stop" | grep -v "mopidy-status" | awk '{print $2}')
+        if [ -n "$REMAINING" ]; then
+          echo "Force killing remaining processes: $REMAINING"
+          for pid in $REMAINING; do
+            kill -9 $pid 2>/dev/null
+          done
+        fi
+
+        echo "All mopidy processes stopped"
       else
-        echo "Mopidy was not running"
+        echo "No mopidy processes found"
       fi
     '')
 
@@ -1185,13 +1217,8 @@ connection_timeout = 60
 
 [tidal]
 enabled = true
-# IMPORTANT: Edit these with your Tidal credentials:
-username = YOUR_EMAIL
-password = YOUR_PASSWORD
 quality = LOSSLESS
-# Optional: OAuth login (if you have issues with username/password)
-# client_id = YOUR_CLIENT_ID
-# client_secret = YOUR_CLIENT_SECRET
+# OAuth tokens are stored automatically after authentication
 
 [audio]
 mixer = software
@@ -1205,14 +1232,131 @@ EOF
         echo "✓ Configuration created at ~/.config/mopidy/mopidy.conf"
         echo ""
         echo "NEXT STEPS:"
-        echo "1. Edit the config and add your Tidal credentials:"
-        echo "   nvim ~/.config/mopidy/mopidy.conf"
+        echo "1. Authenticate with Tidal using OAuth:"
+        echo "   mopidy-tidal-auth"
         echo ""
         echo "2. Start mopidy:"
         echo "   mopidy-start"
         echo ""
         echo "3. Connect with ncmpcpp:"
         echo "   ncmpcpp"
+      fi
+    '')
+
+    # Mopidy Tidal OAuth authentication helper
+    (writeScriptBin "mopidy-tidal-auth" ''
+      #!${bash}/bin/bash
+      echo "═══════════════════════════════════════════════════════"
+      echo "         Mopidy-Tidal OAuth Authentication"
+      echo "═══════════════════════════════════════════════════════"
+      echo ""
+
+      # Create config directory if needed
+      mkdir -p ~/.config/mopidy
+      mkdir -p ~/.local/share/mopidy
+
+      # Check if mopidy-tidal is available
+      if ! ${pkgs.python3}/bin/python -c "
+import sys
+sys.path.extend([
+    '${pkgs.mopidy}/lib/python3.11/site-packages',
+    '${pkgs.mopidy-tidal}/lib/python3.11/site-packages',
+    '${pkgs.python3Packages.pykka}/lib/python3.11/site-packages',
+    '${pkgs.python3Packages.setuptools}/lib/python3.11/site-packages'
+])
+try:
+    import mopidy_tidal
+    print('✓ mopidy-tidal found')
+except:
+    print('✗ mopidy-tidal not found')
+    sys.exit(1)
+" 2>/dev/null; then
+        echo "Error: mopidy-tidal is not properly installed"
+        exit 1
+      fi
+
+      echo "Starting OAuth authentication flow..."
+      echo ""
+
+      # Run the OAuth authentication
+      ${pkgs.python3}/bin/python << 'PYTHON_EOF'
+import sys
+import os
+import json
+from pathlib import Path
+
+# Add all required dependencies to path
+sys.path.insert(0, '${pkgs.python3Packages.setuptools}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.pykka}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.mopidy}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.mopidy-tidal}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.tidalapi}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.requests}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.urllib3}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.certifi}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.charset-normalizer}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.idna}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.python-dateutil}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.six}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.isodate}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.mpegdash}/lib/python3.11/site-packages')
+sys.path.insert(0, '${pkgs.python3Packages.typing-extensions}/lib/python3.11/site-packages')
+
+try:
+    import tidalapi
+
+    # OAuth flow
+    session = tidalapi.Session()
+
+    # Start login process
+    login, future = session.login_oauth()
+
+    print("Please visit this URL to authenticate:")
+    print(f"\n{login.verification_uri_complete}\n")
+    print("Waiting for authentication...")
+
+    # Wait for authentication
+    future.result()
+
+    if session.check_login():
+        # Save tokens to the location mopidy-tidal expects
+        token_dir = Path.home() / '.local' / 'share' / 'mopidy' / 'tidal'
+        token_dir.mkdir(parents=True, exist_ok=True)
+        token_file = token_dir / 'tidal-oauth.json'
+
+        token_data = {
+            'token_type': session.token_type or 'Bearer',
+            'access_token': session.access_token,
+            'refresh_token': session.refresh_token,
+            'expiry_time': session.expiry_time.isoformat() if session.expiry_time else None
+        }
+
+        with open(token_file, 'w') as f:
+            json.dump(token_data, f, indent=2)
+
+        print("\n✓ Authentication successful!")
+        print(f"✓ Tokens saved to {token_file}")
+        print("\nYou can now start mopidy with: mopidy-start")
+    else:
+        print("\n✗ Authentication failed")
+        sys.exit(1)
+
+except ImportError as e:
+    print(f"Error importing tidalapi: {e}")
+    print("\nMake sure tidalapi is properly installed")
+    sys.exit(1)
+except Exception as e:
+    print(f"Error during authentication: {e}")
+    sys.exit(1)
+PYTHON_EOF
+
+      if [ $? -eq 0 ]; then
+        echo ""
+        echo "═══════════════════════════════════════════════════════"
+        echo "✓ Setup complete! You can now use:"
+        echo "  1. mopidy-bg     - Start Mopidy in background"
+        echo "  2. ncmpcpp       - Control playback"
+        echo "═══════════════════════════════════════════════════════"
       fi
     '')
 
