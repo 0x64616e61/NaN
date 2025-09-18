@@ -126,6 +126,8 @@
   home.packages = with pkgs; [
     signal-cli
     android-tools  # includes adb and fastboot
+    zip
+    busybox
   ];
 
   # Hydenix home-manager options
