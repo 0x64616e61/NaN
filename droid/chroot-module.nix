@@ -82,10 +82,10 @@ with lib;
         fi
 
         # Replace with chroot login
-        cp ${pkgs.writeScript "login" ''
-          #!/system/bin/sh
-          exec ${config.environment.packages}/bin/chroot-login "$@"
-        ''} /data/data/com.termux.nix/files/usr/bin/login
+        cat > /data/data/com.termux.nix/files/usr/bin/login << 'EOF'
+        #!/system/bin/sh
+        exec chroot-login "$@"
+        EOF
 
         chmod 755 /data/data/com.termux.nix/files/usr/bin/login
         echo "✓ Chroot mode enabled. Restart the app to use it."

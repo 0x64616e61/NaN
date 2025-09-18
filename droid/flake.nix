@@ -21,6 +21,7 @@
     nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
       modules = [
         ./nix-on-droid.nix
+        ./chroot-module.nix
 
         # list of extra modules for Nix-on-Droid system
         # { nix.registry.nixpkgs.flake = nixpkgs; }
