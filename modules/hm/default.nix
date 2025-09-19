@@ -129,7 +129,6 @@
     zip
     busybox
     patchelf
-    androidndk  # Android Native Development Kit
   ];
 
   # Hydenix home-manager options
