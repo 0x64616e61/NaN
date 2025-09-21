@@ -30,7 +30,7 @@ in
         "custom/rotation-lock": {
           "format": "{}",
           "exec": "rotation-lock-status",
-          "interval": 1,
+          "interval": 60,
           "on-click": "rotation-lock-simple",
           "signal": 8,
           "tooltip": true,

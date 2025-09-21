@@ -129,6 +129,8 @@
     zip
     busybox
     patchelf
+    androidenv.androidPkgs.ndk-bundle  # Android NDK
+    gcc
   ];
 
   # Hydenix home-manager options
