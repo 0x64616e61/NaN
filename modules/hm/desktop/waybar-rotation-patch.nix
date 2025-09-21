@@ -30,8 +30,8 @@ in
         "custom/rotation-lock": {
           "format": "{}",
           "exec": "rotation-lock-status",
-          "interval": 60,
-          "on-click": "rotation-lock-simple",
+          "interval": "once",
+          "on-click": "rotation-lock-simple && pkill -RTMIN+8 waybar",
           "signal": 8,
           "tooltip": true,
           "tooltip-format": "Toggle rotation lock for focused display",
