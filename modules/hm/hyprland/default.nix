@@ -26,13 +26,13 @@ in
           # Force landscape orientation for GPD Pocket 3
           "sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3"
           # Start waybar
-          "${pkgs.waybar}/bin/waybar"
+          "waybar"
           # Start KeePassXC for secret service
           "keepassxc ~/Documents/Passwords.kdbx"
           # Start auto-rotate service
           "systemctl --user start auto-rotate-both"
           # Start dunst for notifications
-          "${pkgs.dunst}/bin/dunst"
+          "dunst"
         ];
         
         # Environment variables
@@ -133,12 +133,12 @@ in
           "$mainMod, F, fullscreen"
           
           # Application launches
-          "$mainMod, T, exec, ${pkgs.ghostty}/bin/ghostty"
-          "$mainMod, E, exec, ${pkgs.kdePackages.dolphin}/bin/dolphin"
-          "$mainMod, B, exec, ${pkgs.firefox}/bin/firefox"
+          "$mainMod, T, exec, ghostty"
+          "$mainMod, E, exec, dolphin"
+          "$mainMod, B, exec, firefox"
           
           # dmenu launcher
-          "$mainMod, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -t -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25"
+          "$mainMod, SPACE, exec, dmenu-wl_run -t -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25"
           
           # Function keys for GPD Pocket 3
           # Volume controls

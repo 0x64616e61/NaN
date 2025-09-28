@@ -101,7 +101,20 @@
     patchelf
     androidenv.androidPkgs.ndk-bundle  # Android NDK
     gcc
-    dmenu-wayland  # Application launcher
+    # Application launchers and window managers
+    dmenu-wayland
+    waybar
+    dunst
+    # Applications used in keybinds
+    ghostty
+    kdePackages.dolphin
+    firefox
+    pavucontrol
+    # System utilities used in modules
+    nodejs
+    systemd
+    coreutils
+    libinput-gestures
   ];
 
   # Hydenix home-manager options
