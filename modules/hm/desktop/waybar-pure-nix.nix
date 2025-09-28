@@ -433,8 +433,7 @@ let
     #custom-power:hover {
       background: alpha(@gpd-primary, 0.2); /* GPD: Stronger hover for better feedback */
       border-color: @gpd-primary;
-      /* transform not supported in GTK - using visual effects instead */
-      cursor: pointer;
+      /* transform and cursor not supported in GTK CSS */
       /* GPD: Enhanced visual feedback for touch */
       box-shadow: 0 4px 12px alpha(@gpd-primary, 0.3);
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 1.0);
