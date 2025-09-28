@@ -108,7 +108,7 @@ in
   hydenix = {
     enable = true; # Enable Hydenix modules
     # Basic System Settings (REQUIRED):
-    hostname = "mini"; # REQUIRED: Set your computer's network name (change to something unique)
+    hostname = "NaN"; # REQUIRED: Set your computer's network name (change to something unique)
     timezone = "Europe/London"; # REQUIRED: Set timezone (examples: "America/New_York", "Europe/London", "Asia/Tokyo")
     locale = "en_GB.UTF-8"; # REQUIRED: Set locale/language (examples: "en_US.UTF-8", "en_GB.UTF-8", "de_DE.UTF-8")
     # For more configuration options, see: ./docs/options.md

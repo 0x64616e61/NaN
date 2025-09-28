@@ -9,7 +9,7 @@ Personal NixOS configuration for GPD Pocket 3 device using Hydenix (Hyprland-bas
 ## Critical Context
 
 - **Repository Location**: `/nix-modules/` (system-wide, requires sudo for modifications)
-- **Flake System**: `hydenix` and `mini` (alias) - both nixosConfigurations point to same config
+- **Flake System**: `NaN` (primary), `hydenix` and `mini` (legacy aliases) - all nixosConfigurations point to same config
 - **Module System**: Three-tier option system with `hydenix.*` (core), `custom.system.*` (system), and `custom.hm.*` (user)
 - **Sudo Password**: `7` (for system operations)
 - **Total Module Count**: 61 Nix files across system and home-manager modules
@@ -71,15 +71,16 @@ panic
 # Alternative: A!, AA!, AAA!, etc. (up to 20 A's)
 
 # Standard rebuild (always use --impure for hardware detection)
+sudo nixos-rebuild switch --flake .#NaN --impure
+# Alternative using legacy aliases:
 sudo nixos-rebuild switch --flake .#hydenix --impure
-# Alternative using hostname alias:
 sudo nixos-rebuild switch --flake .#mini --impure
 
 # Test configuration without switching
-sudo nixos-rebuild test --flake .#hydenix --impure
+sudo nixos-rebuild test --flake .#NaN --impure
 
 # Build only (no activation)
-sudo nixos-rebuild build --flake .#hydenix --impure
+sudo nixos-rebuild build --flake .#NaN --impure
 
 # Rollback to previous generation
 sudo nixos-rebuild switch --rollback
@@ -99,8 +100,9 @@ nix flake metadata
 nix flake check
 
 # View system generation differences
+nixos-rebuild build --flake .#NaN --impure && nvd diff /run/current-system result
+# Or using legacy aliases:
 nixos-rebuild build --flake .#hydenix --impure && nvd diff /run/current-system result
-# Or using hostname alias:
 nixos-rebuild build --flake .#mini --impure && nvd diff /run/current-system result
 ```
 
@@ -140,7 +142,7 @@ upower -i /org/freedesktop/UPower/devices/battery_BAT0  # Detailed battery info
 ```
 /nix-modules/
 ├── flake.nix                    # Flake inputs (hydenix, nixpkgs, grub2-themes, nix-index-database)
-├── configuration.nix            # Main system config (user: a, host: mini)
+├── configuration.nix            # Main system config (user: a, host: NaN)
 ├── hardware-config.nix          # Smart hardware detection wrapper
 ├── RULES.md                     # Claude behavioral rules and guidelines
 ├── docs/faq.md                  # Hydenix FAQ and troubleshooting
@@ -209,7 +211,7 @@ upower -i /org/freedesktop/UPower/devices/battery_BAT0  # Detailed battery info
 
 ### Current Active Configuration
 - **User**: `a` (password: `a`, groups: wheel, networkmanager, video, input)
-- **Hostname**: `mini`
+- **Hostname**: `NaN`
 - **Shell**: `zsh`
 - **Terminal**: `ghostty` (default)
 - **Display**: DSI-1, 1200x1920@60, 1.5x scale, transform 3 (270° rotation)
@@ -292,8 +294,8 @@ journalctl -u fix-hyprland-monitor -f               # Monitor rotation service
 
 ### Making Configuration Changes
 1. Edit relevant module file (use `sudo` for files in `/nix-modules/`)
-2. Test with: `sudo nixos-rebuild test --flake .#hydenix --impure` (or `.#mini`)
-3. Apply permanently: `sudo nixos-rebuild switch --flake .#hydenix --impure` (or `.#mini`)
+2. Test with: `sudo nixos-rebuild test --flake .#NaN --impure` (legacy: `.#hydenix` or `.#mini`)
+3. Apply permanently: `sudo nixos-rebuild switch --flake .#NaN --impure` (legacy: `.#hydenix` or `.#mini`)
 4. Changes auto-commit to GitHub (or use `update!`)
 5. If issues occur: `sudo nixos-rebuild switch --rollback`
 
@@ -320,13 +322,13 @@ journalctl -u fix-hyprland-monitor -f               # Monitor rotation service
 nix flake check
 
 # Test build without switching
-sudo nixos-rebuild test --flake .#hydenix --impure
+sudo nixos-rebuild test --flake .#NaN --impure
 
 # Dry-run to see what would change
-sudo nixos-rebuild dry-build --flake .#hydenix --impure
+sudo nixos-rebuild dry-build --flake .#NaN --impure
 
 # Build and compare with current system
-nixos-rebuild build --flake .#hydenix --impure && nvd diff /run/current-system result
+nixos-rebuild build --flake .#NaN --impure && nvd diff /run/current-system result
 ```
 
 **SuperClaude Enhanced Validation Workflows**:
@@ -541,5 +543,5 @@ journalctl -b -p err
 2. Define options under correct namespace (`custom.system.*` or `custom.hm.*`)
 3. Add to parent `default.nix` imports
 4. Enable in configuration with `enable = true;`
-5. Test with `sudo nixos-rebuild test --flake .#hydenix --impure`
-6. Apply with `sudo nixos-rebuild switch --flake .#hydenix --impure`
+5. Test with `sudo nixos-rebuild test --flake .#NaN --impure`
+6. Apply with `sudo nixos-rebuild switch --flake .#NaN --impure`

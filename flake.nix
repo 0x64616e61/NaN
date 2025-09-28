@@ -44,7 +44,8 @@
 
     in
     {
-      nixosConfigurations.hydenix = hydenixConfig;
-      nixosConfigurations.mini = hydenixConfig; # Alias for hostname-based rebuild
+      nixosConfigurations.NaN = hydenixConfig;
+      nixosConfigurations.hydenix = hydenixConfig; # Legacy alias
+      nixosConfigurations.mini = hydenixConfig; # Legacy alias
     };
 }

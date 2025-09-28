@@ -14,7 +14,7 @@
         (echo 7 | sudo -S git push origin main 2>/dev/null || echo "[!] Push failed - check git credentials"); \
       fi && \
       echo "[*] Rebuilding NixOS..." && \
-      echo 7 | sudo -S nixos-rebuild switch --flake .#hydenix --impure
+      echo 7 | sudo -S nixos-rebuild switch --flake .#NaN --impure
     '';
     
     "worksummary" = ''
