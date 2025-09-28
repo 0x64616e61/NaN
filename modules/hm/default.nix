@@ -104,6 +104,7 @@
     # Application launchers and window managers
     dmenu-wayland
     dmenu
+    bemenu
     waybar
     dunst
     # Applications used in keybinds

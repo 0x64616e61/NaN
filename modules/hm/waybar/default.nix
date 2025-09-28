@@ -76,7 +76,7 @@ in
           
           "custom/launcher" = {
             format = " ▶ ";
-            on-click = "dmenu_path | dmenu | xargs -r hyprctl dispatch exec";
+            on-click = "dmenu_path | bemenu --grab | xargs -r hyprctl dispatch exec";
             tooltip = false;
           };
           
