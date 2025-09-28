@@ -19,7 +19,7 @@ let
     ];
 
     modules-center = [
-      "custom/launcher"
+      "custom/launcher"  # dmenu launcher
     ];
 
     modules-right = [
@@ -40,11 +40,12 @@ let
       };
     };
 
-    # Dmenu launcher module
+    # Dmenu launcher with integrated text input
     "custom/launcher" = {
-      format = "[ run ]";
-      on-click = "${pkgs.rofi-wayland}/bin/rofi -show drun";
-      tooltip = false;
+      format = "Run: ";
+      exec = "echo ''";
+      on-click = "${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p '' -fn 'monospace:size=10' -nb '#000000' -nf '#00ff00' -sb '#00ff00' -sf '#000000' -h 20";
+      tooltip-format = "Press Windows+Space to launch";
     };
 
     # Ultra-compact battery display
@@ -118,18 +119,23 @@ let
       transition: none;
     }
 
-    /* Center launcher */
+    /* Center launcher - styled as input field */
     #custom-launcher {
-      background: transparent;
-      color: #FFFFFF;
-      padding: 0 8px;
-      margin: 0;
-      border: none;
+      background: #000000;
+      color: #00FF00;
+      padding: 0 10px;
+      margin: 0 5px;
+      border: 1px solid #00FF00;
+      border-radius: 0px;
+      font-family: monospace;
+      font-size: 10px;
+      min-width: 120px;
     }
 
     #custom-launcher:hover {
-      background: #FFFFFF;
+      background: #00FF00;
       color: #000000;
+      border: 1px solid #00FF00;
     }
 
     /* Right modules - ultra compact */
@@ -157,10 +163,10 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Install waybar and rofi packages
+    # Install waybar and dmenu packages
     home.packages = with pkgs; [
       waybar
-      rofi-wayland
+      dmenu-wayland
     ];
 
     # Waybar configuration
@@ -178,7 +184,7 @@ in
         "${pkgs.waybar}/bin/waybar"
       ];
       bind = [
-        "SUPER, D, exec, ${pkgs.rofi-wayland}/bin/rofi -show drun"
+        "SUPER, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p '' -fn 'monospace:size=10' -nb '#000000' -nf '#00ff00' -sb '#00ff00' -sf '#000000' -h 20"
       ];
     };
   };

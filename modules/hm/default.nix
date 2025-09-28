@@ -7,6 +7,8 @@
     ./applications
     ./audio
     ./desktop
+    ./hyprland
+    ./waybar
   ];
 
   # Enable custom modules
@@ -75,22 +77,15 @@
     
     # Gesture support disabled - removed from configuration
     
-    desktop.waybarPureNix = {
-      enable = true;  # OLED-optimized monochrome waybar with dmenu
-      autoStart = true;
+    # Pure Nix modules (replacing HyDE)
+    desktop.dmenuLauncher = {
+      enable = true;  # dmenu launcher with Windows+Space
     };
     
-    desktop.workflowsGhostty = {
-      enable = true;  # Persistent ghostty terminal configuration
-    };
-    
-    desktop.hydeGhostty = {
-      enable = true;  # Configure HyDE to use ghostty
-    };
-
-    desktop.hyprlandGhostty = {
-      enable = true;  # Enable Hyprland keybinding override for ghostty
-    };
+    # HyDE-specific modules disabled (migrated to pure Nix)
+    # desktop.workflowsGhostty.enable = false;
+    # desktop.hydeGhostty.enable = false;
+    # desktop.hyprlandGhostty.enable = false;
 
     # Monitor configuration now handled at system level in modules/system/monitor-config.nix
   };
@@ -129,6 +124,10 @@
   # Hydenix home-manager options
   hydenix.hm.enable = true;
 
+  # Pure Nix modules enabled
+  custom.hm.waybar.enable = true;
+  custom.hm.hyprland.enable = true;
+  
   # Disable hydenix waybar in favor of our pure Nix implementation
   hydenix.hm.waybar.enable = false;
 
