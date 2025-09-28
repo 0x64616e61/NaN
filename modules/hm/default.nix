@@ -142,6 +142,9 @@
   # Hydenix home-manager options
   hydenix.hm.enable = true;
 
+  # Disable hydenix waybar in favor of our pure Nix implementation
+  hydenix.hm.waybar.enable = false;
+
   # Task-master configuration
   hydenix.hm.task-master = {
     enable = true;

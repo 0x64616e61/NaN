@@ -6,7 +6,7 @@
     ./auto-rotate-service.nix
     ./theme.nix
     ./waybar-pure-nix.nix  # Pure Nix waybar configuration
-    # ./waybar-fix.nix  # Disabled - replaced with waybar-pure-nix.nix
+    ./waybar-fix.nix  # Keep imported but disabled in config
     ./waybar-rotation-lock.nix
     ./waybar-rotation-patch.nix
     ./libinput-gestures.nix
