@@ -76,7 +76,7 @@ in
           
           "custom/launcher" = {
             format = " ▶ ";
-            on-click = "${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25";
+            on-click = "${pkgs.dmenu-wayland}/bin/dmenu-wl_run -t -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25";
             tooltip = false;
           };
           

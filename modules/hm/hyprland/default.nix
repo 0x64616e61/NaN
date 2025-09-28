@@ -138,7 +138,7 @@ in
           "$mainMod, B, exec, ${pkgs.firefox}/bin/firefox"
           
           # dmenu launcher
-          "$mainMod, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25"
+          "$mainMod, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -t -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25"
           
           # Function keys for GPD Pocket 3
           # Volume controls
