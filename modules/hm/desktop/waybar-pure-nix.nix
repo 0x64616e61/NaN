@@ -411,9 +411,7 @@ let
       border-radius: 12px; /* GPD: Larger radius for handheld comfort */
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* GPD: Slower transition for handheld */
       font-weight: 700; /* GPD: Bolder text for small screen readability */
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      /* display/align/justify not supported in GTK CSS - using padding for centering */
       /* GPD: Enhanced contrast and visibility for outdoor use */
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
