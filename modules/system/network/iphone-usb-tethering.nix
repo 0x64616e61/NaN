@@ -165,9 +165,8 @@ in
     };
 
     # Add user to necessary groups for iPhone access
-    users.users = mkIf (config.users.users ? a) {
-      a.extraGroups = [ "usbmux" "networkmanager" ];
-    };
+    # Note: User groups should be configured in main configuration.nix to avoid recursion
+    # users.users.a.extraGroups should include: [ "usbmux" "networkmanager" ]
 
     # Kernel modules for iPhone ethernet support
     boot.kernelModules = [ "ipheth" ];
