@@ -122,7 +122,7 @@
   ];
 
   # Hydenix home-manager options
-  hydenix.hm.enable = true;
+  hydenix.hm.enable = false;  # Disabled - migrated to pure Nix
 
   # Pure Nix modules enabled
   custom.hm.waybar.enable = true;
