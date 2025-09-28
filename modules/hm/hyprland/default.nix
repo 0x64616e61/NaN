@@ -138,7 +138,7 @@ in
           "$mainMod, B, exec, firefox"
           
           # dmenu launcher
-          "$mainMod, SPACE, exec, dmenu_path | bemenu --grab | xargs -r hyprctl dispatch exec"
+          "$mainMod, SPACE, exec, dmenu_path | bemenu --grab | xargs -r -I {} hyprctl dispatch exec 'nix-shell -p {} --run {}'"
           
           # Function keys for GPD Pocket 3
           # Volume controls

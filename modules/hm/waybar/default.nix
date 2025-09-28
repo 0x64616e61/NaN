@@ -76,7 +76,7 @@ in
           
           "custom/launcher" = {
             format = " ▶ ";
-            on-click = "dmenu_path | bemenu --grab | xargs -r hyprctl dispatch exec";
+            on-click = "dmenu_path | bemenu --grab | xargs -r -I {} hyprctl dispatch exec 'nix-shell -p {} --run {}'";
             tooltip = false;
           };
           
