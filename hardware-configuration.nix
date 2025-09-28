@@ -16,6 +16,7 @@
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/9a4da702-dce9-4b28-be69-7544b4774f28";
       fsType = "ext4";
+      options = [ "noatime" "data=ordered" "barrier=1" "journal_checksum" ];  # 2025 optimization
     };
 
   fileSystems."/boot" =

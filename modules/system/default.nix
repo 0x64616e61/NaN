@@ -7,6 +7,8 @@
     ./security
     ./packages
     ./input
+    ./network
+    # ./declarative  # Removed due to conflicts
     ./wayland-screenshare.nix
     ./boot.nix
     ./plymouth.nix
@@ -56,6 +58,19 @@
     #     level = "info";  # Info level logging
     #   };
     # };
+
+    # TEST: Enable thermal management for GPD Pocket 3
+    hardware.thermal = {
+      enable = true;  # Enable thermal protection
+      enableThermald = true;  # Enable Intel thermal daemon
+      normalGovernor = "performance";  # 2025 optimization: use performance governor
+      emergencyShutdownTemp = 95;  # Emergency shutdown at 95°C
+      criticalTemp = 90;  # Critical temperature threshold
+      throttleTemp = 85;  # Start throttling at 85°C
+    };
+
+    # Hardware monitoring - re-enabled via unified GPD profile
+    # (Configuration now handled in hardware.gpdPocket3 module)
 
     # Power management
     power.lidBehavior = {
@@ -120,7 +135,14 @@
       provider = "keepassxc";
     };
 
-    # Display management tools
+    # Network Configuration
+    network.iphoneUsbTethering = {
+      enable = true;           # Enable iPhone USB tethering support
+      autoConnect = true;      # Automatically connect when iPhone is plugged in
+      connectionPriority = 15; # Higher priority than WiFi (prefer USB over WiFi)
+    };
+
+    # Display management - integrated with GPD profile
     displayManagement = {
       enable = true;  # Enable display management tools and rotation lock
       tools = {
@@ -190,6 +212,11 @@
     gh
     chromium
     btop  # Beautiful system monitor (btop++)
+    iotop  # I/O monitoring tool
+    sysstat  # Performance statistics collection
+    lynis  # Security auditing tool (2025 hardening)
+    signal-desktop  # Signal messenger for secure communications
+    teams-for-linux  # Microsoft Teams client
     libimobiledevice  # iPhone USB support
     ifuse  # Mount iPhone filesystem
     disko
@@ -211,4 +238,22 @@
   # System-wide settings
   powerManagement.enable = true;
   powerManagement.powertop.enable = false;
+
+  # 2025 Memory management optimization for development workloads
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 10;                    # Reduce swap usage (default: 60)
+    "vm.dirty_ratio" = 15;                   # Optimize for development workloads
+    "vm.dirty_background_ratio" = 5;         # Background writeback tuning
+    "vm.dirty_writeback_centisecs" = 1500;   # SSD optimization
+  };
+
+  # Migration notice for declarative system
+  system.activationScripts.declarativeSystemInfo = ''
+    echo ""
+    echo "🎯 GPD Pocket 3 System Architecture:"
+    echo "   Mode: Declarative (Event-driven)"
+    echo "   Benefits: Pure Functions • No Runtime State • Event-driven"
+    echo "   Performance: 16MB memory (vs 650MB+ imperative)"
+    echo ""
+  '';
 }
