@@ -138,7 +138,7 @@ in
           "$mainMod, B, exec, firefox"
           
           # dmenu launcher
-          "$mainMod, SPACE, exec, dmenu-wl_run -t -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25"
+          "$mainMod, SPACE, exec, dmenu-wl_path | xargs -r hyprctl dispatch exec"
           
           # Function keys for GPD Pocket 3
           # Volume controls
