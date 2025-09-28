@@ -381,8 +381,9 @@ let
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
+      0% { opacity: 1; }
       50% { opacity: 0.7; }
+      100% { opacity: 1; }
     }
 
     /* Module Groups - GPD Pocket 3 touch-optimized with 48px+ targets */
@@ -627,8 +628,9 @@ let
     }
 
     @keyframes warning-blink {
-      0%, 100% { opacity: 1; }
+      0% { opacity: 1; }
       50% { opacity: 0.6; }
+      100% { opacity: 1; }
     }
 
     /* Rotation lock prominence for hardware feature */
@@ -651,8 +653,9 @@ let
     }
 
     @keyframes gentle-pulse {
-      0%, 100% { opacity: 1; }
+      0% { opacity: 1; }
       50% { opacity: 0.8; }
+      100% { opacity: 1; }
     }
   '';
 
