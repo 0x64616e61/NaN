@@ -128,7 +128,7 @@ in
           
           # Application launches
           "$mainMod, T, exec, ${pkgs.ghostty}/bin/ghostty"
-          "$mainMod, E, exec, ${pkgs.dolphin}/bin/dolphin"
+          "$mainMod, E, exec, ${pkgs.kdePackages.dolphin}/bin/dolphin"
           "$mainMod, B, exec, ${pkgs.firefox}/bin/firefox"
           
           # dmenu launcher
