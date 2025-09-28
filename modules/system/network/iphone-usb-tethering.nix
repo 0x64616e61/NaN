@@ -151,17 +151,18 @@ in
     networking.networkmanager = {
       enable = mkDefault true;
 
-      # Additional NetworkManager configuration for iPhone
-      extraConfig = ''
-        [device]
-        # Configure iPhone ethernet devices
-        match-device=driver:ipheth
-        managed=true
-
-        [connection]
-        # iPhone connections get medium priority by default
-        autoconnect-priority=5
-      '';
+      # Additional NetworkManager configuration for iPhone (structured format)
+      settings = {
+        device = {
+          # Configure iPhone ethernet devices
+          "match-device" = "driver:ipheth";
+          managed = true;
+        };
+        connection = {
+          # iPhone connections get medium priority by default
+          autoconnect-priority = 5;
+        };
+      };
     };
 
     # Add user to necessary groups for iPhone access
