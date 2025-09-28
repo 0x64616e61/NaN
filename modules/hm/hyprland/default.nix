@@ -157,14 +157,6 @@ in
           ", XF86AudioNext, exec, playerctl next"
           ", XF86AudioPrev, exec, playerctl previous"
           
-          # GPD Pocket 3 specific Fn+F key combinations
-          "$mainMod, F1, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-          "$mainMod, F2, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-          "$mainMod, F3, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-          "$mainMod, F4, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-          "$mainMod, F5, exec, brightnessctl set 10%-"
-          "$mainMod, F6, exec, brightnessctl set 10%+"
-          
           # Move focus
           "$mainMod, left, movefocus, l"
           "$mainMod, right, movefocus, r"
