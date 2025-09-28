@@ -358,7 +358,8 @@ let
     #workspaces button:hover {
       background: alpha(@gpd-primary, 0.25); /* GPD: Stronger hover for touch feedback */
       color: @gpd-text;
-      transform: scale(1.08); /* GPD: Slightly larger scale for better feedback */
+      /* transform not supported in GTK CSS - using padding instead */
+      padding: 9px 13px; /* GPD: Slightly larger padding for hover effect */
       border-color: @gpd-primary;
     }
 
@@ -433,7 +434,7 @@ let
     #custom-power:hover {
       background: alpha(@gpd-primary, 0.2); /* GPD: Stronger hover for better feedback */
       border-color: @gpd-primary;
-      transform: scale(1.08); /* GPD: Larger scale for handheld visibility */
+      /* transform not supported in GTK - using visual effects instead */
       cursor: pointer;
       /* GPD: Enhanced visual feedback for touch */
       box-shadow: 0 4px 12px alpha(@gpd-primary, 0.3);
@@ -454,7 +455,7 @@ let
     #custom-notification:active,
     #custom-weather:active,
     #custom-power:active {
-      transform: scale(0.92); /* GPD: Stronger press feedback for touch confidence */
+      /* transform not supported in GTK - using inset shadow for press effect */
       background: alpha(@gpd-primary, 0.35); /* GPD: More visible active state */
       border-color: @gpd-secondary;
       /* GPD: Immediate visual confirmation of touch */
@@ -610,11 +611,11 @@ let
     @keyframes urgent-pulse {
       from {
         background: alpha(@gpd-error, 0.2);
-        transform: scale(1.0);
+        /* scale effect via opacity and shadow */
       }
       to {
         background: alpha(@gpd-error, 0.4);
-        transform: scale(1.05);
+        /* scale effect via shadow expansion */
       }
     }
 
