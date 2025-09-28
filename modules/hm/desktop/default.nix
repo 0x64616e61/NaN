@@ -5,10 +5,7 @@
     ./auto-rotate.nix
     ./auto-rotate-service.nix
     ./theme.nix
-    ./waybar-pure-nix.nix  # Pure Nix waybar configuration
-    ./waybar-fix.nix  # Keep imported but disabled in config
-    ./waybar-rotation-lock.nix
-    ./waybar-rotation-patch.nix
+    ./waybar-pure-nix.nix  # OLED monochrome waybar configuration
     ./libinput-gestures.nix
     ./hyprgrass-config.nix
     ./gestures.nix

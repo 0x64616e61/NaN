@@ -76,21 +76,8 @@
     # Gesture support disabled - removed from configuration
     
     desktop.waybarPureNix = {
-      enable = true;  # Pure Nix waybar configuration - no Python dependencies
+      enable = true;  # OLED-optimized monochrome waybar with dmenu
       autoStart = true;
-      systemdIntegration = true;
-    };
-
-    desktop.waybarFix = {
-      enable = false;  # Disabled - replaced with waybarPureNix
-    };
-
-    desktop.waybarRotationLock = {
-      enable = false;  # Disabled - integrated in waybarPureNix
-    };
-
-    desktop.waybarRotationPatch = {
-      enable = false;  # Disabled - not needed with waybarPureNix
     };
     
     desktop.workflowsGhostty = {
