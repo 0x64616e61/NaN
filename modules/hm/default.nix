@@ -103,6 +103,7 @@
     gcc
     # Application launchers and window managers
     dmenu-wayland
+    dmenu
     waybar
     dunst
     # Applications used in keybinds
