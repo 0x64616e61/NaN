@@ -27,6 +27,10 @@ in
           "sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3"
           # Start waybar
           "${pkgs.waybar}/bin/waybar"
+          # Start KeePassXC for secret service
+          "keepassxc ~/Documents/Passwords.kdbx"
+          # Start auto-rotate service
+          "systemctl --user start auto-rotate-both"
           # Start dunst for notifications
           "${pkgs.dunst}/bin/dunst"
         ];

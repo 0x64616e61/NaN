@@ -90,25 +90,7 @@
     # Monitor configuration now handled at system level in modules/system/monitor-config.nix
   };
 
-  # Auto-start applications
-  wayland.windowManager.hyprland.settings.exec-once = [
-    # waybar is managed by HyDE's waybar.py script - don't start it directly
-    "keepassxc ~/Documents/Passwords.kdbx"  # For secret service
-    # Ensure auto-rotate service starts
-    "systemctl --user start auto-rotate-both"
-  ];
-  
-  # Ensure monitor is set to landscape in Hyprland config directly
-  wayland.windowManager.hyprland.settings = {
-    monitor = [
-      "DSI-1, 1200x1920@60, 0x0, 1.5, transform, 3"
-    ];
-    
-    # Also run on startup to ensure landscape is applied
-    exec = [
-      "hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.5,transform,3"
-    ];
-  };
+  # Auto-start applications are now handled by pure Nix Hyprland module
 
   # Additional packages
   home.packages = with pkgs; [
