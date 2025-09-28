@@ -75,16 +75,22 @@
     
     # Gesture support disabled - removed from configuration
     
+    desktop.waybarPureNix = {
+      enable = true;  # Pure Nix waybar configuration - no Python dependencies
+      autoStart = true;
+      systemdIntegration = true;
+    };
+
     desktop.waybarFix = {
-      enable = false;  # Disabled - waybar customization removed
+      enable = false;  # Disabled - replaced with waybarPureNix
     };
-    
+
     desktop.waybarRotationLock = {
-      enable = true;  # Add rotation lock button to waybar
+      enable = false;  # Disabled - integrated in waybarPureNix
     };
-    
+
     desktop.waybarRotationPatch = {
-      enable = true;  # Auto-patch waybar config to include rotation lock
+      enable = false;  # Disabled - not needed with waybarPureNix
     };
     
     desktop.workflowsGhostty = {

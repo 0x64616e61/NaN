@@ -18,7 +18,7 @@ in
           "format": "{}",
           "exec": "rotation-lock-status",
           "interval": 1,
-          "on-click": "rotation-lock-simple",
+          "on-click": "rotation-lock-toggle",
           "signal": 8,
           "tooltip": true,
           "tooltip-format": "Toggle rotation lock for focused display",
