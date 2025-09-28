@@ -101,6 +101,7 @@
     patchelf
     androidenv.androidPkgs.ndk-bundle  # Android NDK
     gcc
+    dmenu-wayland  # Application launcher
   ];
 
   # Hydenix home-manager options
