@@ -75,9 +75,11 @@ in
             size = 3;
             passes = 1;
           };
-          drop_shadow = false;  # Disable for OLED optimization
-          shadow_range = 4;
-          shadow_render_power = 3;
+          shadow = {
+            enabled = false;  # Disable for OLED optimization
+            range = 4;
+            render_power = 3;
+          };
         };
         
         # Animations
@@ -114,10 +116,10 @@ in
         };
         
         # Window rules
-        windowrule = [
-          "float,^(pavucontrol)$"
-          "float,^(blueman-manager)$"
-          "float,^(nm-connection-editor)$"
+        windowrulev2 = [
+          "float,class:^(pavucontrol)$"
+          "float,class:^(blueman-manager)$"
+          "float,class:^(nm-connection-editor)$"
         ];
         
         # Keybindings
