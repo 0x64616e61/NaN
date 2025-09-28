@@ -59,15 +59,15 @@
     #   };
     # };
 
-    # TEST: Enable thermal management for GPD Pocket 3
-    hardware.thermal = {
-      enable = true;  # Enable thermal protection
-      enableThermald = true;  # Enable Intel thermal daemon
-      normalGovernor = "performance";  # 2025 optimization: use performance governor
-      emergencyShutdownTemp = 95;  # Emergency shutdown at 95°C
-      criticalTemp = 90;  # Critical temperature threshold
-      throttleTemp = 85;  # Start throttling at 85°C
-    };
+    # TEST: Enable thermal management for GPD Pocket 3 (TEMPORARILY DISABLED)
+    # hardware.thermal = {
+    #   enable = true;  # Enable thermal protection
+    #   enableThermald = true;  # Enable Intel thermal daemon
+    #   normalGovernor = "performance";  # 2025 optimization: use performance governor
+    #   emergencyShutdownTemp = 95;  # Emergency shutdown at 95°C
+    #   criticalTemp = 90;  # Critical temperature threshold
+    #   throttleTemp = 85;  # Start throttling at 85°C
+    # };
 
     # Hardware monitoring - re-enabled via unified GPD profile
     # (Configuration now handled in hardware.gpdPocket3 module)
