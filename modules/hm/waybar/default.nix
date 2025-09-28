@@ -36,8 +36,8 @@ in
             format = "{title}";
             max-length = 50;
             rewrite = {
-              "(.*) — Mozilla Firefox" = "🌐 $1";
-              "(.*) - Ghostty" = "⌨️ $1";
+              "(.*) — Mozilla Firefox" = "◈ $1";
+              "(.*) - Ghostty" = "▸ $1";
             };
           };
           
@@ -53,23 +53,23 @@ in
               critical = 15;
             };
             format = "{icon} {capacity}%";
-            format-charging = "⚡ {capacity}%";
-            format-plugged = "🔌 {capacity}%";
-            format-icons = [ "🔋" "🔋" "🔋" "🔋" "🔋" ];
+            format-charging = "↑ {capacity}%";
+            format-plugged = "● {capacity}%";
+            format-icons = [ "▁" "▃" "▅" "▇" "█" ];
           };
           
           network = {
-            format-wifi = "📶 {signalStrength}%";
-            format-ethernet = "🌐 Connected";
-            format-disconnected = "⚠️ Disconnected";
+            format-wifi = "≈ {signalStrength}%";
+            format-ethernet = "⊞ Connected";
+            format-disconnected = "✗ Disconnected";
             tooltip-format = "{ifname}: {ipaddr}/{cidr}";
           };
           
           pulseaudio = {
             format = "{icon} {volume}%";
-            format-muted = "🔇 Muted";
+            format-muted = "◌ Muted";
             format-icons = {
-              default = [ "🔈" "🔉" "🔊" ];
+              default = [ "▁" "▃" "▇" ];
             };
             on-click = "${pkgs.pavucontrol}/bin/pavucontrol";
           };
@@ -88,9 +88,9 @@ in
         }
         
         window#waybar {
-          background-color: rgba(0, 0, 0, 0.9);
-          color: #ffffff;
-          border-bottom: 2px solid #00ff00;
+          background-color: rgba(26, 26, 26, 0.9);
+          color: #cccccc;
+          border-bottom: 1px solid #444444;
         }
         
         #workspaces button {
@@ -101,13 +101,13 @@ in
         }
         
         #workspaces button:hover {
-          background: rgba(0, 255, 0, 0.2);
-          color: #00ff00;
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
         }
         
         #workspaces button.active {
-          color: #00ff00;
-          background-color: rgba(0, 255, 0, 0.1);
+          color: #ffffff;
+          background-color: rgba(255, 255, 255, 0.1);
         }
         
         #workspaces button.urgent {
@@ -122,11 +122,11 @@ in
         #tray,
         #window {
           padding: 0 10px;
-          color: #ffffff;
+          color: #cccccc;
         }
         
         #battery.charging {
-          color: #00ff00;
+          color: #88cc88;
         }
         
         #battery.warning:not(.charging) {

@@ -61,8 +61,8 @@ in
           gaps_in = 5;
           gaps_out = 10;
           border_size = 2;
-          "col.active_border" = mkForce "rgba(00ff00ee)";
-          "col.inactive_border" = mkForce "rgba(595959aa)";
+          "col.active_border" = mkForce "rgba(ccccccee)";
+          "col.inactive_border" = mkForce "rgba(333333aa)";
           layout = "dwindle";
           allow_tearing = false;
         };
@@ -136,7 +136,7 @@ in
           "$mainMod, B, exec, ${pkgs.firefox}/bin/firefox"
           
           # dmenu launcher
-          "$mainMod, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p 'Run: ' -fn 'monospace:size=10' -nb '#000000' -nf '#00ff00' -sb '#00ff00' -sf '#000000' -h 25"
+          "$mainMod, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25"
           
           # Move focus
           "$mainMod, left, movefocus, l"
