@@ -79,7 +79,7 @@
     
     # Pure Nix modules (replacing HyDE)
     desktop.dmenuLauncher = {
-      enable = true;  # dmenu launcher with Windows+Space
+      enable = false;  # Now handled by pure Nix Hyprland module
     };
     
     # HyDE-specific modules disabled (migrated to pure Nix)
