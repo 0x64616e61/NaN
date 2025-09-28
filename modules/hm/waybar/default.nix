@@ -21,7 +21,7 @@ in
           height = 25;
           spacing = 0;
           
-          modules-left = [ "hyprland/workspaces" "hyprland/window" ];
+          modules-left = [ "custom/launcher" "hyprland/workspaces" "hyprland/window" ];
           modules-center = [ "clock" ];
           modules-right = [ "tray" "network" "battery" "pulseaudio" ];
           
@@ -74,6 +74,12 @@ in
             on-click = "${pkgs.pavucontrol}/bin/pavucontrol";
           };
           
+          "custom/launcher" = {
+            format = " ▶ ";
+            on-click = "${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p 'Run: ' -fn 'monospace:size=10' -nb '#1a1a1a' -nf '#cccccc' -sb '#333333' -sf '#ffffff' -h 25";
+            tooltip = false;
+          };
+          
           tray = {
             spacing = 10;
           };
@@ -113,6 +119,17 @@ in
         #workspaces button.urgent {
           background-color: #ff0000;
           color: #ffffff;
+        }
+        
+        #custom-launcher {
+          padding: 0 10px;
+          color: #ffffff;
+          background-color: #333333;
+          border-right: 1px solid #444444;
+        }
+        
+        #custom-launcher:hover {
+          background-color: #555555;
         }
         
         #clock,
