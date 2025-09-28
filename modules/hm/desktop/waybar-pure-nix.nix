@@ -468,28 +468,28 @@ in
     # Create systemd service for waybar management
     systemd.user.services.waybar = mkIf cfg.systemdIntegration {
       Unit = {
-        Description = "Waybar - Wayland bar";
-        Documentation = "https://github.com/Alexays/Waybar/wiki";
-        PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session-pre.target" ];
+        Description = mkForce "Waybar - Wayland bar";
+        Documentation = mkForce "https://github.com/Alexays/Waybar/wiki";
+        PartOf = mkForce [ "graphical-session.target" ];
+        After = mkForce [ "graphical-session-pre.target" ];
       };
 
       Service = {
-        Type = "simple";
-        ExecStart = "${pkgs.waybar}/bin/waybar";
-        ExecReload = "${pkgs.coreutils}/bin/kill -SIGUSR2 $MAINPID";
-        Restart = "on-failure";
-        RestartSec = 1;
+        Type = mkForce "simple";
+        ExecStart = mkForce "${pkgs.waybar}/bin/waybar";
+        ExecReload = mkForce "${pkgs.coreutils}/bin/kill -SIGUSR2 $MAINPID";
+        Restart = mkForce "on-failure";
+        RestartSec = mkForce 1;
 
         # Performance tuning
-        CPUSchedulingPolicy = "batch";
-        Nice = 19;
-        IOSchedulingClass = "idle";
-        IOSchedulingPriority = 7;
+        CPUSchedulingPolicy = mkForce "batch";
+        Nice = mkForce 19;
+        IOSchedulingClass = mkForce "idle";
+        IOSchedulingPriority = mkForce 7;
       };
 
       Install = {
-        WantedBy = [ "hyprland-session.target" ];
+        WantedBy = mkForce [ "hyprland-session.target" ];
       };
     };
 
