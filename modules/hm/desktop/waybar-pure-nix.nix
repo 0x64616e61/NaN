@@ -358,8 +358,8 @@ let
     #workspaces button:hover {
       background: alpha(@gpd-primary, 0.25); /* GPD: Stronger hover for touch feedback */
       color: @gpd-text;
-      /* transform not supported in GTK CSS - using padding instead */
-      padding: 9px 13px; /* GPD: Slightly larger padding for hover effect */
+      /* GPD: Slightly larger padding for hover effect */
+      padding: 9px 13px;
       border-color: @gpd-primary;
     }
 
@@ -411,7 +411,6 @@ let
       border-radius: 12px; /* GPD: Larger radius for handheld comfort */
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* GPD: Slower transition for handheld */
       font-weight: 700; /* GPD: Bolder text for small screen readability */
-      /* display/align/justify not supported in GTK CSS - using padding for centering */
       /* GPD: Enhanced contrast and visibility for outdoor use */
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -433,7 +432,6 @@ let
     #custom-power:hover {
       background: alpha(@gpd-primary, 0.2); /* GPD: Stronger hover for better feedback */
       border-color: @gpd-primary;
-      /* transform and cursor not supported in GTK CSS */
       /* GPD: Enhanced visual feedback for touch */
       box-shadow: 0 4px 12px alpha(@gpd-primary, 0.3);
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 1.0);
@@ -453,10 +451,9 @@ let
     #custom-notification:active,
     #custom-weather:active,
     #custom-power:active {
-      /* transform not supported in GTK - using inset shadow for press effect */
+      /* GPD: Immediate visual confirmation of touch using inset shadow */
       background: alpha(@gpd-primary, 0.35); /* GPD: More visible active state */
       border-color: @gpd-secondary;
-      /* GPD: Immediate visual confirmation of touch */
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
     }
 
@@ -581,7 +578,9 @@ let
       /* GPD: Make clock slightly more prominent as primary time reference */
       font-size: 14px;
       font-weight: 800;
-      letter-spacing: 0.5px;
+      /* letter-spacing removed - not supported in GTK CSS */
+      padding-left: 1px;
+      padding-right: 1px;
     }
 
     /* Power button emphasis for critical function */
