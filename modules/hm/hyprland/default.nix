@@ -61,7 +61,7 @@ in
           gaps_in = 5;
           gaps_out = 10;
           border_size = 2;
-          "col.active_border" = "rgba(00ff00ee)";
+          "col.active_border" = mkForce "rgba(00ff00ee)";
           "col.inactive_border" = "rgba(595959aa)";
           layout = "dwindle";
           allow_tearing = false;
