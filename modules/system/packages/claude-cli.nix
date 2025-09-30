@@ -94,7 +94,7 @@ in
     ];
 
     # Ensure Node.js is available in PATH for all users
-    environment.systemVariables = {
+    environment.variables = {
       # Ensure Node.js path is available globally
       NODE_PATH = "${pkgs.nodejs_18}/lib/node_modules";
     };
@@ -107,8 +107,8 @@ in
       claude-version = "claude --version";
     };
 
-    # Ensure npm global packages can be found
-    environment.variables = {
+    # Set NPM configuration for global packages
+    environment.sessionVariables = {
       NPM_CONFIG_PREFIX = "${pkgs.nodejs_18}";
     };
   };
