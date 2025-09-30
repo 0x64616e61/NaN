@@ -27,8 +27,7 @@ let
     '';
 
     nativeBuildInputs = with pkgs; [
-      nodejs
-      npm
+      nodejs  # Node.js includes npm
       makeWrapper
     ];
 
@@ -89,8 +88,7 @@ in
     # Install Claude CLI and required Node.js tools system-wide
     environment.systemPackages = mkIf cfg.installGlobally [
       (if cfg.packageMethod == "npm-direct" then claude-cli else claude-cli-wrapper)
-      pkgs.nodejs  # Ensure latest Node.js is available
-      pkgs.npm
+      pkgs.nodejs  # Ensure latest Node.js is available (includes npm)
     ];
 
     # Ensure Node.js is available in PATH for all users
