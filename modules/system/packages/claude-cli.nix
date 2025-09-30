@@ -9,7 +9,7 @@ let
   claude-cli-wrapper = pkgs.writeShellScriptBin "claude" ''
     #!${pkgs.bash}/bin/bash
     export PATH="${pkgs.nodejs}/bin:$PATH"
-    exec ${pkgs.nodejs}/bin/npx @anthropic-ai/claude-code "$@"
+    exec ${pkgs.nodejs}/bin/npx @anthropic-ai/claude-code@latest "$@"
   '';
 
   # Custom Claude CLI package derivation for offline installation
@@ -41,7 +41,7 @@ let
       cat > $out/bin/claude << 'EOF'
 #!/usr/bin/env bash
 export PATH="${pkgs.nodejs}/bin:$PATH"
-exec ${pkgs.nodejs}/bin/npx @anthropic-ai/claude-code "$@"
+exec ${pkgs.nodejs}/bin/npx @anthropic-ai/claude-code@latest "$@"
 EOF
 
       chmod +x $out/bin/claude
@@ -100,9 +100,12 @@ in
     # Add helpful aliases for Claude CLI usage
     environment.shellAliases = {
       # Direct npx fallback if needed
-      claude-npx = "npx @anthropic-ai/claude-code";
-      # Check Claude version
+      claude-npx = "npx @anthropic-ai/claude-code@latest";
+      # Check Claude version (should be 2.0+ for Sonnet 4.5 support)
       claude-version = "claude --version";
+      # Updated for Claude Code v2.0+ (September 30, 2025)
+      # Note: Sonnet 4.5 requires using /model command in interactive mode
+      claude-latest = "npx @anthropic-ai/claude-code@latest";
     };
 
     # Set NPM configuration for global packages
