@@ -1,0 +1,115 @@
+{ config, lib, pkgs, ... }:
+
+with lib;
+
+let
+  cfg = config.custom.system.packages.claude-cli;
+
+  # Simplified approach using writeShellScriptBin for guaranteed PATH availability
+  claude-cli-wrapper = pkgs.writeShellScriptBin "claude" ''
+    #!${pkgs.bash}/bin/bash
+    export PATH="${pkgs.nodejs_18}/bin:$PATH"
+    exec ${pkgs.nodejs_18}/bin/npx @anthropic-ai/claude-code "$@"
+  '';
+
+  # Custom Claude CLI package derivation for offline installation
+  claude-cli = pkgs.stdenv.mkDerivation rec {
+    pname = "claude-code";
+    version = "latest";
+
+    # Create a minimal derivation that ensures Node.js and npm are available
+    src = pkgs.writeText "package.json" ''
+      {
+        "name": "claude-code-wrapper",
+        "version": "1.0.0",
+        "description": "NixOS wrapper for Claude Code"
+      }
+    '';
+
+    nativeBuildInputs = with pkgs; [
+      nodejs_18
+      npm
+      makeWrapper
+    ];
+
+    unpackPhase = "true";
+    configurePhase = "true";
+
+    buildPhase = ''
+      mkdir -p $out/bin
+
+      # Create a wrapper script that ensures Node.js is in PATH
+      cat > $out/bin/claude << 'EOF'
+#!/usr/bin/env bash
+export PATH="${pkgs.nodejs_18}/bin:$PATH"
+exec ${pkgs.nodejs_18}/bin/npx @anthropic-ai/claude-code "$@"
+EOF
+
+      chmod +x $out/bin/claude
+    '';
+
+    installPhase = "true";  # Already done in buildPhase
+
+    meta = with lib; {
+      description = "Claude Code - AI coding assistant wrapper for NixOS";
+      longDescription = ''
+        Claude Code is an agentic coding tool that lives in your terminal,
+        understands your codebase, and helps you code faster by executing
+        routine tasks, explaining complex code, and handling git workflows
+        - all through natural language commands.
+
+        This NixOS package provides a wrapper that ensures the CLI is
+        available in your PATH using npx.
+      '';
+      homepage = "https://github.com/anthropics/claude-code";
+      license = licenses.unfree;
+      maintainers = [ ];
+      platforms = platforms.unix;
+    };
+  };
+in
+{
+  options.custom.system.packages.claude-cli = {
+    enable = mkEnableOption "Claude CLI - Anthropic's AI coding assistant";
+
+    installGlobally = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Install Claude CLI system-wide";
+    };
+
+    packageMethod = mkOption {
+      type = types.enum [ "npm-direct" "npm-package" ];
+      default = "npm-direct";
+      description = "Method to build the Claude CLI package";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    # Install Claude CLI and required Node.js tools system-wide
+    environment.systemPackages = mkIf cfg.installGlobally [
+      (if cfg.packageMethod == "npm-direct" then claude-cli else claude-cli-wrapper)
+      pkgs.nodejs_18  # Ensure Node.js 18+ is available
+      pkgs.npm
+    ];
+
+    # Ensure Node.js is available in PATH for all users
+    environment.systemVariables = {
+      # Ensure Node.js path is available globally
+      NODE_PATH = "${pkgs.nodejs_18}/lib/node_modules";
+    };
+
+    # Add helpful aliases for Claude CLI usage
+    environment.shellAliases = {
+      # Direct npx fallback if needed
+      claude-npx = "npx @anthropic-ai/claude-code";
+      # Check Claude version
+      claude-version = "claude --version";
+    };
+
+    # Ensure npm global packages can be found
+    environment.variables = {
+      NPM_CONFIG_PREFIX = "${pkgs.nodejs_18}";
+    };
+  };
+}

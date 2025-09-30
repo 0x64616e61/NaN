@@ -173,6 +173,13 @@
       enable = true;  # Enable display rotation scripts for dual monitor setup
     };
 
+    # Claude CLI - Anthropic's AI coding assistant
+    packages.claude-cli = {
+      enable = true;  # Enable Claude CLI with Sonnet 4.5 access
+      installGlobally = true;
+      packageMethod = "npm-direct";  # Use direct npm wrapper approach
+    };
+
     # Keyboard remapping with keyd
     input.keyd = {
       enable = true;  # Enable keyd for advanced keyboard customization
@@ -217,6 +224,7 @@
     lynis  # Security auditing tool (2025 hardening)
     signal-desktop  # Signal messenger for secure communications
     teams-for-linux  # Microsoft Teams client
+    spotify  # Music streaming service
     libimobiledevice  # iPhone USB support
     ifuse  # Mount iPhone filesystem
     disko
@@ -233,6 +241,7 @@
     gst_all_1.gst-plugins-bad
     gst_all_1.gst-plugins-ugly
     gst_all_1.gst-libav
+    spotifyd  # Spotify daemon
   ];
 
   # System-wide settings
