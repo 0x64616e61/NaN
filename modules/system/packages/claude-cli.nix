@@ -8,8 +8,8 @@ let
   # Simplified approach using writeShellScriptBin for guaranteed PATH availability
   claude-cli-wrapper = pkgs.writeShellScriptBin "claude" ''
     #!${pkgs.bash}/bin/bash
-    export PATH="${pkgs.nodejs_18}/bin:$PATH"
-    exec ${pkgs.nodejs_18}/bin/npx @anthropic-ai/claude-code "$@"
+    export PATH="${pkgs.nodejs}/bin:$PATH"
+    exec ${pkgs.nodejs}/bin/npx @anthropic-ai/claude-code "$@"
   '';
 
   # Custom Claude CLI package derivation for offline installation
@@ -27,7 +27,7 @@ let
     '';
 
     nativeBuildInputs = with pkgs; [
-      nodejs_18
+      nodejs
       npm
       makeWrapper
     ];
@@ -41,8 +41,8 @@ let
       # Create a wrapper script that ensures Node.js is in PATH
       cat > $out/bin/claude << 'EOF'
 #!/usr/bin/env bash
-export PATH="${pkgs.nodejs_18}/bin:$PATH"
-exec ${pkgs.nodejs_18}/bin/npx @anthropic-ai/claude-code "$@"
+export PATH="${pkgs.nodejs}/bin:$PATH"
+exec ${pkgs.nodejs}/bin/npx @anthropic-ai/claude-code "$@"
 EOF
 
       chmod +x $out/bin/claude
@@ -89,14 +89,14 @@ in
     # Install Claude CLI and required Node.js tools system-wide
     environment.systemPackages = mkIf cfg.installGlobally [
       (if cfg.packageMethod == "npm-direct" then claude-cli else claude-cli-wrapper)
-      pkgs.nodejs_18  # Ensure Node.js 18+ is available
+      pkgs.nodejs  # Ensure latest Node.js is available
       pkgs.npm
     ];
 
     # Ensure Node.js is available in PATH for all users
     environment.variables = {
       # Ensure Node.js path is available globally
-      NODE_PATH = "${pkgs.nodejs_18}/lib/node_modules";
+      NODE_PATH = "${pkgs.nodejs}/lib/node_modules";
     };
 
     # Add helpful aliases for Claude CLI usage
@@ -109,7 +109,7 @@ in
 
     # Set NPM configuration for global packages
     environment.sessionVariables = {
-      NPM_CONFIG_PREFIX = "${pkgs.nodejs_18}";
+      NPM_CONFIG_PREFIX = "${pkgs.nodejs}";
     };
   };
 }
