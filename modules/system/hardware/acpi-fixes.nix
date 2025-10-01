@@ -4,80 +4,89 @@ with lib;
 
 let
   cfg = config.custom.system.hardware.acpiFixes;
+
+  # Compile ACPI override SSDT table
+  acpiOverride = pkgs.stdenv.mkDerivation {
+    name = "acpi-override";
+    src = ./acpi-override.asl;
+    nativeBuildInputs = [ pkgs.acpica-tools ];
+
+    unpackPhase = "true";
+
+    buildPhase = ''
+      iasl -tc ${./acpi-override.asl}
+    '';
+
+    installPhase = ''
+      mkdir -p $out/kernel/firmware/acpi
+      cp acpi-override.aml $out/kernel/firmware/acpi/
+    '';
+  };
 in
 {
   options.custom.system.hardware.acpiFixes = {
-    enable = mkEnableOption "ACPI BIOS error fixes and suppression for GPD Pocket 3";
+    enable = mkEnableOption "ACPI BIOS error fixes for GPD Pocket 3";
 
-    suppressErrors = mkOption {
+    useOverride = mkOption {
       type = types.bool;
       default = true;
       description = ''
-        Suppress cosmetic ACPI BIOS error messages from kernel logs.
-        These errors are typically harmless firmware bugs that don't affect functionality.
-      '';
-    };
-
-    logLevel = mkOption {
-      type = types.int;
-      default = 4;
-      description = ''
-        Kernel log level for ACPI messages (0-7).
-        4 = warnings and above (recommended to reduce noise from AE_NOT_FOUND errors)
-        6 = info and above (more verbose)
-        7 = debug (very verbose)
+        Use ACPI DSDT override to patch missing BIOS symbols.
+        This creates stub devices/methods for:
+        - _SB.PC00.I2C0.TPD0/TPL1 (touchpad stubs)
+        - _SB.UBTC.RUCC (USB Type-C method)
+        - _SB.PC00.LPCB.HEC.SEN4 (EC sensor)
       '';
     };
   };
 
   config = mkIf cfg.enable {
-    # Kernel parameters to reduce ACPI error verbosity
-    boot.kernelParams = mkIf cfg.suppressErrors [
-      # Reduce ACPI debug output to minimize cosmetic error messages
-      "acpi.debug_layer=0x00000000"
-      "acpi.debug_level=0x00000000"
+    # Install ACPI override table to fix missing symbols
+    hardware.firmware = mkIf cfg.useOverride [ acpiOverride ];
 
-      # Set log level to reduce kernel message verbosity
-      # This helps suppress AE_NOT_FOUND errors which are typically harmless
-      "loglevel=${toString cfg.logLevel}"
+    # Kernel parameters for ACPI override loading
+    boot.kernelParams = mkIf cfg.useOverride [
+      # Enable custom ACPI tables from initrd
+      "acpi_enforce_resources=lax"
     ];
 
-    # Documentation about the ACPI errors
-    system.activationScripts.acpiErrorsInfo = ''
+    # Enable early ACPI table loading
+    boot.initrd.prepend = mkIf cfg.useOverride [
+      "${acpiOverride}/kernel/firmware/acpi/acpi-override.aml"
+    ];
+
+    # Documentation about the ACPI fixes
+    system.activationScripts.acpiFixesInfo = ''
       echo ""
-      echo "🔧 ACPI Error Suppression Active for GPD Pocket 3"
-      echo "   Known Cosmetic Errors (Harmless):"
-      echo "   • _SB.PC00.I2C0.TPD0 / TPL1 - Touchpad/Touchscreen ACPI stubs"
-      echo "   • _SB.UBTC.RUCC - USB Type-C ACPI reference (firmware bug)"
-      echo "   • _SB.PC00.LPCB.HEC.SEN4 - Embedded Controller sensor reference"
-      echo "   Status: Errors suppressed via kernel parameters"
-      echo "   Impact: None - Hardware functions normally despite BIOS bugs"
+      echo "🔧 ACPI DSDT Override Active for GPD Pocket 3"
+      echo "   Fixed Missing BIOS Symbols:"
+      echo "   • _SB.PC00.I2C0.TPD0 / TPL1 - Touchpad/Touchscreen device stubs"
+      echo "   • _SB.UBTC.RUCC - USB Type-C UCSI method stub"
+      echo "   • _SB.PC00.LPCB.HEC.SEN4 - Embedded Controller sensor stub"
+      echo "   Status: ACPI errors should be eliminated"
+      echo "   Method: SSDT override table loaded at boot"
       echo ""
     '';
 
-    # Create systemd service to monitor and log actual ACPI issues
-    # (distinguishes between cosmetic errors and real problems)
+    # Monitor for remaining ACPI issues
     systemd.services.acpi-error-monitor = {
-      description = "Monitor for critical ACPI errors (non-cosmetic)";
+      description = "Monitor for ACPI errors after fixes applied";
       wantedBy = [ "multi-user.target" ];
 
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "acpi-error-check" ''
-          # Check for critical ACPI errors that might indicate real problems
-          # (not the cosmetic AE_NOT_FOUND errors)
+          # Check if ACPI errors still present after fixes
+          ACPI_ERRORS=$(journalctl -b -p err | grep -i "ACPI.*Error" || true)
 
-          CRITICAL_ERRORS=$(journalctl -b -p err | grep -i "acpi" | \
-            grep -v "AE_NOT_FOUND" | \
-            grep -v "Could not resolve symbol" | \
-            grep -v "No support for _PRR" || true)
-
-          if [ -n "$CRITICAL_ERRORS" ]; then
-            echo "⚠️  Critical ACPI errors detected (not cosmetic):"
-            echo "$CRITICAL_ERRORS"
+          if [ -n "$ACPI_ERRORS" ]; then
+            echo "⚠️  Remaining ACPI errors detected:"
+            echo "$ACPI_ERRORS"
+            echo ""
+            echo "Please report these to GPD Pocket 3 NixOS configuration maintainer"
           else
-            echo "✅ No critical ACPI errors detected"
+            echo "✅ No ACPI errors detected - all fixes successful"
           fi
         '';
       };

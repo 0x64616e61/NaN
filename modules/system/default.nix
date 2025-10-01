@@ -46,9 +46,8 @@
 
     # ACPI BIOS error fixes
     hardware.acpiFixes = {
-      enable = true;  # Suppress cosmetic ACPI BIOS errors
-      suppressErrors = true;  # Reduce AE_NOT_FOUND error noise
-      logLevel = 4;  # Warning level and above (reduces cosmetic errors)
+      enable = true;  # Enable ACPI DSDT override patches
+      useOverride = true;  # Apply SSDT table to fix missing BIOS symbols
     };
 
     # GPD Physical Positioning System

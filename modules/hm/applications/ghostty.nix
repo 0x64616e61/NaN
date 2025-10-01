@@ -57,8 +57,8 @@ in
       window-padding-x = 25
       window-padding-y = 25
       window-decoration = true
-      # Translucent background
-      background-opacity = 0.75
+      # NO transparency - solid background
+      background-opacity = 1.0
       
       ## Scrollback
       # ~10MB for ~10000 lines history

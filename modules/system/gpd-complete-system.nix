@@ -8,7 +8,7 @@ let
 
   # Complete system startup script that launches all GPD tools
   gpd-complete-script = pkgs.writeShellScript "gpd-complete-system" ''
-    #!/usr/bin/env bash
+    #!${pkgs.bash}/bin/bash
     # GPD Complete System - Reboot Safe
     # Launches all GPD positioning tools in correct order
 
@@ -65,7 +65,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = "yes";
-        ExecStart = "${gpd-complete-script}";
+        ExecStart = "${pkgs.bash}/bin/bash ${gpd-complete-script}";
         Restart = "on-failure";
         RestartSec = "10";
         # Resource limits
