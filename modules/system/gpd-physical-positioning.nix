@@ -6,7 +6,7 @@ let
   # Custom GPD waybar positioning tool from existing source
   gpd-waybar-positioner = pkgs.stdenv.mkDerivation {
     name = "gpd-waybar-positioner";
-    src = ./../../src/gpd-tools;
+    src = /home/a/nix-modules/src/gpd-tools;
 
     buildInputs = with pkgs; [ gcc ];
 
@@ -24,7 +24,7 @@ let
   # Custom iio-hyprland for GPD auto-rotation
   gpd-auto-rotation = pkgs.stdenv.mkDerivation {
     name = "gpd-auto-rotation";
-    src = ./../../src/gpd-tools;
+    src = /home/a/nix-modules/src/gpd-tools;
 
     buildInputs = with pkgs; [ gcc meson ninja pkg-config glib dbus ];
 
