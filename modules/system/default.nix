@@ -43,6 +43,13 @@
       enable = true;  # Enable FTE3600 fingerprint reader support
     };
 
+    # ACPI BIOS error fixes
+    hardware.acpiFixes = {
+      enable = true;  # Suppress cosmetic ACPI BIOS errors
+      suppressErrors = true;  # Reduce AE_NOT_FOUND error noise
+      logLevel = 4;  # Warning level and above (reduces cosmetic errors)
+    };
+
     # GPD Physical Positioning System
     gpdPhysicalPositioning = {
       enable = true;  # Enable GPD physical positioning system
