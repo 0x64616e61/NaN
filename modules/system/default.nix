@@ -43,6 +43,14 @@
       enable = true;  # Enable FTE3600 fingerprint reader support
     };
 
+    # GPD Physical Positioning System
+    gpdPhysicalPositioning = {
+      enable = true;  # Enable GPD physical positioning system
+      autoRotation = true;  # Accelerometer-based auto-rotation
+      waybarPhysicalPinning = true;  # Pin waybar to physical edge
+      windowPhysicalPinning = true;  # Preserve window physical positions
+    };
+
     # Hardware monitoring (DISABLED: Permission conflicts)
     # hardware.monitoring = {
     #   enable = true;  # Enable hardware monitoring for GPD Pocket 3

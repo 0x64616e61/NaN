@@ -68,7 +68,7 @@
     };
     
     desktop.libinputGestures = {
-      enable = true;  # Enable touchscreen gestures for terminal scrolling
+      enable = false;  # Disabled - redundant with Hyprgrass and requires touchpad (not touchscreen)
     };
     
     desktop.theme = {
@@ -117,6 +117,8 @@
     systemd
     coreutils
     libinput-gestures
+    # Shell prompt
+    oh-my-posh
   ];
 
   # Hydenix home-manager options

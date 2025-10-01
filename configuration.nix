@@ -33,7 +33,7 @@ in
     # ./modules/system/gpd-rotation-service.nix # Disabled - rebuilding for reboot safety
     # ./modules/system/boot-optimization.nix # Disabled - path issues
     # ./modules/system/gpd-comprehensive.nix # Disabled - rebuilding for reboot safety
-    # ./modules/system/gpd-physical-positioning.nix # Disabled - build path conflicts
+    ./modules/system/gpd-physical-positioning.nix # GPD physical positioning system
     ./hardware-config.nix # Hardware configuration wrapper
 
     # Hardware Configuration - Uncomment lines that match your hardware
