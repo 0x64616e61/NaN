@@ -23,7 +23,7 @@ in
           
           modules-left = [ "custom/launcher" "hyprland/workspaces" "hyprland/window" ];
           modules-center = [ "clock" ];
-          modules-right = [ "tray" "network" "battery" "pulseaudio" ];
+          modules-right = [ "tray" "temperature" "network" "battery" "pulseaudio" ];
           
           "hyprland/workspaces" = {
             format = "{id}";
@@ -47,6 +47,13 @@ in
             tooltip-format = "<tt><small>{calendar}</small></tt>";
           };
           
+          temperature = {
+            hwmon-path = "/sys/class/thermal/thermal_zone5/temp";
+            format = "T:{temperatureC}°";
+            critical-threshold = 80;
+            tooltip = false;
+          };
+
           battery = {
             states = {
               warning = 30;
@@ -76,7 +83,7 @@ in
           
           "custom/launcher" = {
             format = " ▶ ";
-            on-click = "dmenu_path | bemenu --grab | xargs -r -I {} hyprctl dispatch exec 'nix-shell -p {} --run {}'";
+            on-click = "/home/a/.local/bin/launch-dmenu";
             tooltip = false;
           };
           
@@ -94,7 +101,7 @@ in
         }
         
         window#waybar {
-          background-color: rgba(26, 26, 26, 0.9);
+          background-color: rgba(0, 0, 0, 0.85);
           color: #cccccc;
           border-bottom: 1px solid #444444;
         }
@@ -133,6 +140,7 @@ in
         }
         
         #clock,
+        #temperature,
         #battery,
         #network,
         #pulseaudio,
@@ -140,6 +148,10 @@ in
         #window {
           padding: 0 10px;
           color: #cccccc;
+        }
+
+        #temperature.critical {
+          color: #ff0000;
         }
         
         #battery.charging {

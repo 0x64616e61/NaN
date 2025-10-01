@@ -16,6 +16,7 @@
     ./display-management.nix
     ./grub-theme.nix
     ./mpd.nix
+    ./gpd-physical-positioning.nix
   ];
 
   # Enable custom modules with clean configuration
@@ -74,15 +75,15 @@
     #   };
     # };
 
-    # TEST: Enable thermal management for GPD Pocket 3 (TEMPORARILY DISABLED)
-    # hardware.thermal = {
-    #   enable = true;  # Enable thermal protection
-    #   enableThermald = true;  # Enable Intel thermal daemon
-    #   normalGovernor = "performance";  # 2025 optimization: use performance governor
-    #   emergencyShutdownTemp = 95;  # Emergency shutdown at 95°C
-    #   criticalTemp = 90;  # Critical temperature threshold
-    #   throttleTemp = 85;  # Start throttling at 85°C
-    # };
+    # Thermal management for GPD Pocket 3
+    hardware.thermal = {
+      enable = true;  # Enable thermal protection
+      enableThermald = true;  # Enable Intel thermal daemon
+      normalGovernor = "schedutil";  # Balanced governor for better thermals
+      emergencyShutdownTemp = 95;  # Emergency shutdown at 95°C
+      criticalTemp = 90;  # Critical temperature threshold
+      throttleTemp = 80;  # Start throttling at 80°C (lowered from 85°C)
+    };
 
     # Hardware monitoring - re-enabled via unified GPD profile
     # (Configuration now handled in hardware.gpdPocket3 module)
@@ -147,7 +148,7 @@
 
     security.secrets = {
       enable = true;
-      provider = "keepassxc";
+      provider = "gnome-keyring";  # Required for Spotify and other apps
     };
 
     # Network Configuration

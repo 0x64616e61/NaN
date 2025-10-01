@@ -22,16 +22,16 @@ in
       font-family = CaskaydiaCove Nerd Font Mono
       font-size = 9
       
-      ## Catppuccin Mocha Theme Colors
-      # Basic colors
-      foreground = cdd6f4
-      background = 1e1e2e
-      selection-foreground = 1e1e2e
-      selection-background = f5e0dc
-      
+      ## Waybar-matched Dark Theme Colors
+      # Basic colors (pure black background)
+      foreground = cccccc
+      background = 000000
+      selection-foreground = 000000
+      selection-background = ffffff
+
       # Cursor configuration
-      cursor-color = f5e0dc
-      cursor-text = 1e1e2e
+      cursor-color = cccccc
+      cursor-text = 000000
       cursor-style = block
       cursor-style-blink = true
       
@@ -57,8 +57,8 @@ in
       window-padding-x = 25
       window-padding-y = 25
       window-decoration = true
-      # Note: For transparency, uncomment the line below
-      # background-opacity = 0.60
+      # Translucent background
+      background-opacity = 0.75
       
       ## Scrollback
       # ~10MB for ~10000 lines history

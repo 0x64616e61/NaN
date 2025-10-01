@@ -25,10 +25,11 @@ in
         exec-once = [
           # Force landscape orientation for GPD Pocket 3
           "sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3"
+          # Set Hydenix wallpaper (Catppuccin Mocha theme)
+          "swaybg -i ~/.config/hyde/themes/Catppuccin\\ Mocha/wallpapers/evening_sky.png -m fill"
           # Start waybar
           "waybar"
-          # Start KeePassXC for secret service
-          "keepassxc ~/Documents/Passwords.kdbx"
+          # gnome-keyring auto-starts via PAM - no manual start needed
           # Start auto-rotate service
           "systemctl --user start auto-rotate-both"
           # Start dunst for notifications
@@ -120,6 +121,7 @@ in
           "float,class:^(pavucontrol)$"
           "float,class:^(blueman-manager)$"
           "float,class:^(nm-connection-editor)$"
+          "opacity 0.85 override,class:^(com.mitchellh.ghostty)$"
         ];
         
         # Keybindings
@@ -138,7 +140,7 @@ in
           "$mainMod, B, exec, firefox"
           
           # dmenu launcher
-          "$mainMod, SPACE, exec, dmenu_path | bemenu --grab | xargs -r -I {} hyprctl dispatch exec 'nix-shell -p {} --run {}'"
+          "$mainMod, A, exec, /home/a/.local/bin/launch-dmenu"
           
           # Function keys for GPD Pocket 3
           # Volume controls

@@ -55,7 +55,11 @@ in
     (mkIf (cfg.provider == "gnome-keyring") {
       services.gnome.gnome-keyring.enable = true;
       programs.seahorse.enable = true;
-      environment.systemPackages = [ pkgs.gnome.gnome-keyring ];
+      environment.systemPackages = [ pkgs.gnome-keyring ];
+
+      # PAM configuration to auto-start keyring on login
+      security.pam.services.login.enableGnomeKeyring = true;
+      security.pam.services.sddm.enableGnomeKeyring = true;
     })
   ]);
 }

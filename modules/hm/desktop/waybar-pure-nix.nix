@@ -23,6 +23,7 @@ let
     ];
 
     modules-right = [
+      "temperature"
       "battery"
       "network"
       "clock"
@@ -46,6 +47,14 @@ let
       exec = "echo ''";
       on-click = "${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p '' -fn 'monospace:size=10' -nb '#000000' -nf '#00ff00' -sb '#00ff00' -sf '#000000' -h 20";
       tooltip-format = "Press Windows+Space to launch";
+    };
+
+    # Ultra-compact temperature display
+    temperature = {
+      hwmon-path = "/sys/class/thermal/thermal_zone5/temp";
+      format = "T:{temperatureC}°";
+      critical-threshold = 80;
+      tooltip = false;
     };
 
     # Ultra-compact battery display
@@ -139,6 +148,7 @@ let
     }
 
     /* Right modules - ultra compact */
+    #temperature,
     #battery,
     #network,
     #clock {
@@ -147,6 +157,10 @@ let
       padding: 0 4px;
       margin: 0;
       border: none;
+    }
+
+    #temperature.critical {
+      color: #FF0000;
     }
   '';
 
@@ -184,7 +198,7 @@ in
         "${pkgs.waybar}/bin/waybar"
       ];
       bind = [
-        "SUPER, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p '' -fn 'monospace:size=10' -nb '#000000' -nf '#00ff00' -sb '#00ff00' -sf '#000000' -h 20"
+        "SUPER, SPACE, exec, ${pkgs.dmenu-wayland}/bin/dmenu-wl_run -b -p 'Run: ' -fn 'monospace:size=14' -nb '#1e1e2e' -nf '#cdd6f4' -sb '#89b4fa' -sf '#1e1e2e' -h 32"
       ];
     };
   };

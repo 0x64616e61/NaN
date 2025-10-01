@@ -3,41 +3,23 @@
 with lib;
 
 let
-  # Custom GPD waybar positioning tool from existing source
-  gpd-waybar-positioner = pkgs.stdenv.mkDerivation {
-    name = "gpd-waybar-positioner";
-    src = ./../../src/gpd-tools;
+  # GPD waybar positioner - use pre-built binary from home directory
+  gpd-waybar-positioner = pkgs.writeShellScriptBin "gpd-positioner" ''
+    #!/usr/bin/env bash
+    exec /home/a/nix-modules/src/gpd-tools/waybar-gpd-positioning "$@"
+  '';
 
-    buildInputs = with pkgs; [ gcc ];
-
-    buildPhase = ''
-      # Build existing compiled tool
-      cp waybar-gpd-positioning gpd-positioner
-    '';
-
-    installPhase = ''
-      mkdir -p $out/bin
-      cp gpd-positioner $out/bin/
-    '';
-  };
-
-  # Custom iio-hyprland for GPD auto-rotation
-  gpd-auto-rotation = pkgs.stdenv.mkDerivation {
-    name = "gpd-auto-rotation";
-    src = ./../../src/gpd-tools;
-
-    buildInputs = with pkgs; [ gcc meson ninja pkg-config glib dbus ];
-
-    buildPhase = ''
-      meson setup build
-      ninja -C build
-    '';
-
-    installPhase = ''
-      mkdir -p $out/bin
-      cp build/iio-hyprland $out/bin/gpd-auto-rotation
-    '';
-  };
+  # GPD auto-rotation - use pre-built binary from home directory
+  gpd-auto-rotation = pkgs.writeShellScriptBin "gpd-auto-rotation" ''
+    #!/usr/bin/env bash
+    # Check if the pre-built binary exists
+    if [ -x "/home/a/nix-modules/src/gpd-tools/build/iio-hyprland" ]; then
+      exec /home/a/nix-modules/src/gpd-tools/build/iio-hyprland "$@"
+    else
+      echo "Error: iio-hyprland not built. Run: cd /home/a/nix-modules/src/gpd-tools && meson setup build && ninja -C build"
+      exit 1
+    fi
+  '';
 
   # Window physical pinning script
   window-pinning-script = pkgs.writeShellScript "window-physical-pinning" ''

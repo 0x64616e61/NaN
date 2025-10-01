@@ -5,6 +5,6 @@
     ./focal-spi
     ./monitoring.nix
     ./acpi-fixes.nix
-    # ./thermal-management.nix  # Temporarily disabled due to integer coercion issue
+    ./thermal-management.nix
   ];
 }

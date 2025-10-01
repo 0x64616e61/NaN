@@ -107,6 +107,7 @@
     bemenu
     waybar
     dunst
+    swaybg  # Wallpaper daemon
     # Applications used in keybinds
     ghostty
     kdePackages.dolphin

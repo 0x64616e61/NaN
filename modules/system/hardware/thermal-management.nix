@@ -12,10 +12,10 @@ let
     # Thermal monitoring and management for GPD Pocket 3
     # Provides emergency protection and thermal event logging
 
-    TEMP_FILE="/sys/class/thermal/thermal_zone0/temp"
-    EMERGENCY_TEMP=${toString (cfg.emergencyShutdownTemp * 1000)}
-    THROTTLE_TEMP=${toString (cfg.throttleTemp * 1000)}
-    CRITICAL_TEMP=${toString (cfg.criticalTemp * 1000)}
+    TEMP_FILE="/sys/class/thermal/thermal_zone5/temp"  # x86_pkg_temp - actual CPU package temp
+    EMERGENCY_TEMP=$((${toString cfg.emergencyShutdownTemp} * 1000))
+    THROTTLE_TEMP=$((${toString cfg.throttleTemp} * 1000))
+    CRITICAL_TEMP=$((${toString cfg.criticalTemp} * 1000))
     LOG_FILE="/var/log/thermal-monitor.log"
     PID_FILE="/var/run/thermal-monitor.pid"
 
@@ -87,19 +87,17 @@ let
         log_event "warning" "CPU temperature exceeded throttle threshold. Applying thermal throttling."
         log_event "info" "Current temperatures: $(get_all_temps)"
 
-        # Reduce CPU frequency to 75% of maximum
+        # Reduce CPU frequency to 2.0GHz (base clock, no turbo)
         for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq; do
             if [ -f "$cpu" ]; then
-                local max_freq=$(cat "$(dirname "$cpu")/cpufreq_max_freq" 2>/dev/null || cat "$(dirname "$cpu")/scaling_max_freq")
-                local throttled_freq=$(($max_freq * 3 / 4))
-                echo "$throttled_freq" > "$cpu" 2>/dev/null || true
+                echo "2000000" > "$cpu" 2>/dev/null || true
             fi
         done
 
-        # Set CPU governor to conservative
+        # Set CPU governor to powersave for aggressive cooling
         for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
             if [ -f "$cpu" ]; then
-                echo "conservative" > "$cpu" 2>/dev/null || true
+                echo "powersave" > "$cpu" 2>/dev/null || true
             fi
         done
     }
@@ -107,11 +105,11 @@ let
     restore_performance() {
         log_event "info" "Temperature normalized. Restoring performance settings."
 
-        # Restore maximum CPU frequency
+        # Restore maximum CPU frequency to hardware max
         for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq; do
             if [ -f "$cpu" ]; then
-                local max_freq=$(cat "$(dirname "$cpu")/cpufreq_max_freq" 2>/dev/null || echo "999999999")
-                echo "$max_freq" > "$cpu" 2>/dev/null || true
+                local cpuinfo_max=$(cat "$(dirname "$cpu")/cpuinfo_max_freq" 2>/dev/null || echo "3700000")
+                echo "$cpuinfo_max" > "$cpu" 2>/dev/null || true
             fi
         done
 
@@ -133,7 +131,7 @@ let
     trap cleanup EXIT INT TERM
 
     log_event "info" "Starting thermal monitor for GPD Pocket 3"
-    log_event "info" "Thresholds: Throttle=${cfg.throttleTemp}°C, Critical=${cfg.criticalTemp}°C, Emergency=${cfg.emergencyShutdownTemp}°C"
+    log_event "info" "Thresholds: Throttle=${toString cfg.throttleTemp}°C, Critical=${toString cfg.criticalTemp}°C, Emergency=${toString cfg.emergencyShutdownTemp}°C"
 
     # State tracking
     throttle_active=false
@@ -197,7 +195,7 @@ let
     # Fan control for GPD Pocket 3
     # Note: This is hardware-dependent and may not work on all units
 
-    TEMP_FILE="/sys/class/thermal/thermal_zone0/temp"
+    TEMP_FILE="/sys/class/thermal/thermal_zone5/temp"  # x86_pkg_temp - actual CPU package temp
     LOG_FILE="/var/log/fan-control.log"
 
     log_event() {
@@ -239,9 +237,9 @@ let
         temp=$(get_cpu_temp)
 
         # Fan curve based on temperature
-        if [ "$temp" -ge ${toString cfg.criticalTemp} ]; then
+        if [ "$temp" -ge "${toString cfg.criticalTemp}" ]; then
             set_fan_speed 100  # Maximum cooling
-        elif [ "$temp" -ge ${toString cfg.throttleTemp} ]; then
+        elif [ "$temp" -ge "${toString cfg.throttleTemp}" ]; then
             set_fan_speed 80   # High cooling
         elif [ "$temp" -ge 65 ]; then
             set_fan_speed 60   # Moderate cooling
