@@ -116,7 +116,7 @@
     nodejs
     systemd
     coreutils
-    libinput-gestures
+    # libinput-gestures removed - redundant with native Hyprland gestures, requires touchpad not touchscreen
     # Shell prompt
     oh-my-posh
   ];
