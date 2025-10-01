@@ -212,9 +212,12 @@ upower -i /org/freedesktop/UPower/devices/battery_BAT0  # Detailed battery info
 ### Current Active Configuration
 - **User**: `a` (password: `a`, groups: wheel, networkmanager, video, input)
 - **Hostname**: `NaN`
-- **Shell**: `zsh`
-- **Terminal**: `ghostty` (default)
+- **Shell**: `zsh` with SuperClaude integration (command_not_found_handler → Claude)
+- **Terminal**: `ghostty` (0.85 opacity, pure black background)
+- **Prompt**: oh-my-posh with SuperClaude framework indicators (⚡SC, todo counter)
 - **Display**: DSI-1, 1200x1920@60, 1.5x scale, transform 3 (270° rotation)
+- **Wallpaper**: Hydenix evening_sky.png via swaybg
+- **Theme**: Pure black (#000000) with Catppuccin Mocha accents
 
 ## Hardware-Specific Features
 
@@ -248,9 +251,13 @@ Optimized for Intel i3-1125G4 (Tiger Lake) handheld PC with comprehensive hardwa
 - **CPU**: Intel i3-1125G4 (4C/8T, 2.0-3.3GHz)
 - **Lid Behavior**: Set to "ignore" (prevents unwanted suspend)
 - **Thermald**: Enabled for critical thermal protection
-- **Temperature Monitoring**: `/sys/class/thermal/thermal_zone0/temp`
-- **Battery Optimization**: TLP available but disabled (conflicts with power-profiles-daemon)
-- **Configuration**: `modules/system/power/`
+- **Thermal Monitor**: Active monitoring via `thermal_zone5` (x86_pkg_temp)
+- **Temperature Zones**: zone5 (CPU package), zone6 (TCPU) - monitors actual CPU temps
+- **Thresholds**: Throttle=80°C, Critical=90°C, Emergency=95°C
+- **Waybar Display**: Shows real-time CPU temp (T:XX°) from thermal_zone5
+- **Auto-Throttling**: Reduces to 2.0GHz base clock when >80°C
+- **Services**: thermald + thermal-monitor (both active)
+- **Configuration**: `modules/system/hardware/thermal-management.nix`
 
 ### Working Features Status
 
@@ -486,6 +493,39 @@ custom.hm.feature = {
 - ❌ **SuperClaude**: Don't execute tasks sequentially when parallel delegation is possible
 - ❌ **SuperClaude**: Don't skip agent cross-validation for critical system changes
 - ❌ **SuperClaude**: Don't ignore RULES.md behavioral patterns for task management
+
+## Terminal Integration
+
+### SuperClaude-Aware Shell
+
+The zsh shell includes direct Claude Code integration for seamless AI assistance:
+
+**Command Not Found Handler**:
+```zsh
+# Any unknown command automatically goes to Claude
+"what is the capital of France"  # → Paris
+nonexistentcommand args         # → Claude asks for clarification
+```
+
+**Direct Claude Access**:
+```bash
+ask "your question"    # Explicit Claude query
+ai "your prompt"       # Shorter alias
+```
+
+**Oh-My-Posh Prompt Indicators**:
+- **⚡SC** - SuperClaude framework detected (cyan)
+- **[N]** - Active in-progress todos from `.todo` file (green)
+- **branch ●** - Git changes detected (yellow)
+- **T:XX°** - CPU temperature from waybar (white/red if >80°C)
+- **❯/✗** - Prompt symbol (green on success, red on error)
+
+**Configuration Files**:
+- `~/.zshrc` - Shell with command_not_found_handler
+- `~/.config/oh-my-posh/config.toml` - SuperClaude-aware prompt theme
+- `~/.config/ghostty/config` - Terminal transparency settings
+
+**Documentation**: `.claude/DOCUMENTATION/TERMINAL_INTEGRATION_METHODOLOGY.md`
 
 ## Quick Reference
 
