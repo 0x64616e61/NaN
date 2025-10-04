@@ -8,7 +8,6 @@
     ./packages
     ./input
     ./network
-    # ./declarative  # Removed due to conflicts
     ./wayland-screenshare.nix
     ./boot.nix
     ./plymouth.nix
@@ -16,7 +15,6 @@
     ./display-management.nix
     ./grub-theme.nix
     ./mpd.nix
-    ./gpd-physical-positioning.nix
   ];
 
   # Enable custom modules with clean configuration
@@ -32,14 +30,6 @@
     };
 
     # Hardware features
-    hardware.autoRotate = {
-      enable = true;  # Enhanced auto-rotation with multi-monitor support
-      monitor = "DSI-1";  # GPD Pocket 3 DSI display
-      scale = 1.5;  # Maintain 1.5x scale during rotation
-      syncExternal = true;  # Sync external monitor rotation
-      externalPosition = "right";  # Position of external monitor
-    };
-
     hardware.focaltechFingerprint = {
       enable = true;  # Enable FTE3600 fingerprint reader support
     };
@@ -50,30 +40,6 @@
       useOverride = true;  # Apply SSDT table to fix missing BIOS symbols
     };
 
-    # GPD Physical Positioning System
-    gpdPhysicalPositioning = {
-      enable = true;  # Enable GPD physical positioning system
-      autoRotation = true;  # Accelerometer-based auto-rotation
-      waybarPhysicalPinning = true;  # Pin waybar to physical edge
-      windowPhysicalPinning = true;  # Preserve window physical positions
-    };
-
-    # Hardware monitoring (DISABLED: Permission conflicts)
-    # hardware.monitoring = {
-    #   enable = true;  # Enable hardware monitoring for GPD Pocket 3
-    #   checkInterval = 30;  # Check every 30 seconds
-    #   alerts = {
-    #     temperatureHigh = 80;  # Alert at 80°C
-    #     batteryLow = 15;  # Alert at 15% battery
-    #     method = "all";  # Use all notification methods
-    #   };
-    #   logging = {
-    #     enable = true;  # Enable logging
-    #     logFile = "/var/log/gpd-hardware-monitor.log";  # Log file location
-    #     level = "info";  # Info level logging
-    #   };
-    # };
-
     # Thermal management for GPD Pocket 3
     hardware.thermal = {
       enable = true;  # Enable thermal protection
@@ -83,9 +49,6 @@
       criticalTemp = 90;  # Critical temperature threshold
       throttleTemp = 80;  # Start throttling at 80°C (lowered from 85°C)
     };
-
-    # Hardware monitoring - re-enabled via unified GPD profile
-    # (Configuration now handled in hardware.gpdPocket3 module)
 
     # Power management
     power.lidBehavior = {
@@ -99,44 +62,6 @@
       disableLowBatterySuspend = false;
     };
 
-    # Battery optimization for GPD Pocket 3
-    power.battery = {
-      enable = false;  # DISABLED: TLP conflicts with power-profiles-daemon
-      tlp = {
-        enable = false;  # DISABLED: Conflicts cause system crash
-        chargeThresholds = {
-          startThreshold = 20;  # Start charging at 20%
-          stopThreshold = 80;   # Stop charging at 80% for battery longevity
-        };
-        cpuGovernor = {
-          onAC = "performance";     # Performance mode when plugged in
-          onBattery = "powersave";  # Power save mode on battery
-        };
-        intelCpuSettings = {
-          enablePstates = true;           # Enable Intel P-states for i3-1125G4
-          enableTurboBoost = true;        # Enable Turbo Boost on AC
-          disableTurboOnBattery = true;   # Disable Turbo on battery to save power
-          maxFreqPercentAC = 100;         # Full performance on AC
-          maxFreqPercentBattery = 80;     # Limit to 80% on battery
-        };
-      };
-      monitoring = {
-        enable = false;          # DISABLED: Service registration issue
-        enableUpower = true;     # UPower for detailed battery stats
-        enableAcpi = true;       # ACPI tools for battery info
-        alertThresholds = {
-          lowBattery = 15;       # Warning at 15%
-          criticalBattery = 5;   # Critical at 5%
-        };
-      };
-      additionalOptimizations = {
-        disableWakeOnLan = true;         # Disable WOL to save power
-        enableWifiPowerSave = true;      # Enable WiFi power saving
-        reduceSwappiness = true;         # Reduce disk swap usage
-        enableKernelPowerSaving = true;  # Enable kernel power optimizations
-      };
-    };
-
     # Security
     security.fingerprint = {
       enable = true;
@@ -148,6 +73,16 @@
     security.secrets = {
       enable = true;
       provider = "gnome-keyring";  # Required for Spotify and other apps
+    };
+
+    security.hardening = {
+      enable = true;  # Enable security hardening
+      restrictSSH = true;  # SSH key-only authentication
+      closeGamingPorts = false;  # Disabled - would need manual port management
+    };
+
+    security.secretsManagement = {
+      enable = true;  # Enable sops-nix secrets management
     };
 
     # Network Configuration
@@ -164,11 +99,6 @@
         wlrRandr = true;
         wdisplays = true;
         kanshi = true;
-      };
-      autoRotate = {
-        enable = true;
-        syncExternal = true;
-        externalPosition = "right";
       };
     };
 
@@ -222,6 +152,17 @@
   };
   # Packages that don't fit into modules
   environment.systemPackages = with pkgs; [
+    # dwl - dwm for Wayland compositor
+    dwl
+    somebar  # Status bar for dwl
+
+    # Status bar utilities for dwl
+    pamixer  # Audio control
+    brightnessctl  # Backlight control
+    lm_sensors  # Temperature monitoring
+    bluez  # Bluetooth support
+    procps  # For top command (CPU usage)
+
     x2goclient
     pandoc
     texlive.combined.scheme-full  #  scheme-full for complete LaTeX support

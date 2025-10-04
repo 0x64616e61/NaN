@@ -2,6 +2,17 @@
 
 A modern, modular NixOS configuration using Hydenix, Hyprland, and flakes with automatic hardware detection and GitHub synchronization.
 
+## 📖 Documentation
+
+**New here? Start with the [Documentation Navigation Hub](docs/NAVIGATION.md)**
+
+Quick Links:
+- 🆕 [Installation Guide](docs/installation.md) - Get up and running
+- 🔧 [Troubleshooting Checklist](docs/troubleshooting-checklist.md) - Fix issues fast
+- 📚 [Options Reference](docs/options.md) - Browse all configuration options
+- 🏗️ [Architecture Overview](docs/architecture.md) - Understand the system
+- 🔄 [Migration Guide](docs/migration.md) - Migrate from existing NixOS
+
 ## 🚀 Features
 
 - **Hydenix Desktop Environment** - Pre-configured Hyprland-based desktop with modern aesthetics
@@ -9,9 +20,11 @@ A modern, modular NixOS configuration using Hydenix, Hyprland, and flakes with a
 - **Auto-commit to GitHub** - Automatically commits and pushes configuration changes on rebuild
 - **Flake-based Configuration** - Reproducible, version-pinned system configuration
 - **Home Manager Integration** - Declarative user environment management
-- **Modular Structure** - Clean separation of system and user configurations
+- **Modular Structure** - Clean separation of system and user configurations (61 modules)
+- **Secure Command System** - No hardcoded passwords, polkit-based privilege escalation
+- **Input Validation** - Catch configuration errors before build time
 
-## 📋 Prerequisites
+## 📋 Quick Start
 
 - NixOS 24.11 or later
 - Git installed and configured

@@ -19,7 +19,7 @@
       device = "nodev";  # Don't install to MBR
       efiSupport = true;
       useOSProber = false;  # Disable OS prober for simplicity
-      configurationLimit = 10;  # Keep 10 generations
+      configurationLimit = 3;  # Keep only 3 generations (save boot space)
       
       # GPD Pocket 3 - using native portrait orientation
       # Theme uses rotated assets to simulate landscape
@@ -61,31 +61,59 @@
       efiSysMountPoint = "/boot";
     };
     
-    # Timeout for boot menu (5 seconds to see menu)
-    timeout = 5;
+    # Timeout for boot menu (1 second for fast boot)
+    timeout = 1;
   };
   
-  # Boot configuration with Plymouth - silent boot
+  # Fast boot optimizations
+  boot.initrd.systemd.enable = true;  # Modern systemd-based initrd (faster)
   boot.initrd.verbose = false;
-  boot.consoleLogLevel = 3;  # NixOS silent boot setting
+  boot.consoleLogLevel = 3;
+
+  # Skip waiting for network in initrd
+  boot.initrd.network.enable = false;
+
+  # Compress initrd with fastest compression
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = ["-1"];  # Fastest compression level
+
+  # Parallel fsck for faster filesystem checks
+  boot.initrd.checkJournalingFS = false;  # Skip fsck on journaling filesystems
+
+  # Optimize systemd boot targets
+  systemd.settings.Manager = {
+    DefaultTimeoutStartSec = "10s";
+    DefaultTimeoutStopSec = "5s";
+    DefaultDeviceTimeoutSec = "10s";
+  };
+
+  # Disable services that slow boot
+  systemd.services = {
+    NetworkManager-wait-online.enable = false;  # Don't wait for network
+    systemd-udev-settle.enable = false;  # Don't wait for udev
+  };
+
   boot.kernelParams = [
-    # Silent boot with Plymouth (ESC to toggle messages)
-    # Order matters: quiet must come first
+    # Fast boot parameters
     "quiet"
-    "loglevel=3"  # Balanced suppression - 0 might break Plymouth
+    "loglevel=3"
     "splash"
     "boot.shell_on_fail"
     "udev.log_priority=3"
     "rd.udev.log_level=3"
-    "rd.systemd.show_status=auto"  # Auto mode for Plymouth compatibility
+    "rd.systemd.show_status=auto"
     "systemd.show_status=auto"
     "rd.quiet"
-    
-    # Plymouth specific - animation mode with ESC toggle
+
+    # Plymouth
     "plymouth.enable=1"
-    "vt.global_cursor_default=0"  # Hide cursor
-    
-    # Fix console rotation for GPD Pocket 3
+    "vt.global_cursor_default=0"
+
+    # Skip unnecessary waits
+    "nowatchdog"  # Disable hardware watchdog (faster boot)
+    # "mitigations=off" removed - security over speed
+
+    # GPD Pocket 3 display
     "fbcon=rotate:1"
     "video=DSI-1:panel_orientation=right_side_up"
   ];

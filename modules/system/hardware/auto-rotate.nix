@@ -190,31 +190,42 @@ in
 {
   options.custom.system.hardware.autoRotate = {
     enable = mkEnableOption "automatic screen rotation for convertible devices";
-    
+
     monitor = mkOption {
       type = types.str;
       default = "eDP-1";
-      description = "Monitor to rotate (check with hyprctl monitors)";
+      example = "DSI-1";
+      description = ''
+        Monitor to rotate (check with: hyprctl monitors)
+        Common values: eDP-1 (laptops), DSI-1 (GPD Pocket 3), HDMI-A-1
+      '';
     };
-    
+
     scale = mkOption {
-      type = types.float;
+      type = types.addCheck types.float (x: x >= 0.5 && x <= 3.0);
       default = 1.0;
-      description = "Monitor scale to maintain during rotation";
+      example = 1.5;
+      description = ''
+        Monitor scale to maintain during rotation (0.5-3.0)
+        This value is preserved when the screen rotates
+      '';
     };
-    
+
     leftMaster = mkOption {
       type = types.bool;
       default = false;
-      description = "Use left master layout";
+      description = "Use left master layout in Hyprland";
     };
-    
+
     syncExternal = mkOption {
       type = types.bool;
       default = true;
-      description = "Synchronize rotation with external monitors";
+      description = ''
+        Synchronize rotation with external monitors
+        WARNING: Most external monitors should stay in normal orientation
+      '';
     };
-    
+
     externalPosition = mkOption {
       type = types.enum [ "right" "left" "above" "below" ];
       default = "right";
@@ -223,6 +234,25 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Validate configuration
+    assertions = [
+      {
+        assertion = cfg.scale >= 0.5 && cfg.scale <= 3.0;
+        message = "Auto-rotate scale must be between 0.5 and 3.0, got ${toString cfg.scale}";
+      }
+      {
+        assertion = cfg.monitor != "";
+        message = "Auto-rotate monitor name cannot be empty. Check available monitors with: hyprctl monitors";
+      }
+      {
+        assertion = !config.custom.system.gpdPhysicalPositioning.autoRotation || !cfg.enable;
+        message = ''
+          Cannot enable both custom.system.hardware.autoRotate and custom.system.gpdPhysicalPositioning.autoRotation
+          These modules provide similar functionality and will conflict.
+          Choose one: hardware.autoRotate (recommended) or gpdPhysicalPositioning
+        '';
+      }
+    ];
     # Install required packages
     environment.systemPackages = with pkgs; [
       iio-sensor-proxy  # Provides accelerometer data

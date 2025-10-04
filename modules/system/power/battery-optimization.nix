@@ -52,13 +52,13 @@ in
 
       cpuGovernor = {
         onAC = mkOption {
-          type = types.enum [ "performance" "powersave" "ondemand" "conservative" "schedutil" ];
+          type = types.enum [ "performance" "powersave" ];
           default = "performance";
           description = "CPU governor when on AC power";
         };
 
         onBattery = mkOption {
-          type = types.enum [ "performance" "powersave" "ondemand" "conservative" "schedutil" ];
+          type = types.enum [ "performance" "powersave" ];
           default = "powersave";
           description = "CPU governor when on battery";
         };
@@ -97,7 +97,7 @@ in
 
         maxFreqPercentBattery = mkOption {
           type = types.int;
-          default = 80;
+          default = 60;  # AGGRESSIVE: Maximum battery savings (was 75%)
           description = "Maximum CPU frequency percentage on battery";
         };
       };
@@ -124,7 +124,7 @@ in
 
       enablePowerTop = mkOption {
         type = types.bool;
-        default = false;
+        default = true;  # Enabled for ongoing monitoring and tuning
         description = "Enable PowerTOP for power analysis";
       };
 
@@ -218,6 +218,12 @@ in
           WIFI_PWR_ON_AC = "off";
           WIFI_PWR_ON_BAT = "on";
 
+          # AGGRESSIVE BATTERY SAVINGS
+          # Reduce screen brightness impact
+          INTEL_GPU_MIN_FREQ_ON_BAT = 300;
+          INTEL_GPU_MAX_FREQ_ON_BAT = 800;
+          INTEL_GPU_BOOST_FREQ_ON_BAT = 800;
+
           # Audio power saving
           SOUND_POWER_SAVE_ON_AC = 0;
           SOUND_POWER_SAVE_ON_BAT = 1;
@@ -231,19 +237,23 @@ in
           USB_EXCLUDE_PRINTER = 1;
           USB_EXCLUDE_WWAN = 0;
 
-          # Runtime power management
+          # Runtime power management - AGGRESSIVE
           RUNTIME_PM_ON_AC = "on";
           RUNTIME_PM_ON_BAT = "auto";
+
+          # Aggressive device autosuspend
+          RUNTIME_PM_DRIVER_DENYLIST = "";
+          RUNTIME_PM_ALL = 1;
 
           # SATA link power management
           SATA_LINKPWR_ON_AC = "med_power_with_dipm";
           SATA_LINKPWR_ON_BAT = "min_power";
 
-          # Disk power management
+          # Disk power management - AGGRESSIVE
           DISK_APM_LEVEL_ON_AC = "254";
-          DISK_APM_LEVEL_ON_BAT = "128";
+          DISK_APM_LEVEL_ON_BAT = "64";  # More aggressive (was 128)
           DISK_SPINDOWN_TIMEOUT_ON_AC = "0";
-          DISK_SPINDOWN_TIMEOUT_ON_BAT = "12";
+          DISK_SPINDOWN_TIMEOUT_ON_BAT = "6";  # Faster spindown (was 12)
 
           # Radios (Bluetooth, WiFi, WWAN)
           RESTORE_DEVICE_STATE_ON_STARTUP = 0;
@@ -362,9 +372,10 @@ in
     # Swappiness optimization
     (mkIf cfg.additionalOptimizations.reduceSwappiness {
       boot.kernel.sysctl = {
-        "vm.swappiness" = 10;  # Reduce swap usage
-        "vm.dirty_ratio" = 15;  # Reduce disk writes
-        "vm.dirty_background_ratio" = 5;
+        "vm.swappiness" = 1;  # Minimize swap usage (was 10)
+        "vm.dirty_ratio" = 10;  # Minimize disk writes (was 15)
+        "vm.dirty_background_ratio" = 3;  # Aggressive writeback (was 5)
+        "vm.laptop_mode" = 5;  # Enable laptop mode for disk power savings
       };
     })
 

@@ -27,11 +27,10 @@ in
           "sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3"
           # Set Hydenix wallpaper (Catppuccin Mocha theme)
           "swaybg -i ~/.config/hyde/themes/Catppuccin\\ Mocha/wallpapers/evening_sky.png -m fill"
-          # Start waybar
-          "waybar"
+          # Start eww status bar
+          "eww daemon && eww open bar"
           # gnome-keyring auto-starts via PAM - no manual start needed
-          # Start auto-rotate service
-          "systemctl --user start auto-rotate-both"
+          # auto-rotate auto-starts via systemd user service
           # Start dunst for notifications
           "dunst"
         ];
@@ -122,6 +121,10 @@ in
           "float,class:^(blueman-manager)$"
           "float,class:^(nm-connection-editor)$"
           "opacity 0.85 override,class:^(com.mitchellh.ghostty)$"
+
+          # dmenu-wl positioned at top, overlapping waybar
+          "stayfocused,title:^(dmenu)$"
+          "pin,title:^(dmenu)$"
         ];
         
         # Keybindings
@@ -136,7 +139,7 @@ in
           
           # Application launches
           "$mainMod, T, exec, ghostty"
-          "$mainMod, E, exec, dolphin"
+          "$mainMod, E, exec, ghostty -e yazi"
           "$mainMod, B, exec, firefox"
           
           # dmenu launcher

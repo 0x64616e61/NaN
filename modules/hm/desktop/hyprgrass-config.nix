@@ -79,9 +79,10 @@ in
       }
       
       # Touchscreen input configuration
+      # Transform 3 = 270° rotation to match display orientation
       input {
         touchdevice {
-          transform = 0
+          transform = 3
           output = DSI-1  # GPD Pocket 3 display
         }
       }

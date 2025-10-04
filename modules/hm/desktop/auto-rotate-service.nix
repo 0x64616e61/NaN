@@ -12,25 +12,26 @@ in
 
   config = mkIf cfg.enable {
     # Create systemd user service for auto-rotation
-    systemd.user.services.auto-rotate-both = {
+    systemd.user.services.auto-rotate = {
       Unit = {
         Description = "Auto-rotation for GPD Pocket 3 with per-display lock support";
-        After = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" "hyprland-session.target" ];
         PartOf = [ "graphical-session.target" ];
+        Wants = [ "graphical-session.target" ];
       };
-      
+
       Service = {
         Type = "simple";
-        # Use the system-installed auto-rotate-both script
-        ExecStart = "/run/current-system/sw/bin/auto-rotate-both";
+        # Use the system-installed auto-rotate script
+        ExecStart = "/run/current-system/sw/bin/auto-rotate";
         Restart = "always";
         RestartSec = 5;
         # Add delay before starting to ensure Hyprland is ready
         ExecStartPre = "${pkgs.coreutils}/bin/sleep 10";
       };
-      
+
       Install = {
-        WantedBy = [ "default.target" ];
+        WantedBy = [ "graphical-session.target" ];
       };
     };
   };

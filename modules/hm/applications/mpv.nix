@@ -56,7 +56,13 @@ in
         # Audio
         volume = 100;
         volume-max = 150;
-        
+        audio-file-auto = "fuzzy";
+        audio-pitch-correction = true;
+
+        # Music mode settings
+        term-osd-bar = true;
+        msg-color = true;
+
         # Screenshots
         screenshot-directory = "~/Pictures/mpv";
         screenshot-format = "png";

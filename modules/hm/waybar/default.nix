@@ -23,7 +23,19 @@ in
           
           modules-left = [ "custom/launcher" "hyprland/workspaces" "hyprland/window" ];
           modules-center = [ "clock" ];
-          modules-right = [ "tray" "temperature" "network" "battery" "pulseaudio" ];
+          modules-right = [
+            "tray"
+            "idle_inhibitor"
+            "cpu"
+            "memory"
+            "disk"
+            "temperature"
+            "backlight"
+            "network"
+            "battery"
+            "pulseaudio"
+            "custom/power"
+          ];
           
           "hyprland/workspaces" = {
             format = "{id}";
@@ -45,6 +57,43 @@ in
             format = "{:%H:%M}";
             format-alt = "{:%Y-%m-%d}";
             tooltip-format = "<tt><small>{calendar}</small></tt>";
+            on-click-right = "gnome-calendar";
+          };
+
+          cpu = {
+            format = "▪ {usage}%";
+            tooltip = true;
+            on-click = "ghostty -e btop";
+          };
+
+          memory = {
+            format = "▫ {percentage}%";
+            tooltip-format = "{used:0.1f}G / {total:0.1f}G used";
+            on-click = "ghostty -e btop";
+          };
+
+          disk = {
+            format = "◊ {percentage_used}%";
+            path = "/";
+            tooltip-format = "{used} / {total} used ({percentage_used}%)";
+            on-click = "ghostty -e ncdu /";
+          };
+
+          backlight = {
+            format = "☼ {percent}%";
+            on-scroll-up = "brightnessctl set +5%";
+            on-scroll-down = "brightnessctl set 5%-";
+            tooltip-format = "Brightness: {percent}%";
+          };
+
+          idle_inhibitor = {
+            format = "{icon}";
+            format-icons = {
+              activated = "◉";
+              deactivated = "○";
+            };
+            tooltip-format-activated = "Idle inhibitor: active";
+            tooltip-format-deactivated = "Idle inhibitor: inactive";
           };
           
           temperature = {
@@ -63,13 +112,19 @@ in
             format-charging = "↑ {capacity}%";
             format-plugged = "● {capacity}%";
             format-icons = [ "▁" "▃" "▅" "▇" "█" ];
+            format-time = "{H}h {M}m";
+            tooltip-format = "{timeTo}, {power}W";
+            on-click = "battery-status";
           };
           
           network = {
             format-wifi = "≈ {signalStrength}%";
-            format-ethernet = "⊞ Connected";
+            format-ethernet = "⊞ {bandwidthDownBits}";
             format-disconnected = "✗ Disconnected";
-            tooltip-format = "{ifname}: {ipaddr}/{cidr}";
+            tooltip-format = "{ifname}: {ipaddr}/{cidr}\n↓ {bandwidthDownBits} ↑ {bandwidthUpBits}";
+            tooltip-format-wifi = "{essid} ({signalStrength}%)\n{ipaddr}/{cidr}\n↓ {bandwidthDownBits} ↑ {bandwidthUpBits}";
+            on-click = "nm-connection-editor";
+            interval = 2;
           };
           
           pulseaudio = {
@@ -79,6 +134,10 @@ in
               default = [ "▁" "▃" "▇" ];
             };
             on-click = "pavucontrol";
+            on-click-right = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
+            on-scroll-up = "pactl set-sink-volume @DEFAULT_SINK@ +5%";
+            on-scroll-down = "pactl set-sink-volume @DEFAULT_SINK@ -5%";
+            scroll-step = 5;
           };
           
           "custom/launcher" = {
@@ -89,6 +148,13 @@ in
           
           tray = {
             spacing = 10;
+            icon-size = 16;
+          };
+
+          "custom/power" = {
+            format = "⏻";
+            on-click = "wlogout";
+            tooltip = false;
           };
         };
       };
@@ -140,14 +206,49 @@ in
         }
         
         #clock,
+        #cpu,
+        #memory,
+        #disk,
         #temperature,
+        #backlight,
         #battery,
         #network,
         #pulseaudio,
+        #idle_inhibitor,
         #tray,
+        #custom-power,
         #window {
           padding: 0 10px;
           color: #cccccc;
+        }
+
+        #cpu,
+        #memory,
+        #disk {
+          color: #aaaaff;
+        }
+
+        #backlight {
+          color: #ffdd88;
+        }
+
+        #idle_inhibitor {
+          color: #88ff88;
+        }
+
+        #idle_inhibitor.activated {
+          color: #ff8888;
+        }
+
+        #custom-power {
+          color: #ff6666;
+          background-color: #222222;
+          border-left: 1px solid #444444;
+        }
+
+        #custom-power:hover {
+          background-color: #ff0000;
+          color: #ffffff;
         }
 
         #temperature.critical {
@@ -188,6 +289,11 @@ in
     # Install required packages
     home.packages = with pkgs; [
       pavucontrol
+      brightnessctl
+      wlogout
+      btop
+      ncdu
+      networkmanagerapplet
     ];
   };
 }

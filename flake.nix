@@ -26,6 +26,12 @@
       url = "github:vinceliuice/grub2-themes";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Secrets management
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -39,6 +45,7 @@
         modules = [
           ./configuration.nix
           inputs.grub2-themes.nixosModules.default
+          inputs.sops-nix.nixosModules.sops
         ];
       };
 

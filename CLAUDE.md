@@ -4,584 +4,436 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal NixOS configuration for GPD Pocket 3 device using Hydenix (Hyprland-based desktop environment). Features hardware-specific optimizations, touchscreen gestures, fingerprint authentication, and modular system/home configuration.
+Personal NixOS configuration for GPD Pocket 3 handheld PC using Hydenix (Hyprland-based desktop). Features hardware-specific optimizations for touchscreen gestures, fingerprint authentication, auto-rotation, and thermal management. Modular structure with 61+ modules split between system-level and user-level (Home Manager) configurations.
 
 ## Critical Context
 
-- **Repository Location**: `/nix-modules/` (system-wide, requires sudo for modifications)
-- **Flake System**: `NaN` (primary), `hydenix` and `mini` (legacy aliases) - all nixosConfigurations point to same config
-- **Module System**: Three-tier option system with `hydenix.*` (core), `custom.system.*` (system), and `custom.hm.*` (user)
-- **Sudo Password**: `7` (for system operations)
-- **Total Module Count**: 61 Nix files across system and home-manager modules
-- **Configuration Flow**: flake.nix:47-48 → configuration.nix:28-30 → modules/system & modules/hm
-- **Hardware Detection**: Smart wrapper in hardware-config.nix:10-13 with impure fallback
-- **Follow RULES.md**: Always delegate todos and use parallel operations where possible
+- **Repository**: `/nix-modules/` (system-wide location, requires sudo for modifications)
+- **Flake Names**: `NaN` (primary), `hydenix`/`mini` (legacy aliases) - all point to same config
+- **Module Namespaces**:
+  - `hydenix.*` - Core Hydenix framework options
+  - `custom.system.*` - System-level modules (requires sudo)
+  - `custom.hm.*` - User-level Home Manager modules
+- **Configuration Flow**: `flake.nix` → `configuration.nix` → `modules/system/` & `modules/hm/`
+- **Hardware Detection**: Smart wrapper in `hardware-config.nix` with `--impure` flag required
+- **Sudo Password**: `7`
 
-## SuperClaude Framework Integration
+## Essential Commands
 
-This repository is enhanced with the SuperClaude framework for advanced Claude Code operations. The framework provides intelligent task management, parallel execution capabilities, and specialized MCP server integration.
-
-### Framework Components
-
-- **Core Framework**: FLAGS.md, PRINCIPLES.md, RULES.md - Behavioral rules and operational patterns
-- **Task Management**: TodoWrite tool for complex multi-step NixOS configurations with delegation support
-- **MCP Servers**: Specialized tools for different aspects of NixOS development:
-  - **Sequential MCP**: For complex system analysis and debugging multi-component issues
-  - **Morphllm MCP**: For bulk configuration changes across multiple modules
-  - **Context7 MCP**: For official NixOS/Nix documentation and pattern guidance
-
-### SuperClaude Operational Patterns
-
-**Task Delegation for Complex Rebuilds**:
+### System Rebuilds
 ```bash
-# Instead of sequential operations, use parallel delegation:
-# 1. Create todos for: hardware test, configuration validation, service verification
-# 2. Delegate each todo to specialized agents running in parallel
-# 3. Cross-validate results across agents for redundancy
-```
-
-**NixOS-Specific SuperClaude Usage**:
-- **Module Development**: Use TodoWrite for >3 step module creation tasks
-- **Hardware Debugging**: Delegate hardware tests to parallel agents (fingerprint, gestures, thermal)
-- **System Recovery**: Use agent delegation for comprehensive system diagnosis
-- **Configuration Changes**: Break large config changes into parallel validation tasks
-
-### Framework Integration with NixOS Workflows
-
-The framework enhances standard NixOS operations:
-- **Rebuild workflows**: Parallel validation and testing phases
-- **Module testing**: Delegated hardware verification across multiple agents
-- **System diagnosis**: Multi-agent parallel analysis for complex issues
-- **Configuration management**: Systematic task tracking for large changes
-
-See `.claude/` directory for complete framework documentation and operational rules.
-
-## Key Commands
-
-### Quick System Management
-```bash
-# Quick update: commit, push, and rebuild in one command (uses password '7')
+# Quick update (commit + push + rebuild) - RECOMMENDED
 update!
 
-# Create work summary commit (last 12 hours of work)
-worksummary
-
-# PANIC MODE - discard all local changes and reset to GitHub
-panic
-# Alternative: A!, AA!, AAA!, etc. (up to 20 A's)
-
-# Standard rebuild (always use --impure for hardware detection)
+# Standard rebuild - ALWAYS use --impure flag for hardware detection
 sudo nixos-rebuild switch --flake .#NaN --impure
-# Alternative using legacy aliases:
-sudo nixos-rebuild switch --flake .#hydenix --impure
-sudo nixos-rebuild switch --flake .#mini --impure
 
-# Test configuration without switching
+# Test without switching (safe - no activation)
 sudo nixos-rebuild test --flake .#NaN --impure
 
-# Build only (no activation)
-sudo nixos-rebuild build --flake .#NaN --impure
+# Build only (compare before switching)
+rebuild-diff  # Builds and shows nvd diff
 
-# Rollback to previous generation
+# Dry-run (see what would change)
+rebuild-dry
+
+# Emergency rollback
+panic  # or: A!, AA!, AAA!, AAAA!, AAAAA!
 sudo nixos-rebuild switch --rollback
 ```
 
-### Flake Management
+### Development & Testing
 ```bash
+# Validate configuration
+nix flake check
+
+# Build and compare with current system
+nixos-rebuild build --flake .#NaN --impure && nvd diff /run/current-system result
+
+# Update flake inputs
+nix flake update          # All inputs
+nix flake update hydenix  # Specific input
+
+# Work summary (analyze last 12h of commits)
+worksummary
+```
+
+### Hardware Diagnostics
+```bash
+# Touchscreen/gestures (GPD Pocket 3)
+sudo libinput debug-events --device /dev/input/event18
+
+# Hyprland
+hyprctl monitors          # Display setup (expect DSI-1)
+hyprctl plugins list      # Should show hyprgrass
+
+# Services & errors
+journalctl -xe --user     # User services
+journalctl -b -p err      # Boot errors
+
+# Power management
+battery-status            # Battery health
+power-profile performance # AC power mode
+power-profile powersave   # Battery mode
+```
+
+## Architecture
+
+### High-Level Structure
+
+```
+/nix-modules/                  # System-wide repository (requires sudo)
+├── flake.nix                  # Flake entrypoint (inputs: hydenix, nixpkgs, grub2-themes, sops-nix)
+├── flake.lock                 # Pinned dependency versions
+├── configuration.nix          # Main system config (imports modules)
+├── hardware-config.nix        # Smart wrapper for hardware detection (requires --impure)
+├── modules/
+│   ├── system/default.nix     # System module configuration (custom.system.* options)
+│   └── hm/default.nix         # User module configuration (custom.hm.* options)
+└── docs/                      # Documentation (start with NAVIGATION.md)
+```
+
+**Key Insight:** This is a **declarative configuration**, not application code. You're working with:
+- Nix expressions that define system behavior
+- Modules that are enabled/disabled via options
+- Two namespaces: `custom.system.*` (system-wide) and `custom.hm.*` (user-level)
+
+### Module Structure
+```
+modules/
+├── system/              # custom.system.* namespace
+│   ├── hardware/        # GPD-specific: fingerprint, rotation, thermal
+│   │   ├── focal-spi/   # FTE3600 fingerprint (kernel module + libfprint patch)
+│   │   ├── thermal-management.nix
+│   │   ├── auto-rotate.nix
+│   │   └── acpi-fixes.nix
+│   ├── power/           # Battery, lid behavior, suspend control
+│   ├── security/        # Fingerprint auth, secrets management, hardening
+│   ├── packages/        # Custom derivations (SuperClaude, MCP servers)
+│   │   └── mcp/         # 6 MCP server modules (context7, magic, playwright, etc.)
+│   ├── input/           # Keyboard (keyd), mouse (vial)
+│   ├── network/         # iPhone USB tethering
+│   └── *.nix           # Boot, monitor, display, auto-commit, update-alias
+└── hm/                  # custom.hm.* namespace (Home Manager)
+    ├── applications/    # Firefox, Ghostty, MPV, btop
+    ├── audio/           # EasyEffects, MPD
+    ├── desktop/         # Gestures (hyprgrass), idle, rotation, theming
+    ├── hyprland/        # Window manager config (keybinds, window rules)
+    └── waybar/          # Status bar
+```
+
+### Key Files
+- `flake.nix` - Inputs: hydenix, nixpkgs, grub2-themes, sops-nix
+- `configuration.nix` - Main config (user: a, host: NaN, timezone, locale)
+- `hardware-config.nix` - Smart wrapper for `/etc/nixos/hardware-configuration.nix`
+- `modules/system/default.nix` - System module toggles
+- `modules/hm/default.nix` - User module toggles
+- `modules/system/update-alias.nix` - Defines `update!`, `panic`, `worksummary` commands
+
+### Active System
+- **Hardware**: GPD Pocket 3 (Intel i3-1125G4)
+- **Display**: DSI-1, 1200x1920@60Hz, 1.5x scale, 270° rotation
+- **Shell**: zsh with oh-my-posh prompt
+- **Terminal**: Ghostty (0.85 opacity, pure black background)
+- **Desktop**: Hyprland + Waybar
+- **Theme**: Pure black + Catppuccin Mocha accents
+
+## GPD Pocket 3 Hardware
+
+### Display & Touch
+- **Display**: DSI-1, 1200x1920@60Hz, 1.5× scale, 270° rotation
+- **Touchscreen**: `/dev/input/event18` (GXTP7380:00 27C6:0113)
+- **Auto-Rotation**: Accelerometer via `/sys/bus/iio/devices/iio:device0`
+- **Multi-Monitor**: DP-1, HDMI-A-1 with independent orientation
+- **Module**: `modules/system/monitor-config.nix`, `modules/hm/desktop/auto-rotate-service.nix`
+
+### Authentication & Security
+- **Fingerprint**: FocalTech FTE3600 SPI scanner at `/dev/focal_moh_spi`
+- **PAM Integration**: SDDM, sudo, swaylock
+- **Custom Module**: `modules/system/hardware/focal-spi/` (kernel module + patched libfprint)
+- **Test**: `fprintd-enroll` to add fingerprint
+
+### Gestures (Hyprgrass)
+- **3-Finger Swipe**: Left/right for workspaces, up/down for fullscreen
+- **Sensitivity**: 4.0 (touchscreen-optimized)
+- **Module**: `modules/hm/desktop/hyprgrass-config.nix`
+- **Known**: 2/4-finger gestures don't work
+
+### Thermal Management
+- **CPU**: Intel i3-1125G4 (4C/8T, 2.0-3.3GHz)
+- **Thresholds**: Throttle 80°C, Critical 90°C, Emergency 95°C
+- **Waybar**: Real-time temp display (T:XX°) from `thermal_zone5`
+- **Services**: thermald + thermal-monitor
+- **Module**: `modules/system/hardware/thermal-management.nix`
+
+### Power
+- **Lid Behavior**: Ignore (no suspend on close)
+- **TLP**: Disabled (conflicts with power-profiles-daemon)
+- **Commands**: `power-profile performance|powersave`, `battery-status`
+
+## Development Workflow
+
+### Making Changes
+
+**Standard workflow:**
+1. Edit module file (use `sudo` for `/nix-modules/` files)
+2. **Test first** (safe, no activation): `rebuild-test`
+3. If successful, apply: `update!` (commits + pushes + rebuilds)
+4. Auto-commit in `modules/system/auto-commit.nix` handles git operations
+5. If broken: `panic` (rollback to GitHub) or `sudo nixos-rebuild switch --rollback`
+
+**Common tasks:**
+
+```bash
+# Enable an existing module
+# Edit modules/system/default.nix or modules/hm/default.nix
+custom.system.hardware.thermal.enable = true;
+
+# Check what would change before applying
+rebuild-diff
+
+# View recent changes
+worksummary  # AI-generated summary of last 12h commits
+
+# Validate configuration syntax
+nix flake check
+```
+
+### Adding Modules
+
+**Creating a new module:**
+
+1. **Create module file:**
+   ```bash
+   # System-level module
+   sudo vim modules/system/myfeature.nix
+
+   # User-level module
+   sudo vim modules/hm/myfeature.nix
+   ```
+
+2. **Define module structure:**
+   ```nix
+   { config, lib, pkgs, ... }:
+
+   with lib;
+
+   let
+     cfg = config.custom.system.myfeature;  # or custom.hm.myfeature
+   in {
+     options.custom.system.myfeature = {
+       enable = mkEnableOption "My Feature";
+       someOption = mkOption {
+         type = types.str;
+         default = "value";
+         description = "Description of option";
+       };
+     };
+
+     config = mkIf cfg.enable {
+       # Your configuration here
+       environment.systemPackages = [ pkgs.somepackage ];
+     };
+   }
+   ```
+
+3. **Import in parent `default.nix`:**
+   ```nix
+   # In modules/system/default.nix or modules/hm/default.nix
+   imports = [
+     ./myfeature.nix
+     # ... other imports
+   ];
+   ```
+
+4. **Enable in configuration:**
+   ```nix
+   # In modules/system/default.nix (for system modules)
+   # or modules/hm/default.nix (for user modules)
+   custom.system.myfeature = {
+     enable = true;
+     someOption = "custom value";
+   };
+   ```
+
+5. **Test and apply:**
+   ```bash
+   rebuild-test  # Test without activation
+   update!       # Apply and commit
+   ```
+
+### Package Management
+- **System packages**: `environment.systemPackages` in `modules/system/default.nix`
+- **User packages**: `home.packages` in `modules/hm/default.nix`
+- **Custom derivations**: Create in `modules/system/packages/` (see `superclaude.nix`)
+
+## Important Implementation Details
+
+### Hardware Detection (CRITICAL)
+**The `--impure` flag is NON-NEGOTIABLE for all rebuilds.**
+
+- `hardware-config.nix` is a smart wrapper that:
+  - Uses `/etc/nixos/hardware-configuration.nix` when available (local system)
+  - Falls back to placeholder for GitHub sync compatibility
+  - Requires `--impure` flag to access files outside Nix store
+- **Without `--impure`**: Build fails with "getting status of '/etc/nixos/hardware-configuration.nix': No such file"
+- All rebuild aliases (`update!`, `rebuild-test`, etc.) include `--impure` automatically
+
+### Auto-commit System
+How `update!` works:
+
+1. **Pre-flight check** (`modules/system/auto-commit.nix`):
+   - Checks `git status --porcelain` for uncommitted changes
+   - If changes exist: commits with timestamp, pushes to GitHub via `gh` CLI
+   - Handles push failures gracefully (shows troubleshooting steps)
+
+2. **Rebuild**:
+   - Runs `nixos-rebuild switch --flake .#NaN --impure`
+   - Shows errors if rebuild fails
+   - Suggests rollback commands
+
+3. **Authentication**:
+   - Uses `gh` CLI for GitHub operations (not raw git)
+   - Polkit handles privilege escalation (no hardcoded passwords)
+   - Check auth status: `gh auth status`
+
+**Disable auto-commit:** Remove import in `configuration.nix:31`
+
+### Module Patterns
+
+**Two namespaces control all configuration:**
+
+```nix
+# System-wide (requires sudo, affects all users)
+custom.system.hardware.thermal = {
+  enable = true;
+  throttleTemp = 80;
+};
+
+# User-level (Home Manager, per-user settings)
+custom.hm.applications.firefox = {
+  enable = true;
+  enableCascade = true;
+};
+```
+
+**Common pattern in modules:**
+```nix
+let
+  cfg = config.custom.system.myfeature;
+in {
+  options.custom.system.myfeature = { ... };
+  config = mkIf cfg.enable { ... };  # Only applies if enabled
+}
+```
+
+### Key File Locations
+- `configuration.nix:82-105` - User account, hostname, timezone, locale
+- `modules/system/default.nix:23-227` - System module toggles and configuration
+- `modules/hm/default.nix:15-151` - User module toggles and configuration
+- `modules/system/update-alias.nix` - Shell aliases: `update!`, `panic`, `worksummary`, `help-aliases`
+- `modules/system/auto-commit.nix` - Git automation (systemd service + polkit rules)
+
+## Best Practices
+
+### DO
+- ✅ **Always use `--impure` flag** with nixos-rebuild (or use aliases: `update!`, `rebuild-test`)
+- ✅ **Test before switching**: `rebuild-test` → verify → `update!` for safe changes
+- ✅ **Use proper namespaces**: `custom.system.*` (system-wide) or `custom.hm.*` (user-level)
+- ✅ **Check logs** when services fail:
+  - User services: `journalctl -xe --user`
+  - System services: `journalctl -xe`
+  - Boot errors: `journalctl -b -p err`
+- ✅ **Use `sudo`** for all `/nix-modules/` file modifications (system-wide location)
+- ✅ **Leverage helper commands**: `help-aliases` to see all available commands
+- ✅ **Validate before rebuild**: `nix flake check` to catch syntax errors
+
+### DON'T
+- ❌ **Never rebuild without `--impure`** (breaks hardware detection, build will fail)
+- ❌ **Don't commit secrets** (Nix store is world-readable at `/nix/store/`)
+- ❌ **Don't modify `/etc/nixos/hardware-configuration.nix`** directly (use `hardware-config.nix` wrapper)
+- ❌ **Don't skip module imports** in `default.nix` files (module won't be loaded)
+- ❌ **Don't enable multiple rotation modules** simultaneously (causes conflicts)
+- ❌ **Don't edit files in `~/.config/hypr/`** directly (managed by Home Manager, changes will be overwritten)
+
+## Emergency Recovery
+
+```bash
+# Reset to GitHub state (creates backup branch)
+panic  # or: A!, AA!, AAA!, AAAA!, AAAAA!
+
+# Rollback to previous generation
+sudo nixos-rebuild switch --rollback
+
+# Check system errors
+journalctl -b -p err
+```
+
+## Common Workflows & Examples
+
+### Enabling a Feature
+```bash
+# Example: Enable thermal monitoring
+sudo vim modules/system/default.nix
+
+# Add or modify:
+custom.system.hardware.thermal = {
+  enable = true;
+  throttleTemp = 80;
+};
+
+# Test and apply
+rebuild-test && update!
+```
+
+### Troubleshooting a Service
+```bash
+# Check if service is running
+systemctl --user status auto-rotate-both  # User service
+systemctl status thermald                  # System service
+
+# View logs
+journalctl --user -u auto-rotate-both -n 50
+journalctl -u thermald -n 50
+
+# Restart service
+systemctl --user restart auto-rotate-both
+sudo systemctl restart thermald
+```
+
+### Updating Inputs
+```bash
+cd /nix-modules
+
 # Update all flake inputs
 nix flake update
 
 # Update specific input
 nix flake update hydenix
+nix flake update nixpkgs
 
-# Check flake metadata and outputs
-nix flake show
-nix flake metadata
-nix flake check
-
-# View system generation differences
-nixos-rebuild build --flake .#NaN --impure && nvd diff /run/current-system result
-# Or using legacy aliases:
-nixos-rebuild build --flake .#hydenix --impure && nvd diff /run/current-system result
-nixos-rebuild build --flake .#mini --impure && nvd diff /run/current-system result
+# Apply updates
+update!
 ```
 
-### Debugging Commands
+### Finding Configuration Options
 ```bash
-# Monitor touchscreen/gesture events (GPD Pocket 3 touchscreen)
-sudo libinput debug-events --device /dev/input/event18
+# Search in module source
+grep -r "mkOption" modules/system/hardware/thermal-management.nix
 
-# Hyprland diagnostics
-hyprctl plugins list        # Check loaded plugins (should show hyprgrass)
-hyprctl reload             # Reload configuration
-hyprctl monitors           # Check monitor setup (should show DSI-1)
+# Check documentation
+cat docs/options.md | grep -A 5 "thermal"
 
-# Service and error checking
-journalctl -xe --user      # User service logs
-journalctl -b -p err       # Boot errors
-systemctl --user status    # User services status
-
-# Manual service starts (if needed)
-waybar &                   # Start waybar manually
-
-# Check Nix evaluation errors
-nix flake check --show-trace
-nix eval .#nixosConfigurations.hydenix.config.system.build.toplevel --show-trace
-
-# Battery and power management
-battery-status                  # Show comprehensive battery info and health
-power-profile performance       # Switch to performance mode (AC power profile)
-power-profile powersave        # Switch to power save mode (battery profile)
-tlp-stat -s                    # Show TLP power management status
-upower -i /org/freedesktop/UPower/devices/battery_BAT0  # Detailed battery info
+# Query active system (if option exists)
+nixos-option custom.system.hardware.thermal.enable
 ```
 
-## Architecture
-
-### Configuration Hierarchy
-```
-/nix-modules/
-├── flake.nix                    # Flake inputs (hydenix, nixpkgs, grub2-themes, nix-index-database)
-├── configuration.nix            # Main system config (user: a, host: NaN)
-├── hardware-config.nix          # Smart hardware detection wrapper
-├── RULES.md                     # Claude behavioral rules and guidelines
-├── docs/faq.md                  # Hydenix FAQ and troubleshooting
-├── droid/configuration.nix      # Android/Nix-on-Droid config
-└── modules/
-    ├── system/                  # System-level modules (custom.system.*)
-    │   ├── hardware/            # GPD Pocket 3 hardware support
-    │   │   ├── auto-rotate.nix # Screen rotation service
-    │   │   ├── focal-spi/       # FTE3600 fingerprint reader
-    │   │   └── default.nix     # Hardware module aggregation
-    │   ├── power/               # Power management
-    │   │   ├── lid-behavior.nix # Lid close handling (set to ignore)
-    │   │   ├── suspend-control.nix
-    │   │   ├── battery-optimization.nix # Comprehensive TLP battery management
-    │   │   └── default.nix     # Power module aggregation
-    │   ├── security/            # Security features
-    │   │   ├── fingerprint.nix # fprintd configuration
-    │   │   ├── secrets.nix     # KeePassXC integration
-    │   │   └── default.nix     # Security module aggregation
-    │   ├── packages/            # Custom packages
-    │   │   ├── superclaude.nix # SuperClaude AI framework
-    │   │   ├── email.nix       # Proton Bridge + Thunderbird
-    │   │   └── default.nix     # Package module aggregation
-    │   ├── input/               # Input device configuration
-    │   ├── wayland-screenshare.nix # Screen sharing support
-    │   ├── boot.nix            # Boot configuration
-    │   ├── plymouth.nix        # Boot splash
-    │   ├── monitor-config.nix  # Display settings
-    │   ├── display-management.nix # Display management
-    │   ├── grub-theme.nix      # GRUB theming
-    │   ├── mpd.nix             # Music Player Daemon
-    │   ├── auto-commit.nix     # Auto-commit on rebuild
-    │   ├── update-alias.nix    # update!, panic, worksummary commands
-    │   └── default.nix         # System module aggregation (61 total modules)
-    └── hm/                      # Home Manager modules (custom.hm.*)
-        ├── applications/        # User applications
-        │   ├── firefox.nix     # Firefox with Cascade theme
-        │   ├── ghostty.nix     # Main terminal emulator
-        │   ├── mpv.nix         # Video player config
-        │   ├── btop.nix        # System monitor
-        │   └── default.nix     # Application module aggregation
-        ├── audio/               # Audio configuration
-        │   ├── easyeffects.nix # Meze_109_Pro preset
-        │   └── default.nix     # Audio module aggregation
-        └── desktop/             # Desktop environment (12+ modules)
-            ├── auto-rotate-service.nix # Dual-monitor rotation
-            ├── hypridle.nix    # Idle management
-            ├── waybar-rotation-patch.nix # Rotation lock button
-            ├── hyprgrass-config.nix # Gesture configuration
-            ├── gestures.nix    # Touch gesture handling
-            ├── fusuma.nix      # Alternative gesture engine (disabled)
-            ├── libinput-gestures.nix # libinput gesture support
-            ├── theme.nix       # Desktop theming
-            ├── workflows-ghostty.nix # Workflow automation
-            ├── hyprland-ghostty.nix # Hyprland terminal integration
-            ├── hyde-ghostty.nix # HyDE theme integration
-            ├── waybar-fix.nix  # Waybar configuration fixes
-            ├── waybar-rotation-lock.nix # Rotation control
-            └── default.nix     # Desktop module aggregation
-```
-
-### Module Namespaces
-- **hydenix.***: Core Hydenix framework options
-- **custom.system.***: System-level customizations
-- **custom.hm.***: Home Manager (user-level) customizations
-
-### Current Active Configuration
-- **User**: `a` (password: `a`, groups: wheel, networkmanager, video, input)
-- **Hostname**: `NaN`
-- **Shell**: `zsh` with SuperClaude integration (command_not_found_handler → Claude)
-- **Terminal**: `ghostty` (0.85 opacity, pure black background)
-- **Prompt**: oh-my-posh with SuperClaude framework indicators (⚡SC, todo counter)
-- **Display**: DSI-1, 1200x1920@60, 1.5x scale, transform 3 (270° rotation)
-- **Wallpaper**: Hydenix evening_sky.png via swaybg
-- **Theme**: Pure black (#000000) with Catppuccin Mocha accents
-
-## Hardware-Specific Features
-
-### GPD Pocket 3 Hardware Configuration
-Optimized for Intel i3-1125G4 (Tiger Lake) handheld PC with comprehensive hardware support.
-
-#### Display & Input
-- **Primary Display**: DSI-1, 1200x1920@60Hz, 1.5x scale, transform 3 (270° rotation)
-- **Touchscreen**: GXTP7380:00 27C6:0113 on `/dev/input/event18`
-- **Auto-Rotation**: Accelerometer-based via `/sys/bus/iio/devices/iio:device0`
-- **Multi-Monitor**: Supports DP-1, HDMI-A-1 with independent orientation
-- **Touch Transform**: Synchronized with display rotation
-- **Configuration**: `modules/system/monitor-config.nix`
-
-#### Fingerprint Authentication (FTE3600)
-- **Reader**: FocalTech FTE3600 SPI scanner
-- **Kernel Module**: Custom `focal_spi` module
-- **Library**: Patched libfprint with FocalTech support
-- **PAM Integration**: SDDM login, sudo, swaylock authentication
-- **Device**: `/dev/focal_moh_spi`
-- **Configuration**: `modules/system/hardware/focal-spi/`
-
-#### Gesture Support (Hyprgrass)
-- **Plugin**: hyprgrass for Hyprland touchscreen gestures
-- **Sensitivity**: 4.0 (optimized for touchscreen)
-- **Working Gestures**: 3-finger horizontal swipe for workspace switching
-- **Bindings**: 3-finger left/right (workspaces), up/down (fullscreen toggle)
-- **Configuration**: `modules/hm/desktop/hyprgrass-config.nix`
-
-#### Power & Thermal Management
-- **CPU**: Intel i3-1125G4 (4C/8T, 2.0-3.3GHz)
-- **Lid Behavior**: Set to "ignore" (prevents unwanted suspend)
-- **Thermald**: Enabled for critical thermal protection
-- **Thermal Monitor**: Active monitoring via `thermal_zone5` (x86_pkg_temp)
-- **Temperature Zones**: zone5 (CPU package), zone6 (TCPU) - monitors actual CPU temps
-- **Thresholds**: Throttle=80°C, Critical=90°C, Emergency=95°C
-- **Waybar Display**: Shows real-time CPU temp (T:XX°) from thermal_zone5
-- **Auto-Throttling**: Reduces to 2.0GHz base clock when >80°C
-- **Services**: thermald + thermal-monitor (both active)
-- **Configuration**: `modules/system/hardware/thermal-management.nix`
-
-### Working Features Status
-
-#### ✅ Fully Functional
-- **Display**: DSI-1 with auto-rotation service
-- **Touch**: 3-finger horizontal swipe for workspace switching
-- **Fingerprint**: SDDM login, sudo, swaylock authentication
-- **Auto-Rotation**: Accelerometer-based screen orientation
-- **Audio**: EasyEffects with Meze_109_Pro preset
-- **Security**: KeePassXC auto-start for secret management
-- **Development**: Auto-commit to GitHub on rebuild
-- **Thermal**: Thermald protection for critical temperatures
-
-#### ⚠️ Known Issues
-- **Hyprgrass**: Only 3-finger gestures work (2/4-finger not responding)
-- **Power Management**: TLP disabled due to power-profiles-daemon conflicts
-- **Hardware Monitoring**: Disabled due to permission conflicts
-- **Home Manager**: Service may show failed status but configuration applies
-- **Fusuma**: Disabled due to Ruby gem installation failures in Nix
-
-### Hardware Testing Commands
-
-```bash
-# Display & Touch
-hyprctl monitors                                      # Check monitor setup
-sudo libinput debug-events --device /dev/input/event18  # Monitor touchscreen
-cat /sys/bus/iio/devices/iio:device0/in_accel_*_raw   # Test accelerometer
-
-# Fingerprint & Thermal
-systemctl status fprintd                             # Check fingerprint service
-fprintd-enroll                                       # Enroll fingerprint
-cat /sys/class/thermal/thermal_zone0/temp            # Check CPU temperature
-systemctl status thermald                            # Monitor thermal daemon
-
-# Gestures & Services
-hyprctl plugins list                                 # Check hyprgrass plugin
-journalctl -u fix-hyprland-monitor -f               # Monitor rotation service
-```
-
-## Development Workflow
-
-### Making Configuration Changes
-1. Edit relevant module file (use `sudo` for files in `/nix-modules/`)
-2. Test with: `sudo nixos-rebuild test --flake .#NaN --impure` (legacy: `.#hydenix` or `.#mini`)
-3. Apply permanently: `sudo nixos-rebuild switch --flake .#NaN --impure` (legacy: `.#hydenix` or `.#mini`)
-4. Changes auto-commit to GitHub (or use `update!`)
-5. If issues occur: `sudo nixos-rebuild switch --rollback`
-
-### Adding New Modules
-1. Create `.nix` file in appropriate directory:
-   - System-wide: `modules/system/`
-   - User-specific: `modules/hm/`
-2. Define options under correct namespace:
-   - System: `custom.system.myfeature`
-   - User: `custom.hm.myfeature`
-3. Import in parent `default.nix`
-4. Enable in respective `default.nix` or configuration
-
-### Package Management
-- **System packages**: Add to `environment.systemPackages` in `modules/system/default.nix:126`
-- **User packages**: Add to `home.packages` in `modules/hm/default.nix:122`
-- **Custom derivations**: Create in `modules/system/packages/` (see superclaude.nix example)
-
-### Testing and Validation
-
-**Standard Validation Commands**:
-```bash
-# Validate configuration syntax
-nix flake check
-
-# Test build without switching
-sudo nixos-rebuild test --flake .#NaN --impure
-
-# Dry-run to see what would change
-sudo nixos-rebuild dry-build --flake .#NaN --impure
-
-# Build and compare with current system
-nixos-rebuild build --flake .#NaN --impure && nvd diff /run/current-system result
-```
-
-**SuperClaude Enhanced Validation Workflows**:
-```bash
-# For complex system changes, use TodoWrite and agent delegation:
-# 1. Create todos for parallel validation tasks:
-#    - Hardware compatibility check
-#    - Service configuration validation
-#    - Module dependency verification
-#    - Configuration syntax validation
-# 2. Delegate each validation to parallel agents
-# 3. Cross-validate results for consistency
-
-# Example parallel validation pattern:
-# TodoWrite: [
-#   "Validate flake syntax and dependencies",
-#   "Test hardware module configurations",
-#   "Verify service integration",
-#   "Check module namespace consistency"
-# ]
-# Each todo delegated to specialized agent for parallel execution
-```
-
-## SuperClaude Task Management Integration
-
-### Complex Configuration Management
-
-**TodoWrite Patterns for NixOS Development**:
-- **Multi-Module Changes**: Break large configuration updates into tracked, parallel tasks
-- **Hardware Integration**: Delegate hardware testing to specialized agents
-- **Service Validation**: Parallel verification of system services and dependencies
-- **Cross-Agent Validation**: Use redundant agent execution for critical system changes
-
-**Task Delegation Examples**:
-
-**Example 1: New Module Development**
-```
-TodoWrite: [
-  "Create module structure in modules/system/newfeature/",
-  "Define module options with custom.system.newfeature namespace",
-  "Add imports to modules/system/default.nix",
-  "Test module configuration with nixos-rebuild test",
-  "Validate module integration with existing services"
-]
-# Delegate tasks 1-3 to Agent A1, task 4 to Agent A2, task 5 to Agent A3
-# Cross-validate results across all agents for consistency
-```
-
-**Example 2: Hardware Issue Diagnosis**
-```
-TodoWrite: [
-  "Test fingerprint authentication service",
-  "Verify touchscreen gesture functionality",
-  "Check auto-rotation service status",
-  "Validate power management configuration",
-  "Confirm thermal management setup"
-]
-# Each todo delegated to separate agent for parallel hardware testing
-# Results cross-validated for comprehensive system health assessment
-```
-
-**Example 3: System Recovery Operations**
-```
-TodoWrite: [
-  "Analyze system errors and failure patterns",
-  "Check git repository status and integrity",
-  "Validate hardware configuration compatibility",
-  "Test critical services functionality",
-  "Verify NixOS generation status"
-]
-# Parallel agent execution for comprehensive system diagnosis
-# Triple redundancy validation for critical recovery decisions
-```
-
-### Framework Integration with .todo File
-
-The repository maintains a persistent `.todo` file for tracking complex operations:
-- **Agent Results**: All delegated task results documented with timestamps
-- **Cross-Validation**: Multiple agent findings compared for consistency
-- **Session Persistence**: Task state maintained across Claude Code sessions
-- **Recovery Tracking**: System recovery operations fully documented
-
-**Todo File Management**:
-- Never delete todos - save progress to `.todo` file in nix-modules/
-- Mark progress as tasks complete with agent attribution
-- Use parallel agent execution rather than sequential processing
-- Document agent redundancy results for critical system operations
-
-## Important Implementation Details
-
-### Hardware Detection (CRITICAL)
-- **Always use `--impure` flag** for nixos-rebuild commands
-- Hardware configuration uses smart detection via `hardware-config.nix:10-13`
-- Falls back to placeholder when `/etc/nixos/hardware-configuration.nix` unavailable
-- This allows GitHub sync without breaking local hardware config
-
-### Auto-commit System
-- Runs pre-activation before each rebuild (`modules/system/auto-commit.nix:6-46`)
-- Commits all changes with timestamp
-- Pushes to GitHub using `gh` CLI
-- Prevents "dirty git tree" warnings during flake evaluation
-
-### Module Option Patterns
-System modules typically follow:
-```nix
-custom.system.feature = {
-  enable = true;
-  option1 = value;
-};
-```
-
-Home Manager modules follow:
-```nix
-custom.hm.feature = {
-  enable = true;
-  option1 = value;
-};
-```
-
-### Critical Files Reference
-- `configuration.nix:75,87,89,103-105` - User setup and system identity
-- `modules/system/default.nix:20-103` - All system module toggles
-- `modules/hm/default.nix:13-84` - All user module toggles
-- `hardware-config.nix:10-13` - Hardware detection logic
-- `modules/system/update-alias.nix:6-46` - Quick command definitions
-- `flake.nix:47-48` - Flake inputs and nixosConfiguration
-
-## Tips and Warnings
-
-### DO's
-- ✅ Always rebuild with `--impure` flag
-- ✅ Use `update!` for quick commits and rebuilds
-- ✅ Check `journalctl -xe --user` when services fail
-- ✅ Use `panic` or `A!` to quickly reset to GitHub state
-- ✅ Use `sudo` when modifying files in `/nix-modules/`
-- ✅ Follow RULES.md for task management and delegation
-- ✅ Create todos for complex tasks (>3 steps) and delegate in parallel
-- ✅ Use proper module namespaces (`custom.system.*` or `custom.hm.*`)
-- ✅ **SuperClaude**: Use TodoWrite for multi-step NixOS configurations
-- ✅ **SuperClaude**: Delegate hardware tests to parallel agents for redundancy
-- ✅ **SuperClaude**: Cross-validate critical system changes across multiple agents
-- ✅ **SuperClaude**: Document agent results in .todo file for session persistence
-- ✅ **SuperClaude**: Use Sequential MCP for complex system analysis
-- ✅ **SuperClaude**: Apply Morphllm MCP for bulk configuration changes
-
-### DON'Ts
-- ❌ Never rebuild without `--impure` (breaks hardware detection)
-- ❌ Don't commit secrets (will be world-readable in Nix store)
-- ❌ Don't modify hardware-configuration.nix directly (use hardware-config.nix wrapper)
-- ❌ Don't start waybar manually in exec-once (managed by HyDE)
-- ❌ Don't forget to use sudo for system-level file edits
-- ❌ Don't work on production branch directly (per RULES.md git workflow)
-- ❌ Don't ignore module aggregation patterns in default.nix files
-- ❌ **SuperClaude**: Don't delete todos from .todo file (save progress instead)
-- ❌ **SuperClaude**: Don't execute tasks sequentially when parallel delegation is possible
-- ❌ **SuperClaude**: Don't skip agent cross-validation for critical system changes
-- ❌ **SuperClaude**: Don't ignore RULES.md behavioral patterns for task management
-
-## Terminal Integration
-
-### SuperClaude-Aware Shell
-
-The zsh shell includes direct Claude Code integration for seamless AI assistance:
-
-**Command Not Found Handler**:
-```zsh
-# Any unknown command automatically goes to Claude
-"what is the capital of France"  # → Paris
-nonexistentcommand args         # → Claude asks for clarification
-```
-
-**Direct Claude Access**:
-```bash
-ask "your question"    # Explicit Claude query
-ai "your prompt"       # Shorter alias
-```
-
-**Oh-My-Posh Prompt Indicators**:
-- **⚡SC** - SuperClaude framework detected (cyan)
-- **[N]** - Active in-progress todos from `.todo` file (green)
-- **branch ●** - Git changes detected (yellow)
-- **T:XX°** - CPU temperature from waybar (white/red if >80°C)
-- **❯/✗** - Prompt symbol (green on success, red on error)
-
-**Configuration Files**:
-- `~/.zshrc` - Shell with command_not_found_handler
-- `~/.config/oh-my-posh/config.toml` - SuperClaude-aware prompt theme
-- `~/.config/ghostty/config` - Terminal transparency settings
-
-**Documentation**: `.claude/DOCUMENTATION/TERMINAL_INTEGRATION_METHODOLOGY.md`
-
-## Quick Reference
-
-### SuperClaude Framework Quick Patterns
-
-**Multi-Agent Hardware Testing**:
-```bash
-# Pattern for comprehensive hardware validation
-TodoWrite: ["Test fingerprint service", "Check gesture support", "Verify thermal management"]
-# → Delegate each todo to Agent A1, A2, A3 for parallel execution
-# → Cross-validate results for redundancy and consistency
-```
-
-**Complex Module Development**:
-```bash
-# Pattern for new module creation with validation
-TodoWrite: ["Create module structure", "Define options", "Add imports", "Test integration"]
-# → Use Sequential MCP for architectural planning
-# → Delegate implementation tasks to parallel agents
-# → Cross-validate module integration across agents
-```
-
-**System Recovery with Agent Redundancy**:
-```bash
-# Pattern for comprehensive system diagnosis
-TodoWrite: ["Analyze errors", "Check git status", "Validate config", "Test services"]
-# → Use 3+ agents for each critical task
-# → Compare results across agents for consensus
-# → Document findings in .todo file for persistence
-```
-
-**Bulk Configuration Changes**:
-```bash
-# Pattern for large-scale configuration updates
-# → Use Morphllm MCP for consistent pattern application
-# → Sequential MCP for change impact analysis
-# → TodoWrite for tracking multi-file modifications
-# → Agent delegation for parallel validation
-```
-
-### Emergency Recovery
-```bash
-# PANIC MODE - reset to GitHub state
-panic  # or A!, AA!, AAA! (up to 20 A's)
-
-# Rollback to previous working generation
-sudo nixos-rebuild switch --rollback
-
-# Check what broke
-journalctl -b -p err
-```
-
-### Module Development Pattern
-1. Create module in appropriate directory (`modules/system/` or `modules/hm/`)
-2. Define options under correct namespace (`custom.system.*` or `custom.hm.*`)
-3. Add to parent `default.nix` imports
-4. Enable in configuration with `enable = true;`
-5. Test with `sudo nixos-rebuild test --flake .#NaN --impure`
-6. Apply with `sudo nixos-rebuild switch --flake .#NaN --impure`
+## Documentation
+
+- **Start Here**: `docs/NAVIGATION.md` - Documentation hub with guided paths
+- **Quick Fixes**: `docs/troubleshooting-checklist.md` - 5-minute diagnostic steps
+- **Options Reference**: `docs/options.md` - All 219+ configuration options
+- **Architecture**: `docs/architecture.md` - System design and module interactions
+- **Installation**: `docs/installation.md` - Fresh install guide
+- **Migration**: `docs/migration.md` - Migrating from existing NixOS
+- **SuperClaude Framework**: `.claude/RULES.md` - AI-assisted development patterns

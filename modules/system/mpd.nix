@@ -8,13 +8,19 @@ in
 {
   options.custom.system.mpd = {
     enable = mkEnableOption "MPD (Music Player Daemon) with user configuration";
-    
-    musicDirectory = mkOption {
+
+    user = mkOption {
       type = types.str;
-      default = "/home/a/Music";
-      description = "Directory containing music files";
+      default = "a";
+      description = "User to run MPD as";
     };
-    
+
+    musicDirectory = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Directory containing music files (defaults to ~/Music)";
+    };
+
     enableWeb = mkOption {
       type = types.bool;
       default = false;
@@ -22,12 +28,14 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (let
+    userHome = config.users.users.${cfg.user}.home;
+  in {
     # Enable MPD service
     services.mpd = {
       enable = true;
-      musicDirectory = cfg.musicDirectory;
-      user = "a";  # Run as user instead of mpd user
+      musicDirectory = if cfg.musicDirectory != null then cfg.musicDirectory else "${userHome}/Music";
+      user = cfg.user;
       group = "users";
       
       extraConfig = ''
@@ -70,8 +78,8 @@ in
     
     # Create MPD directories
     systemd.tmpfiles.rules = [
-      "d /home/a/.config/mpd 0755 a users -"
-      "d /home/a/.config/mpd/playlists 0755 a users -"
+      "d ${userHome}/.config/mpd 0755 ${cfg.user} users -"
+      "d ${userHome}/.config/mpd/playlists 0755 ${cfg.user} users -"
     ];
     
     # Install MPD clients
@@ -85,5 +93,5 @@ in
     networking.firewall = mkIf cfg.enableWeb {
       allowedTCPPorts = [ 8080 ];
     };
-  };
+  });
 }

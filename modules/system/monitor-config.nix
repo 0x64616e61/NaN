@@ -8,39 +8,78 @@ in
 {
   options.custom.system.monitor = {
     enable = mkEnableOption "system-level monitor configuration for Hyprland";
-    
+
     name = mkOption {
       type = types.str;
       default = "DSI-1";
-      description = "Monitor name/identifier";
+      example = "HDMI-A-1";
+      description = "Monitor name/identifier (e.g., DSI-1, HDMI-A-1, DP-1)";
     };
-    
+
     resolution = mkOption {
       type = types.str;
       default = "1200x1920@60";
-      description = "Monitor resolution and refresh rate";
+      example = "1920x1080@144";
+      description = ''
+        Monitor resolution and refresh rate in format: WIDTHxHEIGHT@REFRESH
+        Examples: "1920x1080@60", "2560x1440@144", "3440x1440@98"
+      '';
     };
-    
+
     position = mkOption {
       type = types.str;
       default = "0x0";
-      description = "Monitor position";
+      example = "1920x0";
+      description = ''
+        Monitor position in format: X_OFFSETxY_OFFSET
+        Use "0x0" for primary monitor, "1920x0" for second monitor to the right
+      '';
     };
-    
+
     scale = mkOption {
-      type = types.float;
+      type = types.addCheck types.float (x: x >= 0.5 && x <= 3.0);
       default = 1.5;
-      description = "Monitor scale factor";
+      example = 2.0;
+      description = ''
+        Monitor scale factor (0.5-3.0)
+        Common values: 1.0 (native), 1.5 (150%), 2.0 (200%)
+        Higher values make UI elements larger
+      '';
     };
-    
+
     transform = mkOption {
-      type = types.int;
+      type = types.enum [ 0 1 2 3 ];
       default = 3;
-      description = "Monitor rotation (0=normal, 1=90, 2=180, 3=270)";
+      description = ''
+        Monitor rotation transform:
+        0 = normal (0°)
+        1 = 90° clockwise
+        2 = 180° (upside down)
+        3 = 270° clockwise (or 90° counter-clockwise)
+      '';
     };
   };
 
   config = mkIf cfg.enable {
+    # Validate configuration
+    assertions = [
+      {
+        assertion = cfg.scale >= 0.5 && cfg.scale <= 3.0;
+        message = "Monitor scale must be between 0.5 and 3.0, got ${toString cfg.scale}";
+      }
+      {
+        assertion = builtins.elem cfg.transform [ 0 1 2 3 ];
+        message = "Monitor transform must be 0, 1, 2, or 3, got ${toString cfg.transform}";
+      }
+      {
+        assertion = builtins.match "[0-9]+x[0-9]+@[0-9]+" cfg.resolution != null;
+        message = "Monitor resolution must be in format WIDTHxHEIGHT@REFRESH (e.g., 1920x1080@60), got: ${cfg.resolution}";
+      }
+      {
+        assertion = builtins.match "[0-9]+x[0-9]+" cfg.position != null;
+        message = "Monitor position must be in format XxY (e.g., 0x0 or 1920x0), got: ${cfg.position}";
+      }
+    ];
     # Create a systemd service that runs AFTER the rebuild to fix monitor orientation
     # This runs as a oneshot service after multi-user.target and home-manager
     systemd.services.fix-hyprland-monitor = {

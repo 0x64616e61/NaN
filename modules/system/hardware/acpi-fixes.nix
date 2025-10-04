@@ -14,12 +14,13 @@ let
     unpackPhase = "true";
 
     buildPhase = ''
-      iasl -tc ${./acpi-override.asl}
+      cp ${./acpi-override.asl} acpi-override.asl
+      iasl -tc acpi-override.asl
     '';
 
     installPhase = ''
-      mkdir -p $out/kernel/firmware/acpi
-      cp acpi-override.aml $out/kernel/firmware/acpi/
+      mkdir -p $out/lib/firmware/acpi
+      cp acpi-override.aml $out/lib/firmware/acpi/
     '';
   };
 in
@@ -41,30 +42,23 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Install ACPI override table to fix missing symbols
-    hardware.firmware = mkIf cfg.useOverride [ acpiOverride ];
-
-    # Kernel parameters for ACPI override loading
-    boot.kernelParams = mkIf cfg.useOverride [
-      # Enable custom ACPI tables from initrd
-      "acpi_enforce_resources=lax"
-    ];
-
-    # Enable early ACPI table loading
-    boot.initrd.prepend = mkIf cfg.useOverride [
-      "${acpiOverride}/kernel/firmware/acpi/acpi-override.aml"
+    # Kernel parameters to work around BIOS bugs
+    boot.kernelParams = [
+      # Mask GPE that triggers _QF1 method (reduces HEC.SEN4 errors)
+      "acpi_mask_gpe=0x6D"
     ];
 
     # Documentation about the ACPI fixes
     system.activationScripts.acpiFixesInfo = ''
       echo ""
-      echo "🔧 ACPI DSDT Override Active for GPD Pocket 3"
-      echo "   Fixed Missing BIOS Symbols:"
-      echo "   • _SB.PC00.I2C0.TPD0 / TPL1 - Touchpad/Touchscreen device stubs"
-      echo "   • _SB.UBTC.RUCC - USB Type-C UCSI method stub"
-      echo "   • _SB.PC00.LPCB.HEC.SEN4 - Embedded Controller sensor stub"
-      echo "   Status: ACPI errors should be eliminated"
-      echo "   Method: SSDT override table loaded at boot"
+      echo "🔧 ACPI BIOS Workarounds Active for GPD Pocket 3"
+      echo "   Known BIOS Bugs (worked around via kernel parameters):"
+      echo "   • _SB.PC00.I2C0.TPD0 / TPL1 - Missing touchpad/touchscreen references"
+      echo "   • _SB.UBTC.RUCC - Missing USB Type-C UCSI method"
+      echo "   • _SB.PC00.LPCB.HEC.SEN4 - Missing EC sensor (triggers on certain GPE events)"
+      echo "   Workaround: acpi_osi modified + GPE masking"
+      echo "   Impact: Reduced ACPI errors, some EC features may not work"
+      echo "   Note: BIOS update from GPD would fully fix these issues"
       echo ""
     '';
 

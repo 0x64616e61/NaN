@@ -77,8 +77,8 @@ DefinitionBlock ("acpi-override.aml", "SSDT", 2, "GPD", "FIXACPI", 0x00000001)
 
             Method (RUCC, 0, NotSerialized)
             {
-                // Stub method - returns empty package
-                Return (Package (0x00) {})
+                // Stub method - returns zero
+                Return (Zero)
             }
         }
     }
@@ -89,35 +89,6 @@ DefinitionBlock ("acpi-override.aml", "SSDT", 2, "GPD", "FIXACPI", 0x00000001)
      */
     Scope (\_SB.PC00.LPCB.H_EC)
     {
-        // Create alias for HEC if it exists
-        External (\_SB.PC00.LPCB.HEC, DeviceObj)
-
-        Name (SEN4, Package (0x05)
-        {
-            0x00,  // Sensor type
-            0x00,  // Sensor status
-            0x00,  // Current value
-            0x00,  // Min value
-            0x00   // Max value
-        })
-    }
-
-    // Also create the same in HEC scope if it's different from H_EC
-    Scope (\_SB.PC00.LPCB)
-    {
-        Device (HEC)
-        {
-            Name (_HID, "EC000000")
-
-            Method (_STA, 0, NotSerialized)
-            {
-                Return (0x00)  // Stub only
-            }
-
-            Name (SEN4, Package (0x05)
-            {
-                0x00, 0x00, 0x00, 0x00, 0x00
-            })
-        }
+        Name (SEN4, 0x00)  // Simple stub value
     }
 }

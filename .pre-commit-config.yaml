@@ -1,0 +1,40 @@
+# Pre-commit hooks for NixOS configuration security
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+        name: Detect hardcoded secrets
+        entry: gitleaks protect --verbose --redact --staged
+        language: golang
+        pass_filenames: false
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: ^(secrets/.*\.yaml|\.sops\.yaml)$
+
+  - repo: local
+    hooks:
+      - id: no-plaintext-passwords
+        name: Block plaintext password commits
+        entry: bash -c 'grep -rn "password.*['\''\"]\(.\{1,3\}\)['\''\"]\|passwd.*=" --include="*.nix" --include="*.md" . && exit 1 || exit 0'
+        language: system
+        pass_filenames: false
+
+      - id: nix-format-check
+        name: Check Nix formatting
+        entry: nix fmt -- --check
+        language: system
+        files: \.nix$
+        pass_filenames: true
+
+      - id: nix-flake-check
+        name: Validate flake
+        entry: nix flake check --no-build
+        language: system
+        pass_filenames: false
+        files: ^flake\.(nix|lock)$
