@@ -1,4 +1,4 @@
-# Fallback hardware configuration for grOSs
+# Fallback hardware configuration for NaN
 # Auto-generated hardware-configuration.nix should be used in production
 # This fallback enables flake evaluation in CI/CD environments
 

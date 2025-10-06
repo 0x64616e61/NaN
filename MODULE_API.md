@@ -1,7 +1,7 @@
 7
 # Module API Reference
 
-Complete reference for all `custom.system.*` and `custom.hm.*` configuration options in grOSs.
+Complete reference for all `custom.system.*` and `custom.hm.*` configuration options in NaN.
 
 ## Table of Contents
 

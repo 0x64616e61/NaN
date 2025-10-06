@@ -1,6 +1,6 @@
 # GPD Pocket 3 Ultrathink: Animation System Documentation
 
-**System:** grOSs (GPD Pocket 3 NixOS Configuration)
+**System:** NaN (GPD Pocket 3 NixOS Configuration)
 **Component:** Wayland Animation Framework
 **Module:** `modules/hm/desktop/animations.nix`
 **Status:** ✅ Production Ready
@@ -25,7 +25,7 @@
 
 ## Overview
 
-The **GPD Pocket 3 Ultrathink Animation System** is a comprehensive Wayland-based animation framework designed specifically for the compact, portrait-oriented GPD Pocket 3 handheld device running grOSs with the DWL compositor.
+The **GPD Pocket 3 Ultrathink Animation System** is a comprehensive Wayland-based animation framework designed specifically for the compact, portrait-oriented GPD Pocket 3 handheld device running NaN with the DWL compositor.
 
 ### Design Philosophy
 

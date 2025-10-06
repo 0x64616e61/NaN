@@ -1,6 +1,6 @@
-# Contributing to grOSs
+# Contributing to NaN
 
-Thank you for your interest in contributing to grOSs! This guide will help you add modules, fix bugs, and improve the system.
+Thank you for your interest in contributing to NaN! This guide will help you add modules, fix bugs, and improve the system.
 
 ## Table of Contents
 
@@ -39,10 +39,10 @@ Thank you for your interest in contributing to grOSs! This guide will help you a
 3. **Test environment**:
    ```bash
    # Test without activating
-   sudo nixos-rebuild dry-build --flake .#grOSs
+   sudo nixos-rebuild dry-build --flake .#NaN
    
    # Test with temporary activation (no boot entry)
-   sudo nixos-rebuild test --flake .#grOSs
+   sudo nixos-rebuild test --flake .#NaN
    ```
 
 ---
@@ -70,7 +70,7 @@ Thank you for your interest in contributing to grOSs! This guide will help you a
 
 5. **Enable and test**:
    ```bash
-   sudo nixos-rebuild test --flake .#grOSs
+   sudo nixos-rebuild test --flake .#NaN
    ```
 
 6. **Validate** (check logs, test functionality)
@@ -173,14 +173,14 @@ custom.system.myFeature = {
 nix flake check
 
 # Dry-build without activation
-sudo nixos-rebuild dry-build --flake .#grOSs
+sudo nixos-rebuild dry-build --flake .#NaN
 ```
 
 #### 2. Temporary Activation
 
 ```bash
 # Test without boot entry (temporary until reboot)
-sudo nixos-rebuild test --flake .#grOSs
+sudo nixos-rebuild test --flake .#NaN
 
 # Check service status
 systemctl status my-service
@@ -193,7 +193,7 @@ journalctl -xe -u my-service
 
 ```bash
 # Build for next boot (no immediate activation)
-sudo nixos-rebuild boot --flake .#grOSs
+sudo nixos-rebuild boot --flake .#NaN
 
 # Reboot and test
 sudo reboot
@@ -203,7 +203,7 @@ sudo reboot
 
 ```bash
 # Build, activate, and create boot entry
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 ### Testing Checklist
@@ -486,4 +486,4 @@ Any caveats, known issues, or future improvements
 - Help others learn
 - Test your changes thoroughly
 - Document your code
-- Have fun improving grOSs!
+- Have fun improving NaN!

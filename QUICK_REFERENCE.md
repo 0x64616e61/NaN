@@ -1,6 +1,6 @@
-# grOSs Quick Reference Guide
+# NaN Quick Reference Guide
 
-**System:** grOSs - DWL-based NixOS for GPD Pocket 3
+**System:** NaN - DWL-based NixOS for GPD Pocket 3
 **Version:** Production-ready (2025-10-05)
 **Documentation:** Complete system reference
 
@@ -48,16 +48,16 @@ systemctl poweroff
 ### Standard Operations
 ```bash
 # Full rebuild (activate immediately)
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 
 # Test without boot entry
-sudo nixos-rebuild test --flake .#grOSs
+sudo nixos-rebuild test --flake .#NaN
 
 # Build for next boot only
-sudo nixos-rebuild boot --flake .#grOSs
+sudo nixos-rebuild boot --flake .#NaN
 
 # Dry-run validation
-sudo nixos-rebuild dry-build --flake .#grOSs
+sudo nixos-rebuild dry-build --flake .#NaN
 
 # Update flake inputs
 nix flake update
@@ -72,7 +72,7 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 sudo nixos-rebuild switch --rollback
 
 # Boot specific generation
-sudo nixos-rebuild switch --flake .#grOSs --generation 42
+sudo nixos-rebuild switch --flake .#NaN --generation 42
 ```
 
 ---
@@ -258,7 +258,7 @@ systemctl status thermald.service
 
 5. **Test:**
    ```bash
-   sudo nixos-rebuild test --flake .#grOSs
+   sudo nixos-rebuild test --flake .#NaN
    ```
 
 ### Modifying Thermal Thresholds
@@ -297,7 +297,7 @@ journalctl -xe | grep dwl
 ls -la ~/.local/bin/dwl-status/status
 
 # Rebuild
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 ### Display Issues
@@ -494,7 +494,7 @@ Ctrl + Alt + F2
 
 # Login and fix
 sudo systemctl stop display-manager
-sudo nixos-rebuild switch --flake .#grOSs --rollback
+sudo nixos-rebuild switch --flake .#NaN --rollback
 sudo systemctl start display-manager
 ```
 
@@ -527,4 +527,4 @@ sudo systemctl start display-manager
 
 ---
 
-*For detailed information, see the full documentation in `/home/a/grOSs/docs/` or `CLAUDE.md`*
+*For detailed information, see the full documentation in `/home/a/NaN/docs/` or `CLAUDE.md`*

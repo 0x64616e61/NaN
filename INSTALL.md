@@ -1,8 +1,8 @@
-# grOSs Installation Guide
+# NaN Installation Guide
 
 ## Fresh Installation
 
-This guide covers installing grOSs on your GPD Pocket 3.
+This guide covers installing NaN on your GPD Pocket 3.
 
 ### Features
 
@@ -25,10 +25,10 @@ This guide covers installing grOSs on your GPD Pocket 3.
 #### Standard Installation
 
 ```bash
-# 1. Clone grOSs
+# 1. Clone NaN
 cd ~
-git clone https://github.com/garmir/grOSs
-cd grOSs
+git clone https://github.com/garmir/NaN
+cd NaN
 
 # 2. Copy your hardware config
 sudo cp /etc/nixos/hardware-configuration.nix ./
@@ -38,7 +38,7 @@ sudo cp /etc/nixos/hardware-configuration.nix ./
 #    - Check user settings
 
 # 4. Build and switch
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 
 # 5. Reboot
 sudo reboot
@@ -50,10 +50,10 @@ sudo reboot
 
 ```bash
 # Build without switching
-sudo nixos-rebuild build --flake .#grOSs
+sudo nixos-rebuild build --flake .#NaN
 
 # If successful, then switch
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 ### Post-Migration
@@ -96,7 +96,7 @@ display-reset          # Reset to defaults
 
 ```bash
 # Rebuild
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 #### Fingerprint not working
@@ -125,14 +125,14 @@ Boot into previous generation from GRUB:
 
 1. Reboot
 2. At GRUB, select "NixOS - All Generations"
-3. Choose generation before grOSs
+3. Choose generation before NaN
 4. Boot
 
 
-### Updating grOSs
+### Updating NaN
 
 ```bash
-cd ~/grOSs
+cd ~/NaN
 git pull
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```

@@ -1,4 +1,4 @@
-# Lock Screen Integration - grOSs
+# Lock Screen Integration - NaN
 
 **Lock Screen:** swaylock
 **Idle Manager:** swayidle
@@ -7,7 +7,7 @@
 
 ## Overview
 
-grOSs implements comprehensive automatic screen locking to protect your GPD Pocket 3 from unauthorized access during idle periods, system events, and manual triggers. The system uses swaylock (Wayland-native) with swayidle for event monitoring and systemd integration for system-level event handling.
+NaN implements comprehensive automatic screen locking to protect your GPD Pocket 3 from unauthorized access during idle periods, system events, and manual triggers. The system uses swaylock (Wayland-native) with swayidle for event monitoring and systemd integration for system-level event handling.
 
 ## Lock Screen Features
 

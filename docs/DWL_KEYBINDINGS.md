@@ -1,4 +1,4 @@
-# DWL Keybindings Reference - grOSs
+# DWL Keybindings Reference - NaN
 
 **Compositor:** DWL (dwm for Wayland)
 **Modifier Key:** SUPER (Windows/Logo key)
@@ -6,7 +6,7 @@
 
 ## Overview
 
-grOSs uses DWL, a minimal tiling Wayland compositor based on the dwm window manager philosophy. All keybindings use the **SUPER key** (Windows/Command key) as the modifier, customized from the default ALT key for better ergonomics on the GPD Pocket 3.
+NaN uses DWL, a minimal tiling Wayland compositor based on the dwm window manager philosophy. All keybindings use the **SUPER key** (Windows/Command key) as the modifier, customized from the default ALT key for better ergonomics on the GPD Pocket 3.
 
 ## Window Navigation
 
@@ -179,7 +179,7 @@ nixpkgs.overlays = [
 
 1. Edit `modules/system/dwl-custom.nix`
 2. Add sed commands to modify `config.def.h`
-3. Rebuild: `sudo nixos-rebuild switch --flake .#grOSs`
+3. Rebuild: `sudo nixos-rebuild switch --flake .#NaN`
 4. Logout and login to activate
 
 ### Available Modifiers
@@ -209,12 +209,12 @@ nixpkgs.overlays = [
 2. **Verify configuration:**
    ```bash
    # Check if custom overlay applied
-   nix eval --raw .#nixosConfigurations.grOSs.config.nixpkgs.overlays
+   nix eval --raw .#nixosConfigurations.NaN.config.nixpkgs.overlays
    ```
 
 3. **Rebuild system:**
    ```bash
-   sudo nixos-rebuild switch --flake .#grOSs
+   sudo nixos-rebuild switch --flake .#NaN
    ```
 
 ### Conflicts with System Keybindings
@@ -257,7 +257,7 @@ Logout:              SUPER + Shift + Q
 ## See Also
 
 - **DWL Homepage**: https://codeberg.org/dwl/dwl
-- **grOSs Configuration**: `modules/system/dwl-custom.nix`
+- **NaN Configuration**: `modules/system/dwl-custom.nix`
 - **Home Manager DWL**: `modules/hm/dwl/default.nix`
 - **Lock Screen Integration**: `docs/LOCK_SCREEN_INTEGRATION.md`
 - **GPD Pocket 3 Hardware**: `CLAUDE.md` - GPD Pocket 3 Hardware Specifics

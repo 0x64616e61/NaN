@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 # System Backup Configuration Module
 #
-# This module provides automated backup capabilities using restic for the grOSs system.
+# This module provides automated backup capabilities using restic for the NaN system.
 # Restic is a fast, secure, and efficient backup program with deduplication and encryption.
 #
 # Features:
@@ -126,7 +126,7 @@ in
 
     # Systemd service for backups
     systemd.services.restic-backup = {
-      description = "Restic backup service for grOSs";
+      description = "Restic backup service for NaN";
 
       serviceConfig = {
         Type = "oneshot";
@@ -166,7 +166,7 @@ in
           ${concatStringsSep " " (map (path: ''"${path}"'') cfg.paths)} \
           ${concatStringsSep " " (map (pattern: ''--exclude "${pattern}"'') cfg.exclude)} \
           ${concatStringsSep " " cfg.extraOptions} \
-          --tag "grOSs-system" \
+          --tag "NaN-system" \
           --tag "$(hostname)" \
           --host "$(hostname)"
 

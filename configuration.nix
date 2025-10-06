@@ -8,7 +8,7 @@
   ];
 
   # Networking
-  networking.hostName = "grOSs";
+  networking.hostName = "NaN";
   networking.networkmanager.enable = true;
   networking.wireless.enable = false;
 

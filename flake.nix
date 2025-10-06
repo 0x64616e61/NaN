@@ -1,5 +1,5 @@
 {
-  description = "grOSs - Production NixOS configuration for GPD Pocket 3";
+  description = "NaN - Production NixOS configuration for GPD Pocket 3";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -13,7 +13,7 @@
   };
 
   outputs = { self, nixpkgs, home-manager, nixos-hardware }: {
-    nixosConfigurations.grOSs = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.NaN = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       
       modules = [

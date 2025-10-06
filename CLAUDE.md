@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**grOSs** is a production-ready NixOS configuration for the GPD Pocket 3 handheld device, featuring:
+**NaN** is a production-ready NixOS configuration for the GPD Pocket 3 handheld device, featuring:
 - DWL Wayland compositor (dwm for Wayland)
 - Complete GPD Pocket 3 hardware integration
 - Modular custom options framework
@@ -77,22 +77,22 @@ in
 
 ```bash
 # Full system rebuild (activates immediately)
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 
 # Test without boot entry (temporary activation)
-sudo nixos-rebuild test --flake .#grOSs
+sudo nixos-rebuild test --flake .#NaN
 
 # Build for next boot only (no immediate activation)
-sudo nixos-rebuild boot --flake .#grOSs
+sudo nixos-rebuild boot --flake .#NaN
 
 # Dry-run validation (check for errors without building)
-sudo nixos-rebuild dry-build --flake .#grOSs
+sudo nixos-rebuild dry-build --flake .#NaN
 
 # Update flake inputs
 nix flake update
 
 # Build without activation (creates result symlink)
-sudo nixos-rebuild build --flake .#grOSs
+sudo nixos-rebuild build --flake .#NaN
 ```
 
 ### Flake Configuration
@@ -182,7 +182,7 @@ Status bar scripts:
    custom.system.newFeature.enable = true;
    ```
 
-5. Test: `sudo nixos-rebuild test --flake .#grOSs`
+5. Test: `sudo nixos-rebuild test --flake .#NaN`
 
 ### Modifying Hardware Configuration
 
@@ -270,7 +270,7 @@ journalctl -xe | grep dwl
 ls -la ~/.local/bin/dwl-status/status
 
 # Rebuild home-manager config
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 ### Fingerprint reader not detected

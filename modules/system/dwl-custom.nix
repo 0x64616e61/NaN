@@ -14,7 +14,7 @@
           # Change menu from bemenu-run to full path (prevents crash)
           ${pkgs.gnused}/bin/sed -i 's|"bemenu-run"|"${pkgs.bemenu}/bin/bemenu-run"|' config.def.h
 
-          echo "[grOSs] DWL configured with SUPER key, foot terminal, and bemenu launcher"
+          echo "[NaN] DWL configured with SUPER key, foot terminal, and bemenu launcher"
         '';
       });
     })

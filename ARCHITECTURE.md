@@ -1,7 +1,7 @@
 7
 # Architecture Overview
 
-System design and module organization for grOSs NixOS configuration.
+System design and module organization for NaN NixOS configuration.
 
 ## Design Principles
 
@@ -25,7 +25,7 @@ flake.nix
     │
     ├── configuration.nix ─────────────► Main system config
     │   ├── User account (a)
-    │   ├── Hostname (grOSs)
+    │   ├── Hostname (NaN)
     │   ├── SDDM display manager
     │   └── System packages
     │
@@ -311,9 +311,9 @@ SDDM Display Manager
 
 ### Why No Flake?
 
-Actually, **grOSs USES flakes**! The file `flake.nix.disabled` indicates a previous non-flake iteration, but the system now fully utilizes:
+Actually, **NaN USES flakes**! The file `flake.nix.disabled` indicates a previous non-flake iteration, but the system now fully utilizes:
 - Flake inputs for dependency pinning
-- `nixosConfigurations.grOSs` for system definition
+- `nixosConfigurations.NaN` for system definition
 - Home Manager as flake module
 
 ### Why System-Level Hardware Modules?

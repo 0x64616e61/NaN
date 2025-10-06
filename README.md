@@ -101,7 +101,7 @@ sudo nixos-generate-config --show-hardware-config > hardware-config.nix
 # Edit modules/system/default.nix and modules/hm/default.nix
 
 # 4. Build system
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 
 # 5. Reboot
 sudo reboot
@@ -211,16 +211,16 @@ custom.hm = {
 
 ```bash
 # Dry-run (check for errors)
-sudo nixos-rebuild dry-build --flake .#grOSs
+sudo nixos-rebuild dry-build --flake .#NaN
 
 # Test without boot entry
-sudo nixos-rebuild test --flake .#grOSs
+sudo nixos-rebuild test --flake .#NaN
 
 # Build for next boot
-sudo nixos-rebuild boot --flake .#grOSs
+sudo nixos-rebuild boot --flake .#NaN
 
 # Full rebuild (activate + boot entry)
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 ### Updating
@@ -230,7 +230,7 @@ sudo nixos-rebuild switch --flake .#grOSs
 nix flake update
 
 # Rebuild with updates
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 
 ### Fingerprint Setup
@@ -328,7 +328,7 @@ journalctl -xe | grep dwl
 ls -la ~/.local/bin/dwl-status/status
 
 # Rebuild
-sudo nixos-rebuild switch --flake .#grOSs
+sudo nixos-rebuild switch --flake .#NaN
 ```
 </details>
 
@@ -384,7 +384,7 @@ Contributions welcome! This is a personal config, but improvements benefit every
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/my-module`
 3. Make changes following [CONTRIBUTING.md](CONTRIBUTING.md)
-4. Test on hardware: `sudo nixos-rebuild test --flake .#grOSs`
+4. Test on hardware: `sudo nixos-rebuild test --flake .#NaN`
 5. Commit: `git commit -m "feat: add feature"`
 6. Push: `git push origin feature/my-module`
 7. Open Pull Request
