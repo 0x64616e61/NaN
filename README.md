@@ -1,4 +1,3 @@
-7
 # NaN
 
 > **Production-ready NixOS configuration for GPD Pocket 3**  
