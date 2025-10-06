@@ -1,0 +1,44 @@
+{ config, lib, pkgs, ... }:
+
+with lib;
+
+let
+  cfg = config.custom.system.power.lidBehavior;
+in
+{
+  options.custom.system.power.lidBehavior = {
+    enable = mkEnableOption "custom lid behavior management";
+    
+    action = mkOption {
+      type = types.enum [ "suspend" "hibernate" "ignore" "poweroff" ];
+      default = "suspend";
+      description = "Action to take when laptop lid is closed";
+    };
+    
+    actionOnAC = mkOption {
+      type = types.nullOr (types.enum [ "suspend" "hibernate" "ignore" "poweroff" ]);
+      default = null;
+      description = "Override action when on AC power (null uses main action)";
+    };
+    
+    actionWhenDocked = mkOption {
+      type = types.nullOr (types.enum [ "suspend" "hibernate" "ignore" "poweroff" ]);
+      default = null;
+      description = "Override action when docked (null uses main action)";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    # Use the new services.logind.extraConfig structure
+    services.logind.extraConfig = {
+      Login = {
+        HandleLidSwitch = cfg.action;
+        HandleLidSwitchExternalPower = if cfg.actionOnAC != null then cfg.actionOnAC else cfg.action;
+        HandleLidSwitchDocked = if cfg.actionWhenDocked != null then cfg.actionWhenDocked else cfg.action;
+      } // (if cfg.action == "ignore" then {
+        # Force systemd-logind to respect inhibitors when action is ignore
+        LidSwitchIgnoreInhibited = "no";
+      } else {});
+    };
+  };
+}

@@ -1,0 +1,217 @@
+# Custom Globe Plymouth Theme Script
+# Professional design with animated globe and boot log display
+
+# Window setup - dark gradient background
+Window.SetBackgroundTopColor(0.05, 0.05, 0.08);
+Window.SetBackgroundBottomColor(0.02, 0.02, 0.03);
+
+# Screen dimensions
+screen.width = Window.GetWidth();
+screen.height = Window.GetHeight();
+
+# Load animation frames (280 frames total)
+animation.imagecount = 280;
+animation.images = [];
+
+for (i = 0; i < animation.imagecount; i++) {
+    # Format frame number with leading zeros
+    if (i < 10)
+        filename = "frame-000" + i + ".png";
+    else if (i < 100)  
+        filename = "frame-00" + i + ".png";
+    else
+        filename = "frame-0" + i + ".png";
+    
+    animation.images[i] = Image(filename);
+}
+
+# Create sprite for animation
+animation.sprite = Sprite();
+
+# Position animation centered on screen (600x612 native size)
+animation.width = 600;
+animation.height = 612;
+animation.x = screen.width / 2 - animation.width / 2;
+animation.y = screen.height * 0.5 - animation.height / 2;  # Centered vertically
+animation.sprite.SetPosition(animation.x, animation.y, 10);
+
+# Animation loop
+animation.index = 0;
+fun refresh_callback() {
+    animation.index = (animation.index + 1) % animation.imagecount;
+    animation.sprite.SetImage(animation.images[animation.index]);
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# Boot message area setup
+# Create a semi-transparent background for messages
+message_area.height = screen.height * 0.35;  # Bottom 35% of screen
+message_area.y = screen.height - message_area.height - 20;
+
+# Message display configuration
+NUM_SCROLL_LINES = 12;  # Number of visible log lines
+LINE_HEIGHT = 18;       # Height of each line
+MARGIN_LEFT = 40;       # Left margin for text
+MARGIN_BOTTOM = 60;     # Bottom margin
+
+# Initialize message lines array
+message_sprite = [];
+for (i = 0; i < NUM_SCROLL_LINES; i++) {
+    message_sprite[i] = Sprite();
+    message_sprite[i].SetPosition(
+        MARGIN_LEFT, 
+        message_area.y + (i * LINE_HEIGHT), 
+        20
+    );
+}
+
+# Message queue for scrolling
+message_queue = [];
+queue_index = 0;
+
+# Function to add a new message
+fun scroll_message(text) {
+    # Create styled text with monospace font appearance
+    # Green tint for success messages, white for normal
+    if (text.SubString(0, 2) == "OK" || text.SubString(0, 1) == "[") {
+        # Success or status messages in subtle green
+        image = Image.Text(text, 0.5, 0.9, 0.5, 1.0, "Monospace 11");
+    } else if (text.SubString(0, 6) == "Failed" || text.SubString(0, 5) == "Error") {
+        # Error messages in subtle red
+        image = Image.Text(text, 0.9, 0.4, 0.4, 1.0, "Monospace 11");
+    } else {
+        # Normal messages in light gray
+        image = Image.Text(text, 0.8, 0.8, 0.8, 0.9, "Monospace 11");
+    }
+    
+    # Add to queue
+    message_queue[queue_index] = image;
+    queue_index = (queue_index + 1) % NUM_SCROLL_LINES;
+    
+    # Update display - scroll effect
+    for (i = 0; i < NUM_SCROLL_LINES; i++) {
+        if (message_queue[i]) {
+            message_sprite[i].SetImage(message_queue[i]);
+            # Fade older messages
+            opacity = 1.0 - (i * 0.05);
+            if (opacity < 0.3) opacity = 0.3;
+            message_sprite[i].SetOpacity(opacity);
+        }
+    }
+}
+
+# Boot progress callback with subtle progress indicator
+progress.sprite = Sprite();
+progress.x = screen.width * 0.1;
+progress.y = screen.height - 30;
+progress.width = screen.width * 0.8;
+progress.height = 2;
+
+fun progress_callback(duration, progress) {
+    # Create a subtle progress line at bottom
+    if (progress > 0) {
+        # Create progress indicator (thin line)
+        for (i = 0; i < (progress.width * progress); i++) {
+            pixel.sprite = Sprite();
+            pixel.sprite.SetPosition(progress.x + i, progress.y, 15);
+            # Gradient color from blue to green as progress increases
+            red = 0.2 * (1 - progress) + 0.2 * progress;
+            green = 0.4 * (1 - progress) + 0.8 * progress;
+            blue = 0.8 * (1 - progress) + 0.4 * progress;
+            pixel.image = Image.Text(".", red, green, blue, 0.6);
+            pixel.sprite.SetImage(pixel.image);
+        }
+    }
+}
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+# System messages callback
+fun message_callback(text) {
+    # Display actual boot messages from systemd
+    if (text) {
+        scroll_message(text);
+    }
+}
+
+Plymouth.SetMessageFunction(message_callback);
+
+# Update callback for system messages
+fun update_status_callback(status) {
+    if (status == "normal") {
+        scroll_message("[ OK ] System initialization complete");
+    } else if (status == "failed") {
+        scroll_message("[FAILED] Service startup failed");
+    }
+}
+
+Plymouth.SetUpdateStatusFunction(update_status_callback);
+
+# Service update callback - shows systemd service messages
+fun display_message_callback(text) {
+    scroll_message(text);
+}
+
+Plymouth.SetDisplayMessageFunction(display_message_callback);
+
+# Display mode callbacks
+fun display_normal_callback() {
+    global.status = "normal";
+    # Ensure animation is visible in normal mode
+    animation.sprite.SetOpacity(1.0);
+}
+
+fun display_password_callback(prompt, bullets) {
+    global.status = "password";
+    
+    # Create password prompt with modern styling
+    password.box = Sprite();
+    password.box.SetPosition(screen.width / 2 - 150, screen.height / 2, 10000);
+    
+    password.text = Image.Text(prompt, 1.0, 1.0, 1.0, 1.0);
+    password.sprite = Sprite(password.text);
+    password.sprite.SetPosition(screen.width / 2 - 150, screen.height / 2 - 50, 10001);
+    
+    # Show bullets for password
+    for (i = 0; i < bullets; i++) {
+        bullet.sprite = Sprite();
+        bullet.image = Image.Text("•", 0.5, 0.9, 0.5, 1.0);
+        bullet.sprite.SetImage(bullet.image);
+        bullet.sprite.SetPosition(
+            screen.width / 2 - 140 + (i * 15), 
+            screen.height / 2, 
+            10002
+        );
+    }
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+# Let Plymouth handle ESC toggle natively
+
+# Mode switching callbacks for ESC toggle
+fun display_details_callback() {
+    # Hide animation when showing details
+    animation.sprite.SetOpacity(0);
+}
+
+fun display_splash_callback() {
+    # Show animation when in splash mode
+    animation.sprite.SetOpacity(1.0);
+}
+
+Plymouth.SetDisplayDetailsFunction(display_details_callback);
+Plymouth.SetDisplaySplashFunction(display_splash_callback);
+
+# Quit callback for cleanup
+fun quit_callback() {
+    # Clean transition to login
+    animation.sprite.SetOpacity(0);
+}
+
+Plymouth.SetQuitFunction(quit_callback);
+
+# Initial boot message - removed hardcoded messages
+# Real systemd messages will come through message_callback

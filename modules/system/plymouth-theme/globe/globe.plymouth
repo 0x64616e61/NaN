@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Custom Globe
+Description=Custom Plymouth theme with spinning globe
+ModuleName=script
+
+[script]
+ImageDir=/etc/plymouth/themes/globe
+ScriptFile=/etc/plymouth/themes/globe/globe.script

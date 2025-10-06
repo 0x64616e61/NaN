@@ -1,0 +1,6 @@
+{ ... }:
+{
+  imports = [
+    ./suspend-control.nix
+  ];
+}
