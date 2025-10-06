@@ -1,240 +1,242 @@
-# grOSs - Minimal Wayland OS for GPD Pocket 3
+7
+# NaN
 
-A declarative, modular NixOS configuration tailored for the GPD Pocket 3 handheld device, featuring the DWL compositor and comprehensive hardware integration.
+> **Production-ready NixOS configuration for GPD Pocket 3**  
+> Minimal Wayland system with DWL compositor, complete hardware integration, and security hardening
 
-## Overview
+<div align="center">
 
-grOSs is a **production-ready NixOS system** designed specifically for the GPD Pocket 3's unique hardware characteristics:
+![NixOS](https://img.shields.io/badge/NixOS-25.05-5277C3.svg?style=flat&logo=nixos&logoColor=white)
+![GPD Pocket 3](https://img.shields.io/badge/Hardware-GPD_Pocket_3-orange?style=flat)
+![DWL](https://img.shields.io/badge/Compositor-DWL-green?style=flat)
+![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)
 
-- **Minimal Wayland environment** with DWL compositor
-- **Portrait display optimization** (1200x1920 native resolution)
-- **Complete hardware support** (fingerprint, touchscreen, thermal management)
-- **Security-hardened** with AppArmor, audit logging, and SSH restrictions
-- **Performance-optimized** boot and power management
+**[Features](#-features)** • **[Quick Start](#-quick-start)** • **[Documentation](#-documentation)** • **[Contributing](#-contributing)**
 
-### System Specifications
+</div>
 
-- **Compositor**: DWL (dwm for Wayland)
-- **Status Bar**: dwlb (layer shell v3 compatible)
-- **Display Manager**: SDDM
-- **Hardware Platform**: GPD Pocket 3
-- **NixOS Version**: 25.11 (unstable)
-- **Configuration Files**: 53 Nix modules (5,835 lines)
+---
 
-## Quick Start
+## 🎯 What is NaN?
+
+**NaN** (grOSs) is a fully declarative NixOS configuration optimized for the GPD Pocket 3 handheld PC. It combines the minimalism of DWL with comprehensive hardware support, creating a fast, secure, and ergonomic Linux environment for the unique 7" portrait display.
+
+### Why NaN?
+
+- ⚡ **Fast**: <10s boot time with optimized systemd-based initrd
+- 🔒 **Secure**: AppArmor, audit logging, SSH hardening out-of-the-box
+- 🧩 **Modular**: 53 custom modules with clean `custom.*` options API
+- 🎨 **Complete**: Fingerprint auth, thermal management, auto-rotation, theming
+- 📚 **Documented**: Comprehensive API reference and architecture docs
+
+---
+
+## ✨ Features
+
+### 🖥️ **Wayland Environment**
+
+- **DWL** - Lightweight tiling compositor (dwm for Wayland)
+- **dwlb** - Status bar with layer shell v3 support
+- **SDDM** - Display manager with fingerprint integration
+- Custom keybindings optimized for compact keyboard
+- Native touchscreen and stylus support
+
+### 🔐 **Security Hardening**
+
+- ✅ AppArmor mandatory access control
+- ✅ SSH key-based auth only (no passwords, no root)
+- ✅ System-wide audit logging (auditd)
+- ✅ Kernel hardening (dmesg restrictions, BPF hardening)
+- ✅ Git commit signing via SSH
+- ✅ Fingerprint authentication (PAM integration)
+
+### 🎯 **GPD Pocket 3 Integration**
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| **Display** | ✅ Full | 1200x1920→landscape rotation, HiDPI scaling |
+| **Fingerprint** | ✅ Full | Focaltech sensor with PAM (SDDM/sudo/swaylock) |
+| **Touchscreen** | ✅ Full | Calibrated 10-point touch + stylus |
+| **Thermal** | ✅ Full | Emergency shutdown @95°C, throttle @80°C |
+| **Auto-rotate** | ✅ Full | IIO sensor integration |
+| **Gestures** | ✅ Full | Multi-touch gesture recognition |
+| **Battery** | ✅ Full | TLP optimization + monitoring |
+| **iPhone Tether** | ✅ Full | Auto-connect USB tethering |
+
+### ⚙️ **Performance Optimizations**
+
+```
+Boot Time:        ~10 seconds (UEFI → SDDM)
+Memory (Idle):    ~1.5 GB
+Status Bar:       2s refresh interval
+Thermal Monitor:  5s interval monitoring
+```
+
+- Systemd-based initrd with parallel device init
+- zstd -1 compression (fastest decompression)
+- Disabled network-wait and udev-settle delays
+- Kernel params: `nowatchdog`, `quiet`, `splash`
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- GPD Pocket 3 hardware (or compatible x86_64 device)
+- GPD Pocket 3 (or compatible x86_64 device)
 - NixOS installation media
-- Basic familiarity with NixOS and Nix flakes
+- Basic Nix/NixOS knowledge
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url> /etc/nixos
-   cd /etc/nixos
-   ```
+```bash
+# 1. Clone repository
+git clone https://github.com/0x64616e61/NaN.git /etc/nixos
+cd /etc/nixos
 
-2. **Review hardware configuration**
-   ```bash
-   # Ensure hardware-config.nix matches your system
-   nixos-generate-config --show-hardware-config
-   ```
+# 2. Generate your hardware config
+sudo nixos-generate-config --show-hardware-config > hardware-config.nix
 
-3. **🚨 CRITICAL: Set user password**
-   ```bash
-   # BEFORE BUILDING: Remove or change the default password
-   # Edit configuration.nix line 39 and either:
-   # - Remove: initialPassword = "a";
-   # - Or set a secure password hash:
-   # users.users.a.hashedPassword = "$(mkpasswd -m sha-512)";
-   ```
+# 3. Review and customize
+# Edit modules/system/default.nix and modules/hm/default.nix
 
-4. **Build and activate**
-   ```bash
-   sudo nixos-rebuild switch --flake .#grOSs
-   ```
+# 4. Build system
+sudo nixos-rebuild switch --flake .#grOSs
 
-5. **Reboot into grOSs**
-   ```bash
-   sudo reboot
-   ```
+# 5. Reboot
+sudo reboot
+```
 
-See [INSTALLATION.md](INSTALLATION.md) for detailed installation instructions and troubleshooting.
+**⚠️ IMPORTANT**: No default password is set. After first boot, run:
+```bash
+sudo passwd a  # Set password for user 'a'
+```
 
-## Key Features
+See **[INSTALL.md](INSTALL.md)** for detailed installation guide.
 
-### 🖥️ Wayland Compositor
+---
 
-- **DWL**: Lightweight, tiling Wayland compositor based on dwm principles
-- **dwlb**: Modern status bar with layer shell v3 support
-- **Custom keybindings**: Optimized for GPD Pocket 3's compact keyboard
-- **Touchscreen support**: Native Wayland touch input integration
+## 📦 Module System
 
-### 🔐 Security Hardening
+NaN uses a custom options framework with all settings under `custom.*` namespace:
 
-- **AppArmor**: Mandatory access control with profile confinement
-- **SSH hardening**: Key-based authentication only, root login disabled
-- **Audit logging**: Comprehensive system event tracking
-- **Firewall**: Enabled with connection logging
-- **Kernel security**: dmesg restriction, BPF hardening, unprivileged BPF disabled
-- **Git commit signing**: Automatic SSH-based commit signing
-
-**⚠️ See [SECURITY.md](SECURITY.md) for critical security setup requirements**
-
-### 🎯 GPD Pocket 3 Hardware Integration
-
-#### Display
-- **Native portrait resolution**: 1200x1920@60Hz with automatic rotation
-- **Custom GRUB theme**: Rotated assets for landscape appearance
-- **Display tools**: wlr-randr, wdisplays, kanshi integration
-- **Auto-rotate service**: Automatic orientation detection
-
-#### Input Devices
-- **Focaltech fingerprint sensor**: PAM integration for SDDM, sudo, swaylock
-- **Keyd**: Keyboard remapping and customization
-- **Touchscreen & pen**: Full Wayland input support
-- **Gesture recognition**: Custom gesture handlers
-
-#### Thermal & Power Management
-- **Thermald integration**: Intelligent thermal throttling
-- **Custom thermal zones**: Emergency shutdown at 95°C, throttle at 80°C
-- **Battery optimization**: TLP integration with auto-cpufreq
-- **Hardware monitoring**: Systemd service tracking temps, battery, storage health
-- **Lid behavior**: Configurable lid close actions (default: ignore)
-
-#### Connectivity
-- **iPhone USB tethering**: Auto-connect with priority routing
-- **NetworkManager**: WiFi and wired networking
-- **Bluetooth**: Full BlueZ integration
-
-### ⚡ Performance Optimizations
-
-- **Fast boot**: Systemd-based initrd with zstd compression (~10s boot target)
-- **Memory tuning**: Low swappiness (10), optimized dirty page ratios
-- **Service optimization**: Disabled network-wait and udev-settle delays
-- **Kernel parameters**: `nowatchdog`, minimal logging for speed
-
-### 🧩 Modular Architecture
-
-grOSs uses a **custom options framework** for declarative configuration:
+### System Modules (`custom.system.*`)
 
 ```nix
 custom.system = {
-  # Hardware features
+  # Hardware
   hardware.focaltechFingerprint.enable = true;
-  hardware.thermal.enable = true;
+  hardware.thermal = {
+    enable = true;
+    emergencyShutdownTemp = 95;  # °C
+    throttleTemp = 80;
+  };
 
-  # Security settings
+  # Security
   security.hardening.enable = true;
-  security.fingerprint.enable = true;
+  security.fingerprint = {
+    enable = true;
+    enableSddm = true;
+    enableSudo = true;
+  };
 
-  # Power management
-  power.lidBehavior.action = "ignore";
-
-  # Network configuration
-  network.iphoneUsbTethering.enable = true;
+  # Network
+  network.iphoneUsbTethering = {
+    enable = true;
+    autoConnect = true;
+  };
 };
 ```
 
-See [MODULES.md](MODULES.md) for complete module reference.
+### Home Manager Modules (`custom.hm.*`)
 
-## Project Structure
+```nix
+custom.hm = {
+  # Window manager
+  dwl.enable = true;
+
+  # Applications
+  applications.firefox.enable = true;
+  applications.ghostty.enable = true;
+
+  # Audio
+  audio.mpd.enable = true;
+  audio.easyeffects.preset = "Meze_109_Pro";
+
+  # Desktop
+  desktop.theme.catppuccinMochaTeal = true;
+  desktop.touchscreen.rotation = 270;
+  animations.enable = true;
+};
+```
+
+**Full API Reference**: [MODULE_API.md](MODULE_API.md)
+
+---
+
+## 📁 Project Structure
 
 ```
-/home/a/grOSs/
-├── flake.nix                    # Flake configuration with inputs
-├── configuration.nix            # Main system configuration
-├── hardware-config.nix          # Hardware-specific settings
+.
+├── configuration.nix          # Main system config
+├── gpd-pocket-3.nix          # GPD-specific optimizations
+├── hardware-config.nix        # Auto-generated hardware config
+├── flake.lock                # Locked dependencies
 │
 ├── modules/
-│   ├── system/                  # System-level modules
-│   │   ├── boot.nix            # Boot optimization & GRUB config
-│   │   ├── security/           # Security hardening modules
-│   │   ├── hardware/           # Hardware support (fingerprint, thermal, etc.)
-│   │   ├── power/              # Power management modules
-│   │   ├── network/            # Network configuration
-│   │   └── packages/           # System package modules
+│   ├── system/               # System-level (root) modules
+│   │   ├── boot.nix         # Fast boot configuration
+│   │   ├── hardware/        # Fingerprint, thermal, monitoring
+│   │   ├── security/        # Hardening, fingerprint, secrets
+│   │   ├── network/         # iPhone tethering
+│   │   └── power/           # Battery, lid behavior
 │   │
-│   └── hm/                      # Home Manager user configuration
-│       ├── applications/        # User application configs
-│       ├── desktop/            # Desktop environment settings
-│       ├── audio/              # Audio configuration (MPD, EasyEffects)
-│       └── dwl/                # DWL compositor configuration
+│   └── hm/                   # Home Manager (user) modules
+│       ├── dwl/             # DWL compositor + status bar
+│       ├── applications/    # Firefox, Ghostty, MPV, etc.
+│       ├── audio/           # MPD, EasyEffects
+│       └── desktop/         # Theme, gestures, animations
 │
-└── tests/                       # Test configurations (optional)
+└── docs/                     # Feature documentation
+    ├── DWL_KEYBINDINGS.md
+    ├── GPD_POCKET_3_ANIMATIONS.md
+    └── LOCK_SCREEN_INTEGRATION.md
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed system design documentation.
+---
 
-## Configuration Highlights
+## 🛠️ Common Tasks
 
-### Custom Module Options
-
-All configuration is centralized under `custom.system.*` and `custom.hm.*` namespaces:
-
-| Module | Purpose | Key Options |
-|--------|---------|-------------|
-| `hardware.focaltechFingerprint` | Fingerprint sensor support | `enable` |
-| `hardware.thermal` | Thermal management | `emergencyShutdownTemp`, `throttleTemp` |
-| `hardware.monitoring` | Hardware health monitoring | `alerts.method`, `checkInterval` |
-| `security.hardening` | Security hardening | `restrictSSH`, `closeGamingPorts` |
-| `security.fingerprint` | Fingerprint auth | `enableSddm`, `enableSudo` |
-| `security.secrets` | Secret storage | `provider` (keepassxc/gnome-keyring) |
-| `power.lidBehavior` | Lid close behavior | `action` (ignore/suspend/hibernate) |
-| `power.suspendControl` | Suspend configuration | `disableCompletely` |
-| `network.iphoneUsbTethering` | iPhone tethering | `autoConnect`, `connectionPriority` |
-
-### Flake Inputs
-
-- **nixpkgs**: NixOS unstable channel
-- **home-manager**: User environment management
-- **nixos-hardware**: GPD Pocket 3 hardware profile
-
-## Usage
-
-### Building the System
+### Building & Testing
 
 ```bash
-# Full system rebuild
-sudo nixos-rebuild switch --flake .#grOSs
+# Dry-run (check for errors)
+sudo nixos-rebuild dry-build --flake .#grOSs
 
-# Test configuration without activation
+# Test without boot entry
 sudo nixos-rebuild test --flake .#grOSs
 
-# Build boot configuration only
+# Build for next boot
 sudo nixos-rebuild boot --flake .#grOSs
+
+# Full rebuild (activate + boot entry)
+sudo nixos-rebuild switch --flake .#grOSs
 ```
 
-### Updating the System
+### Updating
 
 ```bash
 # Update flake inputs
 nix flake update
 
-# Rebuild with updated inputs
+# Rebuild with updates
 sudo nixos-rebuild switch --flake .#grOSs
 ```
 
-### Hardware Monitoring
+### Fingerprint Setup
 
 ```bash
-# Manual hardware check
-sudo gpd-hardware-monitor
-
-# View monitoring logs
-journalctl -u gpd-hardware-monitor -f
-
-# Check current temperatures
-sensors
-```
-
-### Fingerprint Enrollment
-
-```bash
-# Enroll fingerprint for current user
+# Enroll fingerprint
 fprintd-enroll
 
 # Verify fingerprint
@@ -244,202 +246,187 @@ fprintd-verify
 fprintd-list a
 ```
 
-## Customization
-
-### Changing Display Settings
-
-Edit `modules/system/default.nix`:
-
-```nix
-custom.system.monitor = {
-  enable = true;
-  name = "DSI-1";
-  resolution = "1200x1920@60";
-  scale = 1.5;  # Adjust for readability
-  transform = 3;  # 270° rotation
-};
-```
-
-### Adjusting Thermal Thresholds
-
-Edit `modules/system/default.nix`:
-
-```nix
-custom.system.hardware.thermal = {
-  enable = true;
-  emergencyShutdownTemp = 95;  # °C
-  criticalTemp = 90;
-  throttleTemp = 80;
-  normalGovernor = "schedutil";  # or "performance"/"powersave"
-};
-```
-
-### Security Provider Configuration
-
-Choose secret storage backend:
-
-```nix
-custom.system.security.secrets = {
-  enable = true;
-  provider = "gnome-keyring";  # or "keepassxc"
-};
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**DWL won't start after login**
-- Check: `journalctl -xe | grep dwl`
-- Verify: Status bar script exists at `~/.local/bin/dwl-status/status`
-- Fix: Rebuild with `nixos-rebuild switch`
-
-**Fingerprint reader not working**
-- Check: `lsusb | grep Focal`
-- Verify: `systemctl status fprintd`
-- Enroll: `fprintd-enroll`
-
-**Display rotation incorrect**
-- Check: `wlr-randr`
-- Adjust: `transform` option in monitor config (0=0°, 1=90°, 2=180°, 3=270°)
-
-**High temperatures/thermal throttling**
-- Monitor: `watch sensors`
-- Check: `journalctl -u gpd-hardware-monitor`
-- Adjust: Thermal thresholds in configuration
-
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for comprehensive troubleshooting guide.
-
-## Development
-
-### Adding New Modules
-
-1. Create module file in appropriate directory:
-   ```bash
-   # System module
-   touch modules/system/feature-name.nix
-
-   # Home Manager module
-   touch modules/hm/feature-name.nix
-   ```
-
-2. Define module structure:
-   ```nix
-   { config, lib, pkgs, ... }:
-
-   with lib;
-
-   let
-     cfg = config.custom.system.featureName;
-   in
-   {
-     options.custom.system.featureName = {
-       enable = mkEnableOption "feature description";
-       # Additional options...
-     };
-
-     config = mkIf cfg.enable {
-       # Configuration implementation...
-     };
-   }
-   ```
-
-3. Import in parent module:
-   ```nix
-   # modules/system/default.nix or modules/hm/default.nix
-   imports = [
-     ./feature-name.nix
-   ];
-   ```
-
-4. Test configuration:
-   ```bash
-   sudo nixos-rebuild test --flake .#grOSs
-   ```
-
-### Testing Changes
+### Monitoring
 
 ```bash
-# Dry-run to check for errors
-sudo nixos-rebuild dry-build --flake .#grOSs
+# CPU temperature
+sensors
 
-# Build without activation
-sudo nixos-rebuild build --flake .#grOSs
+# Thermal logs
+journalctl -u thermal-monitor -f
 
-# Test with activation but no boot entry
-sudo nixos-rebuild test --flake .#grOSs
+# Battery status
+cat /sys/class/power_supply/BAT0/capacity
 ```
-
-## Documentation
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design and architectural decisions
-- **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation guide
-- **[MODULES.md](MODULES.md)** - Complete module reference
-- **[SECURITY.md](SECURITY.md)** - Security hardening guide and requirements
-- **[SYSTEM_ANALYSIS_REPORT.md](SYSTEM_ANALYSIS_REPORT.md)** - Comprehensive system analysis
-
-## Contributing
-
-This is a personal NixOS configuration, but contributions and suggestions are welcome:
-
-1. Fork the repository
-2. Create a feature branch
-3. Test changes on GPD Pocket 3 hardware (or similar)
-4. Submit pull request with description
-
-### Contribution Guidelines
-
-- Follow existing Nix code style conventions
-- Add comments for complex logic
-- Update module documentation for new options
-- Test on actual hardware when possible
-- Keep modules focused and single-responsibility
-
-## Security Notice
-
-**🚨 CRITICAL**: Before deploying this configuration:
-
-1. **Remove the default password** in `configuration.nix:39`
-2. **Set a strong user password** using `hashedPassword`
-3. **Review firewall rules** for your use case
-4. **Consider enabling disk encryption** (LUKS)
-5. **Review SSH configuration** if enabling remote access
-
-See [SECURITY.md](SECURITY.md) for complete security hardening checklist.
-
-## License
-
-This configuration is provided as-is for personal use. Adapt and modify as needed for your hardware and requirements.
-
-## Acknowledgments
-
-- **NixOS Community** - For the excellent NixOS distribution
-- **DWL Project** - For the lightweight Wayland compositor
-- **nixos-hardware** - For GPD Pocket 3 hardware profiles
-- **home-manager** - For declarative user environment management
-
-## Support
-
-For issues specific to:
-- **grOSs configuration**: Open an issue in this repository
-- **GPD Pocket 3 hardware**: Check [nixos-hardware GPD Pocket 3 profile](https://github.com/NixOS/nixos-hardware/tree/master/gpd/pocket-3)
-- **NixOS general**: Visit [NixOS Discourse](https://discourse.nixos.org/)
-- **DWL compositor**: See [DWL project documentation](https://github.com/djpohly/dwl)
-
-## System Health
-
-**Current Status**: Production-ready with security fixes required
-
-| Category | Score | Status |
-|----------|-------|--------|
-| Architecture | 9.0/10 | ✅ Excellent |
-| Security | 6.5/10 | ⚠️ Fix required |
-| Performance | 8.5/10 | ✅ Optimized |
-| Hardware Integration | 9.5/10 | ✅ Exceptional |
-| **Overall** | **8.2/10** | ✅ Good |
-
-Last system analysis: See [SYSTEM_ANALYSIS_REPORT.md](SYSTEM_ANALYSIS_REPORT.md)
 
 ---
 
-**grOSs** - Minimal, secure, and performant NixOS for GPD Pocket 3
+## 📖 Documentation
+
+| Document | Description |
+|----------|-------------|
+| **[MODULE_API.md](MODULE_API.md)** | Complete `custom.*` options reference |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | System design and patterns |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Development guidelines |
+| **[INSTALL.md](INSTALL.md)** | Detailed installation guide |
+| **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** | Command cheat sheet |
+| **[docs/](docs/)** | Feature-specific documentation |
+
+---
+
+## 🎨 Customization Examples
+
+### Change Display Settings
+
+```nix
+# modules/system/default.nix
+custom.system.monitor = {
+  enable = true;
+  resolution = "1200x1920@60";
+  scale = 1.5;        # Adjust for readability
+  transform = 3;      # 0=0°, 1=90°, 2=180°, 3=270°
+};
+```
+
+### Adjust Thermal Limits
+
+```nix
+# modules/system/default.nix
+custom.system.hardware.thermal = {
+  emergencyShutdownTemp = 95;  # Emergency shutdown
+  throttleTemp = 80;           # Start throttling
+  normalGovernor = "schedutil"; # powersave/performance/schedutil
+};
+```
+
+### Enable Applications
+
+```nix
+# modules/hm/default.nix
+custom.hm.applications = {
+  firefox.enable = true;
+  ghostty.enable = true;
+  mpv = {
+    enable = true;
+    youtubeQuality = "1080";
+  };
+};
+```
+
+---
+
+## 🐛 Troubleshooting
+
+<details>
+<summary><b>DWL won't start after login</b></summary>
+
+```bash
+# Check DWL errors
+journalctl -xe | grep dwl
+
+# Verify status bar exists
+ls -la ~/.local/bin/dwl-status/status
+
+# Rebuild
+sudo nixos-rebuild switch --flake .#grOSs
+```
+</details>
+
+<details>
+<summary><b>Fingerprint reader not detected</b></summary>
+
+```bash
+# Check USB device
+lsusb | grep Focal
+
+# Check service
+systemctl status fprintd
+
+# Re-enroll
+fprintd-enroll
+```
+</details>
+
+<details>
+<summary><b>Display rotation incorrect</b></summary>
+
+```bash
+# Check current config
+wlr-randr
+
+# Adjust transform in modules/system/default.nix
+# 0=0°, 1=90°, 2=180°, 3=270°
+```
+</details>
+
+<details>
+<summary><b>High CPU temperatures</b></summary>
+
+```bash
+# Monitor temps
+watch sensors
+
+# Check thermal logs
+journalctl -u thermal-monitor -f
+
+# Lower thresholds in modules/system/default.nix
+```
+</details>
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! This is a personal config, but improvements benefit everyone.
+
+### How to Contribute
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/my-module`
+3. Make changes following [CONTRIBUTING.md](CONTRIBUTING.md)
+4. Test on hardware: `sudo nixos-rebuild test --flake .#grOSs`
+5. Commit: `git commit -m "feat: add feature"`
+6. Push: `git push origin feature/my-module`
+7. Open Pull Request
+
+### Contribution Guidelines
+
+- ✅ Follow existing Nix code style
+- ✅ Use `custom.system.*` or `custom.hm.*` namespaces
+- ✅ Add options documentation
+- ✅ Test on actual hardware when possible
+- ✅ Update MODULE_API.md for new options
+
+---
+
+## 📜 License
+
+MIT License - Feel free to use, modify, and distribute.
+
+---
+
+## 🙏 Acknowledgments
+
+- **[NixOS](https://nixos.org/)** - The purely functional Linux distribution
+- **[DWL](https://github.com/djpohly/dwl)** - Lightweight Wayland compositor
+- **[nixos-hardware](https://github.com/NixOS/nixos-hardware)** - GPD Pocket 3 hardware profile
+- **[home-manager](https://github.com/nix-community/home-manager)** - Declarative user environment
+
+---
+
+## 💬 Support & Community
+
+- **Issues**: [GitHub Issues](https://github.com/0x64616e61/NaN/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/0x64616e61/NaN/discussions)
+- **NixOS Help**: [NixOS Discourse](https://discourse.nixos.org/)
+- **GPD Hardware**: [nixos-hardware GPD Pocket 3](https://github.com/NixOS/nixos-hardware/tree/master/gpd/pocket-3)
+
+---
+
+<div align="center">
+
+**NaN** - Minimal, secure, and performant NixOS for GPD Pocket 3
+
+Made with ❤️ using [NixOS](https://nixos.org/)
+
+</div>
