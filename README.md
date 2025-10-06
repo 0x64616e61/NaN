@@ -19,7 +19,7 @@
 
 ## 🎯 What is NaN?
 
-**NaN** (grOSs) is a fully declarative NixOS configuration optimized for the GPD Pocket 3 handheld PC. It combines the minimalism of DWL with comprehensive hardware support, creating a fast, secure, and ergonomic Linux environment for the unique 7" portrait display.
+**NaN** is a fully declarative NixOS configuration optimized for the GPD Pocket 3 handheld PC. It combines the minimalism of DWL with comprehensive hardware support, creating a fast, secure, and ergonomic Linux environment for the unique 7" portrait display.
 
 ### Why NaN?
 
