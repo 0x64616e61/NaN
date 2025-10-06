@@ -91,12 +91,11 @@
   boot.initrd.checkJournalingFS = false;  # Skip fsck on journaling filesystems
 
   # Optimize systemd boot targets
-  systemd.extraConfig = ''
-    [Manager]
-    DefaultDeviceTimeoutSec=10s
-    DefaultTimeoutStartSec=10s
-    DefaultTimeoutStopSec=5s
-  '';
+  systemd.settings.Manager = {
+    DefaultDeviceTimeoutSec = "10s";
+    DefaultTimeoutStartSec = "10s";
+    DefaultTimeoutStopSec = "5s";
+  };
 
   # Disable services that slow boot
   systemd.services = {

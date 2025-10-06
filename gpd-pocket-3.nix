@@ -45,12 +45,12 @@
   hardware.sensor.iio.enable = true;
 
   # Dana: Systemd manager defaults (all services hardened)
-  systemd.extraConfig = ''
-    DefaultPrivateTmp=yes
-    DefaultNoNewPrivileges=yes
-    DefaultCPUAccounting=yes
-    DefaultMemoryAccounting=yes
-  '';
+  systemd.settings.Manager = {
+    DefaultPrivateTmp = "yes";
+    DefaultNoNewPrivileges = "yes";
+    DefaultCPUAccounting = "yes";
+    DefaultMemoryAccounting = "yes";
+  };
 
   # Optional: HiDPI scaling for small screen
 }
