@@ -27,12 +27,6 @@ in
       description = "Enable fingerprint auth for swaylock";
     };
 
-    enableHyprlock = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable fingerprint auth for hyprlock";
-    };
-
     additionalServices = mkOption {
       type = types.listOf types.str;
       default = [];
@@ -53,9 +47,6 @@ in
       })
       (mkIf cfg.enableSwaylock {
         swaylock.fprintAuth = true;
-      })
-      (mkIf cfg.enableHyprlock {
-        hyprlock.fprintAuth = true;
       })
       (listToAttrs (map (service: {
         name = service;

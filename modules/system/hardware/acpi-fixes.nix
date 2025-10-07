@@ -48,19 +48,8 @@ in
       "acpi_mask_gpe=0x6D"
     ];
 
-    # Documentation about the ACPI fixes
-    system.activationScripts.acpiFixesInfo = ''
-      echo ""
-      echo "🔧 ACPI BIOS Workarounds Active for GPD Pocket 3"
-      echo "   Known BIOS Bugs (worked around via kernel parameters):"
-      echo "   • _SB.PC00.I2C0.TPD0 / TPL1 - Missing touchpad/touchscreen references"
-      echo "   • _SB.UBTC.RUCC - Missing USB Type-C UCSI method"
-      echo "   • _SB.PC00.LPCB.HEC.SEN4 - Missing EC sensor (triggers on certain GPE events)"
-      echo "   Workaround: acpi_osi modified + GPE masking"
-      echo "   Impact: Reduced ACPI errors, some EC features may not work"
-      echo "   Note: BIOS update from GPD would fully fix these issues"
-      echo ""
-    '';
+    # Documentation about the ACPI fixes - now part of unified system info
+    # See modules/system/default.nix for the combined display
 
     # Monitor for remaining ACPI issues
     systemd.services.acpi-error-monitor = {

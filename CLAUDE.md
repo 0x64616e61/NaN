@@ -8,15 +8,15 @@ Personal NixOS configuration for GPD Pocket 3 handheld PC using Hydenix (Hyprlan
 
 ## Critical Context
 
-- **Repository**: `/nix-modules/` (system-wide location, requires sudo for modifications)
-- **Flake Names**: `NaN` (primary), `hydenix`/`mini` (legacy aliases) - all point to same config
+- **Repository**: Current directory `/home/a/NaN` (local working directory)
+- **Flake Name**: `NaN` (primary)
 - **Module Namespaces**:
   - `hydenix.*` - Core Hydenix framework options
   - `custom.system.*` - System-level modules (requires sudo)
   - `custom.hm.*` - User-level Home Manager modules
 - **Configuration Flow**: `flake.nix` → `configuration.nix` → `modules/system/` & `modules/hm/`
 - **Hardware Detection**: Smart wrapper in `hardware-config.nix` with `--impure` flag required
-- **Sudo Password**: `7`
+- **Window Manager**: DWL (Wayland compositor), not Hyprland
 
 ## Essential Commands
 
@@ -60,21 +60,19 @@ worksummary
 
 ### Hardware Diagnostics
 ```bash
-# Touchscreen/gestures (GPD Pocket 3)
+# Touchscreen (GPD Pocket 3)
 sudo libinput debug-events --device /dev/input/event18
 
-# Hyprland
-hyprctl monitors          # Display setup (expect DSI-1)
-hyprctl plugins list      # Should show hyprgrass
+# Display
+wlr-randr                 # Display setup (expect DSI-1)
 
 # Services & errors
 journalctl -xe --user     # User services
 journalctl -b -p err      # Boot errors
 
-# Power management
-battery-status            # Battery health
-power-profile performance # AC power mode
-power-profile powersave   # Battery mode
+# Thermal monitoring
+sensors                   # CPU temperature
+journalctl -u thermal-monitor -f
 ```
 
 ## Architecture
@@ -82,8 +80,8 @@ power-profile powersave   # Battery mode
 ### High-Level Structure
 
 ```
-/nix-modules/                  # System-wide repository (requires sudo)
-├── flake.nix                  # Flake entrypoint (inputs: hydenix, nixpkgs, grub2-themes, sops-nix)
+/home/a/NaN/                   # Local working directory
+├── flake.nix                  # Flake entrypoint (inputs: hydenix, nixpkgs, nix-index-database, grub2-themes, sops-nix)
 ├── flake.lock                 # Pinned dependency versions
 ├── configuration.nix          # Main system config (imports modules)
 ├── hardware-config.nix        # Smart wrapper for hardware detection (requires --impure)
@@ -113,29 +111,31 @@ modules/
 │   │   └── mcp/         # 6 MCP server modules (context7, magic, playwright, etc.)
 │   ├── input/           # Keyboard (keyd), mouse (vial)
 │   ├── network/         # iPhone USB tethering
-│   └── *.nix           # Boot, monitor, display, auto-commit, update-alias
+│   └── *.nix           # Boot, monitor, display, dwl-custom, auto-commit, update-alias
 └── hm/                  # custom.hm.* namespace (Home Manager)
     ├── applications/    # Firefox, Ghostty, MPV, btop
     ├── audio/           # EasyEffects, MPD
-    ├── desktop/         # Gestures (hyprgrass), idle, rotation, theming
-    ├── hyprland/        # Window manager config (keybinds, window rules)
-    └── waybar/          # Status bar
+    ├── desktop/         # Idle, rotation, theming, animations
+    ├── dwl/             # DWL window manager configuration
+    └── claude-code*     # Claude Code integration modules
 ```
 
 ### Key Files
-- `flake.nix` - Inputs: hydenix, nixpkgs, grub2-themes, sops-nix
+- `flake.nix` - Inputs: hydenix, nixpkgs, nix-index-database, grub2-themes, sops-nix
 - `configuration.nix` - Main config (user: a, host: NaN, timezone, locale)
 - `hardware-config.nix` - Smart wrapper for `/etc/nixos/hardware-configuration.nix`
 - `modules/system/default.nix` - System module toggles
 - `modules/hm/default.nix` - User module toggles
 - `modules/system/update-alias.nix` - Defines `update!`, `panic`, `worksummary` commands
+- `modules/system/dwl-custom.nix` - DWL compositor configuration
+- `modules/system/dwl-keybinds.nix` - DWL keybinding definitions
 
 ### Active System
 - **Hardware**: GPD Pocket 3 (Intel i3-1125G4)
 - **Display**: DSI-1, 1200x1920@60Hz, 1.5x scale, 270° rotation
 - **Shell**: zsh with oh-my-posh prompt
 - **Terminal**: Ghostty (0.85 opacity, pure black background)
-- **Desktop**: Hyprland + Waybar
+- **Desktop**: DWL (Wayland compositor) with custom status bar
 - **Theme**: Pure black + Catppuccin Mocha accents
 
 ## GPD Pocket 3 Hardware
@@ -153,11 +153,9 @@ modules/
 - **Custom Module**: `modules/system/hardware/focal-spi/` (kernel module + patched libfprint)
 - **Test**: `fprintd-enroll` to add fingerprint
 
-### Gestures (Hyprgrass)
-- **3-Finger Swipe**: Left/right for workspaces, up/down for fullscreen
-- **Sensitivity**: 4.0 (touchscreen-optimized)
-- **Module**: `modules/hm/desktop/hyprgrass-config.nix`
-- **Known**: 2/4-finger gestures don't work
+### Touchscreen
+- **Device**: GXTP7380:00 27C6:0113 at `/dev/input/event18`
+- **Module**: `modules/system/touchscreen-pen.nix`
 
 ### Thermal Management
 - **CPU**: Intel i3-1125G4 (4C/8T, 2.0-3.3GHz)

@@ -117,7 +117,6 @@ in
             format-plugged = "Charging: {capacity}%";
             format-time = "{H}h {M}m";
             tooltip-format = "{timeTo}, {power}W";
-            on-click = "battery-status";
           };
 
           network = {

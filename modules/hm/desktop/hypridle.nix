@@ -19,11 +19,6 @@ in
       description = "Seconds before turning off screen";
     };
 
-    lockTimeout = mkOption {
-      type = types.int;
-      default = 120;
-      description = "Seconds before locking screen";
-    };
 
     suspendTimeout = mkOption {
       type = types.nullOr types.int;
@@ -39,23 +34,15 @@ in
 
       settings = {
         general = {
-          lock_cmd = "hyprlock";
-          before_sleep_cmd = "hyprlock";
           after_sleep_cmd = "hyprctl dispatch dpms on";
         };
 
         listener = [
-          # Screen timeout - turn off display
+          # Screen timeout - use same toggle-display script as Windows+L keybind
           {
             timeout = cfg.screenTimeout;
-            on-timeout = "sleep 1 && hyprctl dispatch dpms off";
-            on-resume = "hyprctl dispatch dpms on";
-          }
-
-          # Lock timeout
-          {
-            timeout = cfg.lockTimeout;
-            on-timeout = "hyprlock";
+            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch dpms off";
+            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
           }
         ] ++ optional (cfg.suspendTimeout != null) {
           # Suspend timeout (optional)

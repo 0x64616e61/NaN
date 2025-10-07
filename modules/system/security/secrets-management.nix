@@ -38,20 +38,7 @@ in
       age
     ];
 
-    # Documentation
-    system.activationScripts.secretsManagementInfo = ''
-      echo ""
-      echo "🔐 Secrets Management (sops-nix)"
-      echo "   Status: Enabled"
-      echo "   Key file: /var/lib/sops-nix/key.txt"
-      echo "   Secrets file: ${toString cfg.defaultSopsFile}"
-      echo ""
-      echo "   Usage:"
-      echo "   1. Generate age key: age-keygen -o ~/.config/sops/age/keys.txt"
-      echo "   2. Create .sops.yaml with age public key"
-      echo "   3. Create secrets: sops secrets/secrets.yaml"
-      echo "   4. Reference in config: config.sops.secrets.secret-name.path"
-      echo ""
-    '';
+    # Documentation - now part of unified system info
+    # See modules/system/default.nix for the combined display
   };
 }

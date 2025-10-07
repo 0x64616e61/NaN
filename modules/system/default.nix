@@ -212,13 +212,13 @@
     "vm.dirty_writeback_centisecs" = 1500;   # SSD optimization
   };
 
-  # Migration notice for declarative system
-  system.activationScripts.declarativeSystemInfo = ''
+  # Unified system information display (tree structure)
+  system.activationScripts.systemInfo = ''
     echo ""
-    echo "🎯 GPD Pocket 3 System Architecture:"
-    echo "   Mode: Declarative (Event-driven)"
-    echo "   Benefits: Pure Functions • No Runtime State • Event-driven"
-    echo "   Performance: 16MB memory (vs 650MB+ imperative)"
+    echo "GPD Pocket 3 Configuration"
+    echo "├─ ACPI Workarounds: TPD0/TPL1, UBTC.RUCC, HEC.SEN4"
+    echo "├─ Architecture: Declarative (16MB vs 650MB)"
+    echo "└─ Secrets: sops-nix @ /var/lib/sops-nix/key.txt"
     echo ""
   '';
 }

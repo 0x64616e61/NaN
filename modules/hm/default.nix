@@ -53,7 +53,6 @@
     desktop.hypridle = {
       enable = true;
       screenTimeout = 60;     # Turn off screen after 1 minute
-      lockTimeout = 120;      # Lock after 2 minutes
       suspendTimeout = 900;   # Suspend after 15 minutes
     };
 
@@ -72,6 +71,10 @@
     desktop.hyprgrass = {
       enable = true;  # Enable 3-finger touchscreen gestures
       sensitivity = 4.0;  # Optimized for touchscreen
+    };
+
+    desktop.rebuildKeybind = {
+      enable = true;  # Enable Windows+Insert for NixOS rebuild
     };
   };
 
@@ -95,7 +98,6 @@
     jq  # For eww JSON processing
     dunst
     swaybg  # Wallpaper daemon
-    hyprlock  # Hyprland lock screen with fingerprint support
     # Applications used in keybinds
     ghostty
     yazi  # Terminal file manager

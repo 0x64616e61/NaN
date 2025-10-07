@@ -4,6 +4,12 @@ with lib;
 
 let
   cfg = config.custom.hm.hyprland;
+
+  toggleDisplay = pkgs.writeShellScriptBin "toggle-display" ''
+    #!/usr/bin/env bash
+    # Toggle display on/off using Hyprland's dpms
+    ${pkgs.hyprland}/bin/hyprctl dispatch dpms toggle
+  '';
 in
 {
   options.custom.hm.hyprland = {
@@ -27,8 +33,8 @@ in
           "sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3"
           # Set solid black wallpaper
           "swaybg -c '#000000'"
-          # Start eww status bar
-          "eww daemon && eww open bar"
+          # Start waybar status bar
+          "waybar"
           # gnome-keyring auto-starts via PAM - no manual start needed
           # auto-rotate auto-starts via systemd user service
           # Start dunst for notifications
@@ -136,7 +142,7 @@ in
           "$mainMod, P, pseudo"
           "$mainMod, J, togglesplit"
           "$mainMod, F, fullscreen"
-          "$mainMod, L, exec, hyprlock"
+          "$mainMod, L, exec, toggle-display"
 
           # Application launches
           "$mainMod, T, exec, ghostty"
@@ -211,5 +217,8 @@ in
         ];
       };
     };
+
+    # Make toggle-display script available
+    home.packages = [ toggleDisplay ];
   };
 }

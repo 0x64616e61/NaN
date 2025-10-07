@@ -5,6 +5,7 @@
     ./hypridle.nix
     ./auto-rotate-service.nix
     ./theme.nix
+    ./rebuild-keybind.nix
 
     # Pure Nix modules
     ../hyprland            # Pure Nix Hyprland configuration
