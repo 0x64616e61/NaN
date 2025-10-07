@@ -7,31 +7,24 @@ let
 in
 {
   options.custom.hm.desktop.hypridle = {
-    override = mkOption {
+    enable = mkOption {
       type = types.bool;
       default = false;
-      description = "Override hydenix hypridle configuration";
+      description = "Enable hypridle idle management daemon";
     };
-    
-    configFile = mkOption {
-      type = types.nullOr types.path;
-      default = null;
-      example = "~/hypridle-custom.conf";
-      description = "Custom hypridle config file to use";
-    };
-    
+
     screenTimeout = mkOption {
       type = types.int;
       default = 60;
       description = "Seconds before turning off screen";
     };
-    
+
     lockTimeout = mkOption {
       type = types.int;
       default = 120;
       description = "Seconds before locking screen";
     };
-    
+
     suspendTimeout = mkOption {
       type = types.nullOr types.int;
       default = null;
@@ -39,33 +32,40 @@ in
     };
   };
 
-  config = mkIf cfg.override {
-    # Kill and restart hypridle with custom config
-    wayland.windowManager.hyprland.settings.exec-once = mkIf (cfg.configFile != null) [
-      "pkill hypridle; hypridle -c ${cfg.configFile}"
-    ];
-    
-    # Generate custom config if no file specified
-    home.file."hypridle-custom.conf" = mkIf (cfg.configFile == null) {
-      text = ''
-        listener {
-          timeout = ${toString cfg.screenTimeout}
-          on-timeout = "hyprctl dispatch dpms off"
-          on-resume = "hyprctl dispatch dpms on"
-        }
-        
-        listener {
-          timeout = ${toString cfg.lockTimeout}
-          on-timeout = "loginctl lock-session"
-        }
-        
-        ${optionalString (cfg.suspendTimeout != null) ''
-        listener {
-          timeout = ${toString cfg.suspendTimeout}
-          on-timeout = "systemctl suspend"
-        }
-        ''}
-      '';
+  config = mkIf cfg.enable {
+    # Enable hypridle service with proper configuration
+    services.hypridle = {
+      enable = true;
+
+      settings = {
+        general = {
+          lock_cmd = "hyprlock";
+          before_sleep_cmd = "hyprlock";
+          after_sleep_cmd = "hyprctl dispatch dpms on";
+        };
+
+        listener = [
+          # Screen timeout - turn off display
+          {
+            timeout = cfg.screenTimeout;
+            on-timeout = "sleep 1 && hyprctl dispatch dpms off";
+            on-resume = "hyprctl dispatch dpms on";
+          }
+
+          # Lock timeout
+          {
+            timeout = cfg.lockTimeout;
+            on-timeout = "hyprlock";
+          }
+        ] ++ optional (cfg.suspendTimeout != null) {
+          # Suspend timeout (optional)
+          timeout = cfg.suspendTimeout;
+          on-timeout = "systemctl suspend";
+        };
+      };
     };
+
+    # Fix systemd environment import for hypridle service
+    wayland.windowManager.hyprland.systemd.variables = ["--all"];
   };
 }

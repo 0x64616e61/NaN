@@ -52,7 +52,8 @@
     in
     {
       nixosConfigurations.NaN = hydenixConfig;
-      nixosConfigurations.aKetamine = hydenixConfig; # Current system hostname alias
+      nixosConfigurations.grOSs = hydenixConfig; # Current system hostname
+      nixosConfigurations.aKetamine = hydenixConfig; # Legacy hostname alias
       nixosConfigurations.hydenix = hydenixConfig; # Legacy alias
       nixosConfigurations.mini = hydenixConfig; # Legacy alias
     };

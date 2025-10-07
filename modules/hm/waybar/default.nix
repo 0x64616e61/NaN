@@ -13,14 +13,13 @@ in
   config = mkIf cfg.enable {
     programs.waybar = {
       enable = true;
-      
+
       settings = {
         mainBar = {
           layer = "top";
           position = "top";
-          height = 25;
           spacing = 0;
-          
+
           modules-left = [ "hyprland/workspaces" "hyprland/window" ];
           modules-center = [ "clock" ];
           modules-right = [
@@ -30,19 +29,19 @@ in
             "memory"
             "disk"
             "temperature"
-            "backlight"
             "network"
-            "battery"
             "pulseaudio"
+            "battery"
+            "backlight"
           ];
-          
+
           "hyprland/workspaces" = {
             format = "{id}";
             on-click = "activate";
             disable-scroll = false;
             all-outputs = true;
           };
-          
+
           "hyprland/window" = {
             format = "{title}";
             max-length = 50;
@@ -51,7 +50,7 @@ in
               "(.*) - Ghostty" = "▸ $1";
             };
           };
-          
+
           clock = {
             format = "{:%H:%M}";
             format-alt = "{:%Y-%m-%d}";
@@ -82,7 +81,8 @@ in
           };
 
           backlight = {
-            format = "☼ {percent}%";
+            format = "{icon}";
+            format-icons = [ "▁" "▃" "▅" "▇" "█" ];
             on-scroll-up = "brightnessctl set +5%";
             on-scroll-down = "brightnessctl set 5%-";
             tooltip-format = "Brightness: {percent}%";
@@ -112,10 +112,9 @@ in
               warning = 30;
               critical = 15;
             };
-            format = "{icon} {capacity}%";
-            format-charging = "↑ {capacity}%";
-            format-plugged = "● {capacity}%";
-            format-icons = [ "▁" "▃" "▅" "▇" "█" ];
+            format = "Discharging: {capacity}%";
+            format-charging = "Charging: {capacity}%";
+            format-plugged = "Charging: {capacity}%";
             format-time = "{H}h {M}m";
             tooltip-format = "{timeTo}, {power}W";
             on-click = "battery-status";
@@ -137,6 +136,7 @@ in
             format-icons = {
               default = [ "▁" "▃" "▇" ];
             };
+            max-volume = 200;
             on-click = "pavucontrol";
             on-click-right = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
             on-scroll-up = "pactl set-sink-volume @DEFAULT_SINK@ +5%";
@@ -160,14 +160,14 @@ in
         }
 
         window#waybar {
-          background-color: rgba(0, 0, 0, 0.85);
+          background-color: #000000;
           color: #ffffff;
-          border-bottom: 1px solid #444444;
+          border: none;
         }
 
         #workspaces button {
-          padding: 0 12px;
-          min-width: 30px;
+          padding: 0 8px;
+          min-width: 0;
           color: #ffffff;
           background-color: transparent;
           border-radius: 0;

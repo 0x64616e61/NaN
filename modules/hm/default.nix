@@ -51,18 +51,20 @@
     
     # Desktop environment
     desktop.hypridle = {
-      override = true;
-      screenTimeout = 60;     # Dim screen after 1 minute
+      enable = true;
+      screenTimeout = 60;     # Turn off screen after 1 minute
       lockTimeout = 120;      # Lock after 2 minutes
       suspendTimeout = 900;   # Suspend after 15 minutes
     };
-    
+
     desktop.autoRotateService = {
       enable = true;  # Enable dual-monitor auto-rotation service
     };
-    
 
-    
+    waybar = {
+      enable = true;        # Enable full-featured waybar
+    };
+
     desktop.theme = {
       catppuccinMochaTeal = true;  # Permanent Catppuccin Mocha theme with teal accent
     };
@@ -93,11 +95,13 @@
     jq  # For eww JSON processing
     dunst
     swaybg  # Wallpaper daemon
+    hyprlock  # Hyprland lock screen with fingerprint support
     # Applications used in keybinds
     ghostty
     yazi  # Terminal file manager
     firefox
     pavucontrol
+    moonlight-qt  # Game streaming client (NVIDIA GameStream/Sunshine)
     # System utilities used in modules
     nodejs
     systemd

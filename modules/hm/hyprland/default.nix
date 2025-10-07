@@ -25,8 +25,8 @@ in
         exec-once = [
           # Force landscape orientation for GPD Pocket 3
           "sleep 1 && hyprctl keyword monitor DSI-1,1200x1920@60,0x0,1.500000,transform,3"
-          # Set Hydenix wallpaper (Catppuccin Mocha theme)
-          "swaybg -i ~/.config/hyde/themes/Catppuccin\\ Mocha/wallpapers/evening_sky.png -m fill"
+          # Set solid black wallpaper
+          "swaybg -c '#000000'"
           # Start eww status bar
           "eww daemon && eww open bar"
           # gnome-keyring auto-starts via PAM - no manual start needed
@@ -61,8 +61,8 @@ in
           gaps_in = 5;
           gaps_out = 10;
           border_size = 2;
-          "col.active_border" = mkForce "rgba(ccccccee)";
-          "col.inactive_border" = mkForce "rgba(333333aa)";
+          "col.active_border" = mkForce "rgba(ffffffff)";
+          "col.inactive_border" = mkForce "rgba(00000000)";
           layout = "dwindle";
           allow_tearing = false;
         };
@@ -136,31 +136,15 @@ in
           "$mainMod, P, pseudo"
           "$mainMod, J, togglesplit"
           "$mainMod, F, fullscreen"
-          
+          "$mainMod, L, exec, hyprlock"
+
           # Application launches
           "$mainMod, T, exec, ghostty"
           "$mainMod, E, exec, ghostty -e yazi"
           "$mainMod, B, exec, firefox"
-          
+
           # dmenu launcher
           "$mainMod, A, exec, /home/a/.local/bin/launch-dmenu"
-          
-          # Function keys for GPD Pocket 3
-          # Volume controls
-          ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-          ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-          ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-          ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-          
-          # Brightness controls
-          ", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
-          ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
-          
-          # Media controls
-          ", XF86AudioPlay, exec, playerctl play-pause"
-          ", XF86AudioPause, exec, playerctl play-pause"
-          ", XF86AudioNext, exec, playerctl next"
-          ", XF86AudioPrev, exec, playerctl previous"
           
           # Move focus
           "$mainMod, left, movefocus, l"
@@ -205,6 +189,25 @@ in
         bindm = [
           "$mainMod, mouse:272, movewindow"
           "$mainMod, mouse:273, resizewindow"
+        ];
+
+        # Function keys (bindl = works even when locked/inhibited)
+        bindl = [
+          # Volume controls
+          ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+          ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+          ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+          ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+
+          # Brightness controls
+          ", XF86MonBrightnessUp, exec, brightnessctl set 10%+"
+          ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
+
+          # Media controls
+          ", XF86AudioPlay, exec, playerctl play-pause"
+          ", XF86AudioPause, exec, playerctl play-pause"
+          ", XF86AudioNext, exec, playerctl next"
+          ", XF86AudioPrev, exec, playerctl previous"
         ];
       };
     };

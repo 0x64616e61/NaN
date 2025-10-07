@@ -29,6 +29,10 @@ in
     ./modules/system/update-alias.nix # Update! command for quick commits and rebuilds
     ./hardware-config.nix # Hardware configuration wrapper
 
+    # SuperClaude Framework - Automated cleanup and monitoring
+    # ./.claude/cleanup-automation.nix # Daily /tmp cleanup, weekly Nix GC (disabled - file missing)
+    # ./.claude/disk-space-monitor.nix # Hourly disk space monitoring (disabled - file missing)
+
     # Hardware Configuration - Uncomment lines that match your hardware
     # Run `lshw -short` or `lspci` to identify your hardware
 
