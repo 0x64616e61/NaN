@@ -21,7 +21,7 @@ in
           height = 25;
           spacing = 0;
           
-          modules-left = [ "custom/launcher" "hyprland/workspaces" "hyprland/window" ];
+          modules-left = [ "hyprland/workspaces" "hyprland/window" ];
           modules-center = [ "clock" ];
           modules-right = [
             "tray"
@@ -34,7 +34,6 @@ in
             "network"
             "battery"
             "pulseaudio"
-            "custom/power"
           ];
           
           "hyprland/workspaces" = {
@@ -62,12 +61,14 @@ in
 
           cpu = {
             format = "▪ {usage}%";
+            interval = 1;
             tooltip = true;
             on-click = "ghostty -e btop";
           };
 
           memory = {
             format = "▫ {percentage}%";
+            interval = 2;
             tooltip-format = "{used:0.1f}G / {total:0.1f}G used";
             on-click = "ghostty -e btop";
           };
@@ -75,6 +76,7 @@ in
           disk = {
             format = "◊ {percentage_used}%";
             path = "/";
+            interval = 30;
             tooltip-format = "{used} / {total} used ({percentage_used}%)";
             on-click = "ghostty -e ncdu /";
           };
@@ -95,15 +97,17 @@ in
             tooltip-format-activated = "Idle inhibitor: active";
             tooltip-format-deactivated = "Idle inhibitor: inactive";
           };
-          
+
           temperature = {
             hwmon-path = "/sys/class/thermal/thermal_zone5/temp";
             format = "T:{temperatureC}°";
+            interval = 2;
             critical-threshold = 80;
             tooltip = false;
           };
 
           battery = {
+            interval = 5;
             states = {
               warning = 30;
               critical = 15;
@@ -116,7 +120,7 @@ in
             tooltip-format = "{timeTo}, {power}W";
             on-click = "battery-status";
           };
-          
+
           network = {
             format-wifi = "≈ {signalStrength}%";
             format-ethernet = "⊞ {bandwidthDownBits}";
@@ -124,9 +128,9 @@ in
             tooltip-format = "{ifname}: {ipaddr}/{cidr}\n↓ {bandwidthDownBits} ↑ {bandwidthUpBits}";
             tooltip-format-wifi = "{essid} ({signalStrength}%)\n{ipaddr}/{cidr}\n↓ {bandwidthDownBits} ↑ {bandwidthUpBits}";
             on-click = "nm-connection-editor";
-            interval = 2;
+            interval = 1;
           };
-          
+
           pulseaudio = {
             format = "{icon} {volume}%";
             format-muted = "◌ Muted";
@@ -139,22 +143,10 @@ in
             on-scroll-down = "pactl set-sink-volume @DEFAULT_SINK@ -5%";
             scroll-step = 5;
           };
-          
-          "custom/launcher" = {
-            format = " ▶ ";
-            on-click = "/home/a/.local/bin/launch-dmenu";
-            tooltip = false;
-          };
-          
+
           tray = {
             spacing = 10;
             icon-size = 16;
-          };
-
-          "custom/power" = {
-            format = "⏻";
-            on-click = "wlogout";
-            tooltip = false;
           };
         };
       };
@@ -164,47 +156,39 @@ in
           font-family: "JetBrainsMono Nerd Font", monospace;
           font-size: 13px;
           min-height: 0;
+          transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
-        
+
         window#waybar {
           background-color: rgba(0, 0, 0, 0.85);
-          color: #cccccc;
+          color: #ffffff;
           border-bottom: 1px solid #444444;
         }
-        
+
         #workspaces button {
-          padding: 0 10px;
-          color: #888888;
+          padding: 0 12px;
+          min-width: 30px;
+          color: #ffffff;
           background-color: transparent;
           border-radius: 0;
+          transition: all 0.15s ease-out;
         }
-        
+
         #workspaces button:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.15);
           color: #ffffff;
         }
-        
+
         #workspaces button.active {
           color: #ffffff;
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.2);
         }
-        
+
         #workspaces button.urgent {
           background-color: #ff0000;
           color: #ffffff;
         }
-        
-        #custom-launcher {
-          padding: 0 10px;
-          color: #ffffff;
-          background-color: #333333;
-          border-right: 1px solid #444444;
-        }
-        
-        #custom-launcher:hover {
-          background-color: #555555;
-        }
-        
+
         #clock,
         #cpu,
         #memory,
@@ -216,65 +200,23 @@ in
         #pulseaudio,
         #idle_inhibitor,
         #tray,
-        #custom-power,
         #window {
           padding: 0 10px;
-          color: #cccccc;
-        }
-
-        #cpu,
-        #memory,
-        #disk {
-          color: #aaaaff;
-        }
-
-        #backlight {
-          color: #ffdd88;
-        }
-
-        #idle_inhibitor {
-          color: #88ff88;
-        }
-
-        #idle_inhibitor.activated {
-          color: #ff8888;
-        }
-
-        #custom-power {
-          color: #ff6666;
-          background-color: #222222;
-          border-left: 1px solid #444444;
-        }
-
-        #custom-power:hover {
-          background-color: #ff0000;
           color: #ffffff;
         }
 
         #temperature.critical {
           color: #ff0000;
         }
-        
-        #battery.charging {
-          color: #88cc88;
-        }
-        
-        #battery.warning:not(.charging) {
-          color: #ffaa00;
-        }
-        
+
         #battery.critical:not(.charging) {
           background-color: #ff0000;
           color: #ffffff;
           animation: blink 0.5s linear infinite alternate;
         }
-        
+
         #network.disconnected {
           color: #ff0000;
-        }
-        
-        #pulseaudio.muted {
-          color: #888888;
         }
         
         @keyframes blink {
